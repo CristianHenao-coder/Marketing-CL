@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acceso Privado</title>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #1a0014, #4d002f, #ff006e);
+            background-size: 180% 180%;
+            animation: glow 10s ease infinite;
+            color: #fff;
+            text-align: center;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        @keyframes glow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        h1 {
+            font-size: 3em;
+            margin-bottom: 5px;
+            letter-spacing: 2px;
+            font-weight: 700;
+        }
+
+        h2 {
+            font-size: 1.5em;
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+
+        p {
+            font-size: 1.3em;
+            margin: 10px 0;
+            opacity: 0.95;
+        }
+
+        img {
+            max-width: 90%;
+            margin-top: 25px;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(255, 0, 112, 0.6);
+            animation: softPulse 3s infinite ease-in-out;
+        }
+
+        @keyframes softPulse {
+            0% { transform: scale(1); opacity: 0.95; }
+            50% { transform: scale(1.03); opacity: 1; }
+            100% { transform: scale(1); opacity: 0.95; }
+        }
+    </style>
+</head>
+
+<body>
+    <h1>PRIVATE ACCESS</h1>
+    <h2>Follow these instructions to enter</h2>
+
+    <p>1. Tap the three dots in the upper right corner.</p>
+    <p>2. Select <b>"Open in browser"</b>.</p>
+
+    <img src="/clook/gif/gitonly.png" alt="Instructions">
+</body>
+</html>
