@@ -16,7 +16,7 @@ export const publicController = {
 
     // 2. Lógica de Cloaking para Bots 🛡️
     // req.isBot vendrá de un middleware que haremos luego
-    if (req.isBot) {
+    if (req.isBot) {  
       return res.render('safe/yoga-blog'); 
     }
 

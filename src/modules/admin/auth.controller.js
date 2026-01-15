@@ -1,25 +1,32 @@
+// src/modules/admin/auth.controller.js
 import bcrypt from 'bcrypt';
-import { supabase } from '../../config/supabase.js'; // Asegúrate de tener tu cliente de supabase aquí
+import { supabase } from '../../config/supabase.js';
 
 export const authController = {
-  // Renderiza la página de login
+  // ======================
+  //  LOGIN (VISTA)
+  // ======================
   renderLogin(req, res) {
-    res.render('admin/login');
-  },
-  
-  logout(req, res) {
-    // Borramos la cookie de sesión
-    res.clearCookie('admin_session');
-    // Redirigimos al login
-    res.redirect('/admin/login');
+    // Si ya está autenticado, lo mandamos directo al dashboard
+    if (req.adminUser) {
+      return res.redirect('/admin/dashboard');
+    }
+
+    // 👇 DESACTIVAMOS EL LAYOUT GLOBAL
+    return res.render('admin/login', {
+      layout: false,              // <--- clave para que NO use admin/layout.ejs
+      title: 'Admin Access',
+    });
   },
 
-  // Proceso de Login
+  // ======================
+  //  LOGIN (POST)
+  // ======================
   async login(req, res) {
     const { user, pass } = req.body;
 
     try {
-      // 1. Buscamos al usuario en la tabla admin_users
+      // 1. Buscar usuario en tabla admin_users
       const { data: admin, error } = await supabase
         .from('admin_users')
         .select('*')
@@ -30,27 +37,35 @@ export const authController = {
         return res.status(401).json({ error: 'Usuario no encontrado' });
       }
 
-      // 2. Comparamos la contraseña enviada con el hash de la DB 🔐
+      // 2. Comparar contraseña con el hash
       const match = await bcrypt.compare(pass, admin.password_hash);
 
-      if (match) {
-        // 3. Si coincide, creamos la cookie de sesión
-        // Usamos un token simple por ahora (puedes mejorar a JWT luego)
-        const token = Buffer.from(`${user}:${admin.password_hash}`).toString('base64');
-        
-        res.cookie('admin_auth', token, { 
-          httpOnly: true, 
-          secure: process.env.NODE_ENV === 'production',
-          maxAge: 24 * 60 * 60 * 1000 // 1 día
-        });
-        
-        return res.json({ success: true });
-      } else {
+      if (!match) {
         return res.status(401).json({ error: 'Contraseña incorrecta' });
       }
+
+      // 3. Crear cookie de sesión simple (puedes pasar luego a JWT)
+      const token = Buffer.from(`${user}:${admin.password_hash}`).toString('base64');
+
+      res.cookie('admin_auth', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        maxAge: 24 * 60 * 60 * 1000, // 1 día
+      });
+
+      return res.json({ success: true });
     } catch (err) {
-      console.error(err);
-      res.status(500).json({ error: 'Error en el servidor' });
+      console.error('[authController.login] Error:', err);
+      return res.status(500).json({ error: 'Error en el servidor' });
     }
-  }
+  },
+
+  // ======================
+  //  LOGOUT
+  // ======================
+  logout(req, res) {
+    // 👇 Usa el MISMO nombre de cookie que pusimos en login
+    res.clearCookie('admin_auth');
+    return res.redirect('/admin/login');
+  },
 };
