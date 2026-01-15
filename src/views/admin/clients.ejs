@@ -1,182 +1,71 @@
-<!-- views/admin/clients.ejs -->
 
 <div class="page-header" style="margin-bottom: 40px;">
-  <h1 style="font-size: 42px; font-weight: 800; margin: 0;">GESTIÓN_DE_CLIENTES</h1>
-  <p style="color: var(--text-dim); font-size: 18px;">
-    Administra los perfiles y el rendimiento financiero.
-  </p>
+    <h1 style="font-size: 42px; font-weight: 800; margin: 0;">GESTIÓN_DE_CLIENTES</h1>
+    <p style="color: var(--text-dim); font-size: 18px;">Administra los perfiles y el rendimiento financiero.</p>
 </div>
 
-<div
-  style="
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 25px;
-    gap: 20px;
-  "
->
-  <div style="flex: 1; position: relative;">
-    <input
-      type="text"
-      id="clientSearch"
-      placeholder="Buscar por Nombre o ID..."
-      style="
-        width: 100%;
-        padding: 15px 20px;
-        background: #0a0a0a;
-        border: 1px solid var(--border);
-        border-radius: 12px;
-        color: white;
-        font-size: 16px;
-      "
-    />
-  </div>
-  <a href="/admin/links" class="btn-glow">Crear Nuevo Link ➜</a>
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; gap: 20px;">
+    <div style="flex: 1; position: relative;">
+        <input type="text" id="clientSearch" placeholder="Buscar por Nombre o ID..." 
+               style="width: 100%; padding: 15px 20px; background: #0a0a0a; border: 1px solid var(--border); border-radius: 12px; color: white; font-size: 16px;">
+    </div>
+    <a href="/admin/links" class="btn-glow">Crear Nuevo Link ➜</a>
 </div>
 
-<div
-  style="
-    background: var(--card-bg);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    overflow: hidden;
-  "
->
-  <table style="width: 100%; border-collapse: collapse; text-align: left;">
-    <thead>
-      <tr
-        style="
-          border-bottom: 1px solid var(--border);
-          background: rgba(0, 255, 102, 0.05);
-        "
-      >
-        <th
-          style="
-            padding: 20px;
-            color: var(--primary);
-            font-size: 13px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-          "
-        >
-          ID
-        </th>
-        <th
-          style="
-            padding: 20px;
-            color: var(--primary);
-            font-size: 13px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-          "
-        >
-          Nombre
-        </th>
-        <th
-          style="
-            padding: 20px;
-            color: var(--primary);
-            font-size: 13px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-          "
-        >
-          Contacto
-        </th>
-        <th
-          style="
-            padding: 20px;
-            color: var(--primary);
-            font-size: 13px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-          "
-        >
-          Links
-        </th>
-        <th
-          style="
-            padding: 20px;
-            color: var(--primary);
-            font-size: 13px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-          "
-        >
-          Inversión Total
-        </th>
-      </tr>
-    </thead>
-    <tbody id="clientsTableBody">
-      <% if (clients && clients.length > 0) { %>
-      <% clients.forEach((client) => { %>
-      <tr
-        onclick="window.location='/admin/clients/profile/<%= client.id %>'"
-        style="
-          border-bottom: 1px solid var(--border);
-          cursor: pointer;
-          transition: 0.3s;
-        "
-        class="client-row"
-      >
-        <td style="padding: 20px; font-family: monospace; color: var(--text-dim);">
-          #<%= client.id %>
-        </td>
-        <td style="padding: 20px; font-weight: 600;"><%= client.name %></td>
-        <td style="padding: 20px;"><%= client.contact || 'No asignado' %></td>
-        <td style="padding: 20px; text-align: center;">
-          <span
-            style="
-              background: #1a1a1a;
-              padding: 4px 12px;
-              border-radius: 20px;
-              font-size: 14px;
-            "
-          >
-            <%= client.links_comprados || 0 %>
-          </span>
-        </td>
-        <td style="padding: 20px; font-weight: 800; color: var(--primary);">
-          $<%= client.money_total || 0 %> USD
-        </td>
-      </tr>
-      <% }); %>
-      <% } else { %>
-      <tr>
-        <td
-          colspan="5"
-          style="
-            padding: 40px;
-            text-align: center;
-            color: var(--text-dim);
-          "
-        >
-          No hay clientes registrados aún.
-        </td>
-      </tr>
-      <% } %>
-    </tbody>
-  </table>
+<div style="background: var(--card-bg); border: 1px solid var(--border); border-radius: 20px; overflow: hidden;">
+    <table style="width: 100%; border-collapse: collapse; text-align: left;">
+        <thead>
+            <tr style="border-bottom: 1px solid var(--border); background: rgba(0,255,102,0.05);">
+                <th style="padding: 20px; color: var(--primary); font-size: 13px; text-transform: uppercase; letter-spacing: 1px;">ID</th>
+                <th style="padding: 20px; color: var(--primary); font-size: 13px; text-transform: uppercase; letter-spacing: 1px;">Nombre</th>
+                <th style="padding: 20px; color: var(--primary); font-size: 13px; text-transform: uppercase; letter-spacing: 1px;">Contacto</th>
+                <th style="padding: 20px; color: var(--primary); font-size: 13px; text-transform: uppercase; letter-spacing: 1px;">Links</th>
+                <th style="padding: 20px; color: var(--primary); font-size: 13px; text-transform: uppercase; letter-spacing: 1px;">Inversión Total</th>
+            </tr>
+        </thead>
+        <tbody id="clientsTableBody">
+            <% if (clients && clients.length > 0) { %>
+                <% clients.forEach(client => { %>
+                    <tr onclick="window.location='/admin/clients/profile/<%= client.id %>'" 
+                        style="border-bottom: 1px solid var(--border); cursor: pointer; transition: 0.3s;" 
+                        class="client-row">
+                        <td style="padding: 20px; font-family: monospace; color: var(--text-dim);">#<%= client.id %></td>
+                        <td style="padding: 20px; font-weight: 600;"><%= client.name %></td>
+                        <td style="padding: 20px;"><%= client.contact || 'No asignado' %></td>
+                        <td style="padding: 20px; text-align: center;">
+                            <span style="background: #1a1a1a; padding: 4px 12px; border-radius: 20px; font-size: 14px;">
+                                <%= client.links_comprados || 0 %>
+                            </span>
+                        </td>
+                        <td style="padding: 20px; font-weight: 800; color: var(--primary);">
+                            $<%= (client.links_comprados || 0) * 30 %> USD
+                        </td>
+                    </tr>
+                <% }); %>
+            <% } else { %>
+                <tr>
+                    <td colspan="5" style="padding: 40px; text-align: center; color: var(--text-dim);">No hay clientes registrados aún.</td>
+                </tr>
+            <% } %>
+        </tbody>
+    </table>
 </div>
 
 <style>
-  .client-row:hover {
-    background: rgba(0, 255, 102, 0.02);
-    border-color: var(--primary);
-  }
+    .client-row:hover {
+        background: rgba(0, 255, 102, 0.02);
+        border-color: var(--primary);
+    }
 </style>
 
 <script>
-  document
-    .getElementById('clientSearch')
-    .addEventListener('input', function (e) {
-      const term = e.target.value.toLowerCase();
-      const rows = document.querySelectorAll('.client-row');
-
-      rows.forEach((row) => {
-        const text = row.innerText.toLowerCase();
-        row.style.display = text.includes(term) ? '' : 'none';
-      });
+    document.getElementById('clientSearch').addEventListener('input', function(e) {
+        const term = e.target.value.toLowerCase();
+        const rows = document.querySelectorAll('.client-row');
+        
+        rows.forEach(row => {
+            const text = row.innerText.toLowerCase();
+            row.style.display = text.includes(term) ? '' : 'none';
+        });
     });
 </script>
