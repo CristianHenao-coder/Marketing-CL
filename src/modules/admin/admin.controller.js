@@ -74,49 +74,71 @@ export const adminController = {
   // =========================
   //  CLIENTES (LISTADO)
   // =========================
-  async renderClients(req, res) {
-    try {
-      const { data, error } = await supabase
-        .from("clients")
-        .select(
-          `
-          *,
-          smart_links (id)
-        `
-        )
-        .order("created_at", { ascending: false });
+    async renderClients(req, res) {
+      try {
+        const { data, error } = await supabase
+          .from("clients")
+          .select(`
+            id,
+            name,
+            contact,
+            notas,
+            created_at,
+            smart_links (
+              id,
+              is_active,
+              status,
+              price
+            )
+          `)
+          .order("created_at", { ascending: false });
 
-      if (error) throw error;
+        if (error) throw error;
 
-      const clients = (data || []).map((c) => {
-        const linkCount = c.smart_links ? c.smart_links.length : 0;
-        return {
-          id: c.id,
-          name: c.name,
-          contact: c.contact || c.telegram || "No asignado",
-          notas: c.notas || "",
-          created_at: c.created_at,
-          links_count: linkCount,
-          total_money: linkCount * 30,
-        };
-      });
+        const clients = (data || []).map((c) => {
+          const links = c.smart_links || [];
 
-      return res.render("admin/clients", {
-        layout: "admin/layout",
-        currentSection: "clients",
-        clients,
-        error: null,
-      });
-    } catch (err) {
-      console.error("[renderClients] Error:", err);
-      return res.render("admin/clients", {
-        layout: "admin/layout",
-        currentSection: "clients",
-        clients: [],
-        error: "Error cargando clientes",
-      });
-    }
-  },
+          const totalLinks = links.length;
+          const activeLinks = links.filter((l) => l.is_active === true).length;
+          const offLinks = totalLinks - activeLinks;
+
+          const totalMoney = links.reduce((acc, l) => {
+            const p = Number(l.price || 0);
+            return acc + p;
+          }, 0);
+
+          return {
+            id: c.id,
+            name: c.name,
+            contact: c.contact || "no asignado",
+            notas: c.notas || "",
+            created_at: c.created_at,
+
+            // ✅ nuevos campos
+            total_links: totalLinks,
+            active_links: activeLinks,
+            off_links: offLinks,
+            total_money: totalMoney,
+          };
+        });
+
+        return res.render("admin/clients", {
+          layout: "admin/layout",
+          currentSection: "clients",
+          clients,
+          error: null,
+        });
+      } catch (err) {
+        console.error("[renderClients] Error:", err);
+        return res.render("admin/clients", {
+          layout: "admin/layout",
+          currentSection: "clients",
+          clients: [],
+          error: "Error cargando clientes",
+        });
+      }
+    },
+
 
   // =========================
   //  PERFIL DEL CLIENTE
@@ -154,6 +176,37 @@ export const adminController = {
     }
   },
 
+
+
+  
+  // =========================
+  //  modificar cliente 
+  // =========================
+
+
+      async updateClient(req, res) {
+      try {
+        const { id } = req.params;
+        const { name, contact } = req.body;
+
+        const { data, error } = await supabase
+          .from("clients")
+          .update({
+            name: name?.trim(),
+            contact: contact?.trim() || null,
+          })
+          .eq("id", id)
+          .select()
+          .single();
+
+        if (error) throw error;
+
+        return res.json({ success: true, client: data });
+      } catch (err) {
+        return res.status(500).json({ success: false, error: err.message });
+      }
+    },
+
   // =========================
   //  LINKS (LISTADO Y FORM)
   // =========================
@@ -183,7 +236,7 @@ export const adminController = {
         return {
           ...l,
           client_name: client ? client.name : "—",
-          client_contact: client ? client.contact || client.telegram : null,
+          client_contact: client ? client.contact : null,
           os_force: l.advanced_config?.os_force || "all",
           blacklisted_countries:
             l.advanced_config?.blacklisted_countries || [],
@@ -221,7 +274,7 @@ export const adminController = {
         subtitle,
         instagram,
         onlyfans,
-        telegram, // ✅ ESTE TE FALTABA
+        telegram,
         tiktok,
         link_mode,
         custom_domain,
@@ -337,33 +390,31 @@ export const adminController = {
   // =========================
   //  ACTUALIZAR LINK (UPDATE)
   // =========================
-  async updateLink(req, res) {
+  async updateClient(req, res) {
     try {
       const { id } = req.params;
-      const updateData = req.body;
+      const { name, contact } = req.body;
+
+      const payload = {
+        name: (name || '').trim(),
+        contact: (contact || '').trim(),
+      };
 
       const { data, error } = await supabase
-        .from("smart_links")
-        .update({
-          display_name: updateData.display_name,
-          price: updateData.price,
-          fecha_vencimiento: updateData.fecha_vencimiento,
-          instagram: updateData.instagram,
-          onlyfans: updateData.onlyfans,
-          subtitle: updateData.subtitle,
-          tiktok: updateData.tiktok,
-        })
-        .eq("id", id)
-        .select();
+        .from('clients')
+        .update(payload)
+        .eq('id', id)
+        .select()
+        .single();
 
       if (error) throw error;
 
-      return res.json({ success: true, data });
+      return res.json({ success: true, client: data });
     } catch (err) {
-      console.error("Error en updateLink:", err.message);
       return res.status(500).json({ success: false, error: err.message });
     }
   },
+
 
   // =========================
   //  TOGGLE SERVICE (ON/OFF)
@@ -392,6 +443,71 @@ export const adminController = {
       return res.status(500).json({ success: false, error: err.message });
     }
   },
+
+// =========================
+//  ACTUALIZAR CLIENTE
+// =========================
+async updateClient(req, res) {
+  try {
+    const { id } = req.params;
+    const { name, contact } = req.body;
+
+    if (!name || !name.trim()) {
+      return res.status(400).json({ success: false, error: "El nombre es obligatorio." });
+    }
+
+    const { data, error } = await supabase
+      .from("clients")
+      .update({
+        name: name.trim(),
+        contact: contact?.trim() || null,
+      })
+      .eq("id", id)
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    return res.json({ success: true, client: data });
+  } catch (err) {
+    return res.status(500).json({ success: false, error: err.message });
+  }
+},
+
+// =========================
+//  ELIMINAR CLIENTE
+//  (solo si NO tiene links)
+// =========================
+async deleteClient(req, res) {
+  try {
+    const { id } = req.params;
+
+    // 1) validar que no tenga links
+    const { data: links, error: linksError } = await supabase
+      .from("smart_links")
+      .select("id")
+      .eq("client_id", id)
+      .limit(1);
+
+    if (linksError) throw linksError;
+
+    if (links && links.length > 0) {
+      return res.status(400).json({
+        success: false,
+        error: "No puedes eliminar este cliente porque aún tiene links asociados.",
+      });
+    }
+
+    // 2) eliminar cliente
+    const { error } = await supabase.from("clients").delete().eq("id", id);
+    if (error) throw error;
+
+    return res.json({ success: true });
+  } catch (err) {
+    return res.status(500).json({ success: false, error: err.message });
+  }
+},
+
 
   // =========================
   //  ELIMINAR LINK
@@ -433,4 +549,74 @@ export const adminController = {
       return res.status(500).json({ success: false, message: "Error interno" });
     }
   },
+
+
+  // =========================
+//  EDITAR LINK
+// =========================
+async updateLink(req, res) {
+  try {
+    const { id } = req.params;
+
+    const {
+      slug,
+      display_name,
+      subtitle,
+      instagram,
+      onlyfans,
+      telegram,
+      tiktok,
+      link_mode,
+      custom_domain,
+      status,
+      price,
+      fecha_vencimiento,
+      os_force = "all",
+      blacklisted_countries,
+      is_active,
+    } = req.body;
+
+    const payload = {
+      slug: slug?.trim() || null,
+      display_name: display_name || null,
+      subtitle: subtitle || null,
+      instagram: instagram || null,
+      onlyfans: onlyfans || null,
+      telegram: telegram || null,
+      tiktok: tiktok || null,
+      link_mode: link_mode || "landing",
+      custom_domain: custom_domain || null,
+      status: status || "active",
+      price: price && String(price).trim() !== "" ? Number(price) : 30,
+      fecha_vencimiento: toISOorNull(fecha_vencimiento),
+      is_active: typeof is_active === "string" ? is_active === "true" : !!is_active,
+      advanced_config: {
+        os_force,
+        blacklisted_countries: parseBlacklistedCountries(blacklisted_countries),
+        geofilter_enabled: false,
+        data_analysis_enabled: false,
+      },
+    };
+
+    // Limpia campos null innecesarios (opcional)
+    Object.keys(payload).forEach((k) => {
+      if (payload[k] === undefined) delete payload[k];
+    });
+
+    const { data, error } = await supabase
+      .from("smart_links")
+      .update(payload)
+      .eq("id", id)
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    return res.json({ success: true, link: data });
+  } catch (err) {
+    console.error("[updateLink] Error:", err);
+    return res.status(500).json({ success: false, error: err.message });
+  }
+},
+
 };

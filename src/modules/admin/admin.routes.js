@@ -66,6 +66,8 @@ router.get('/logout', authController.logout);
  * ========================================================================= */
 
 router.use(authGuard);
+router.post('/clients/update/:id', adminController.updateClient);
+router.post('/clients/delete/:id', adminController.deleteClient);
 
 /**
  * Dashboard principal – KPIs globales
@@ -135,6 +137,10 @@ router.post('/links/:id/toggle-active', adminController.toggleLinkActive);
  * Editar campos básicos de un link desde el modal del perfil
  * POST /admin/links/edit/:id
  */
+
 router.post('/links/edit/:id', adminController.updateLink);
+
+
+
 
 export default router;

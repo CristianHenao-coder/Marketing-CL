@@ -126,6 +126,9 @@ tr>
 </div>
 
 <script>
+
+
+
     function openEditModal(button) {
         const data = button.dataset;
         document.getElementById('edit_id').value = data.id;
@@ -142,6 +145,56 @@ tr>
         document.getElementById('editModal').style.display = 'none';
     }
 
+
+            // ✅ ENCENDER / APAGAR SERVICIO (status active <-> pending_payment)
+            async function toggleService(id, currentStatus) {
+            try {
+                const response = await fetch(`/admin/links/toggle/${id}`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ currentStatus }),
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                alert(`Estado cambiado ✅ Ahora está: ${result.newStatus}`);
+                location.reload(); // recarga para que cambie el botón ON/OFF
+                } else {
+                alert("Error: " + result.error);
+                }
+            } catch (error) {
+                console.error("toggleService error:", error);
+                alert("Error de conexión ❌");
+            }
+            }
+
+            // ✅ ELIMINAR LINK
+            async function deleteLink(id) {
+            const confirmDelete = confirm("¿Seguro que deseas eliminar este link? 🗑️");
+            if (!confirmDelete) return;
+
+            try {
+                const response = await fetch(`/admin/links/${id}`, {
+                method: "DELETE",
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                alert("Link eliminado ✅");
+                location.reload();
+                } else {
+                alert("Error: " + result.error);
+                }
+            } catch (error) {
+                console.error("deleteLink error:", error);
+                alert("Error de conexión ❌");
+            }
+            }
+
+                    
+
         // Cerrar modal si se hace clic fuera de la caja
         window.onclick = function(event) {
             const modal = document.getElementById('editModal');
@@ -149,8 +202,9 @@ tr>
         }
 
 
+
             // Capturar el envío del formulario de edición
-            document.getElementById('editform').addEventListener('submit', async (e) => {
+            document.getElementById('editForm').addEventListener('submit', async (e) => {
                 e.preventDefault();
 
                 // 1. Capturamos el ID
