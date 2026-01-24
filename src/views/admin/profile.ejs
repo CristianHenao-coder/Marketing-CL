@@ -1,5 +1,4 @@
 
-
 <div style="background: var(--card-bg); padding: 15px; border-radius: 12px; border: 1px solid var(--border); margin-bottom: 20px; display: flex; gap: 20px; font-size: 13px;">
     <div><strong>ID:</strong> #<%= client.id %></div>
     <div><strong>NOMBRE:</strong> <%= client.name %></div>
@@ -17,16 +16,10 @@
                 <th style="padding: 15px;">ANALYTICS</th>
                 <th style="padding: 15px;">VENCIMIENTO</th>
                 <th style="padding: 15px; text-align: right;">ACCIONES</th>
-            </
-
-
-<!doctype html>
-
-
-tr>
+            </tr>
         </thead>
         <tbody>
-            <% links.forEach(link => { %>
+            <% (client.smart_links || []).forEach(link => { %>
                 <tr style="border-bottom: 1px solid var(--border); font-size: 13px;">
                     <td style="padding: 15px;">
                         <div style="display: flex; align-items: center; gap: 10px;">
@@ -38,97 +31,88 @@ tr>
                         </div>
                     </td>
 
-```
-                <td style="padding: 15px;">
-                    <div style="color: #00ff66;">OF: <span style="color: white;"><%= link.onlyfans || '—' %></span></div>
-                    <div style="color: #e1306c;">IG: <span style="color: white;"><%= link.instagram || '—' %></span></div>
-                </td>
+                    <td style="padding: 15px;">
+                        <div style="color: #00ff66;">OF: <span style="color: white;"><%= link.onlyfans || '—' %></span></div>
+                        <div style="color: #e1306c;">IG: <span style="color: white;"><%= link.instagram || '—' %></span></div>
+                    </td>
 
-                <td style="padding: 15px; font-weight: bold;">$<%= link.price || 30 %></td>
+                    <td style="padding: 15px; font-weight: bold;">$<%= link.price || 30 %></td>
 
-                <td style="padding: 15px;">
-                    <div style="background: #111; padding: 5px 10px; border-radius: 5px; display: inline-block;">
-                        🖱️ <%= link.analytics?.total_clicks || 0 %> Clicks
-                    </div>
-                </td>
+                    <td style="padding: 15px;">
+                        <div style="background: #111; padding: 5px 10px; border-radius: 5px; display: inline-block;">
+                            🖱️ <%= link.analytics?.total_clicks || 0 %> Clicks
+                        </div>
+                    </td>
 
-                <td style="padding: 15px;">
-                    <%= link.fecha_vencimiento ? new Date(link.fecha_vencimiento).toLocaleDateString() : 'Sin fecha' %>
-                </td>
+                    <td style="padding: 15px;">
+                        <%= link.fecha_vencimiento ? new Date(link.fecha_vencimiento).toLocaleDateString() : 'Sin fecha' %>
+                    </td>
 
-                <td style="padding: 15px; text-align: right;">
-                    <div style="display: flex; gap: 5px; justify-content: flex-end;">
-                        <button 
-                            onclick="openEditModal(this)" 
-                            data-id="<%= link.id %>"
-                            data-name="<%= link.display_name %>"
-                            data-price="<%= link.price %>"
-                            data-expiry="<%= link.fecha_vencimiento ? link.fecha_vencimiento.split('T')[0] : '' %>"
-                            data-ig="<%= link.instagram %>"
-                            data-of="<%= link.onlyfans %>"
-                            style="background: #222; border: 1px solid #444; padding: 5px 10px; border-radius: 4px; cursor: pointer;">
-                            ✏️
-                        </button>
-                        
-                        <button onclick="toggleService('<%= link.id %>', '<%= link.status %>')" 
-                            style="background: <%= link.status === 'active' ? '#00ff66' : '#444' %>; color: <%= link.status === 'active' ? '#000' : '#fff' %>; border: none; padding: 5px 12px; border-radius: 4px; cursor: pointer; font-weight: bold;">
-                            <%= link.status === 'active' ? 'ON' : 'OFF' %>
-                        </button>
+                    <td style="padding: 15px; text-align: right;">
+                        <div style="display: flex; gap: 5px; justify-content: flex-end;">
+                            <button
+                                onclick="openEditModal(this)"
+                                data-id="<%= link.id %>"
+                                data-name="<%= link.display_name %>"
+                                data-price="<%= link.price %>"
+                                data-expiry="<%= link.fecha_vencimiento ? link.fecha_vencimiento.split('T')[0] : '' %>"
+                                data-ig="<%= link.instagram %>"
+                                data-of="<%= link.onlyfans %>"
+                                style="background: #222; border: 1px solid #444; padding: 5px 10px; border-radius: 4px; cursor: pointer;">
+                                ✏️
+                            </button>
 
-                        <button onclick="deleteLink('<%= link.id %>')" style="background: #411; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">🗑️</button>
-                    </div>
-                </td>
-            </tr>
-        <% }) %>
-    </tbody>
-</table>
-```
+                            <button onclick="toggleService('<%= link.id %>', '<%= link.status %>')"
+                                style="background: <%= link.status === 'active' ? '#00ff66' : '#444' %>; color: <%= link.status === 'active' ? '#000' : '#fff' %>; border: none; padding: 5px 12px; border-radius: 4px; cursor: pointer; font-weight: bold;">
+                                <%= link.status === 'active' ? 'ON' : 'OFF' %>
+                            </button>
 
+                            <button onclick="deleteLink('<%= link.id %>')" style="background: #411; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">🗑️</button>
+                        </div>
+                    </td>
+                </tr>
+            <% }) %>
+        </tbody>
+    </table>
 </div>
 
 <div id="editModal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.8); backdrop-filter: blur(5px);">
     <div style="background-color: #0a0a0a; margin: 5% auto; padding: 25px; border: 1px solid var(--primary); width: 400px; border-radius: 15px; box-shadow: 0 0 20px rgba(0,255,102,0.2);">
         <h3 style="margin-top: 0; color: var(--primary);">EDITAR_LINK <span id="modalLinkId" style="color: var(--text-dim); font-size: 14px;"></span></h3>
 
-```
-    <form id="editForm" style="display: flex; flex-direction: column; gap: 15px;">
-        <input type="hidden" id="edit_id">
-        <div>
-            <label style="display: block; font-size: 12px; color: var(--text-dim); margin-bottom: 5px;">NOMBRE_DISPLAY</label>
-            <input type="text" id="edit_name" style="width: 100%; background: #1a1a1a; border: 1px solid #333; color: white; padding: 8px; border-radius: 5px;">
-        </div>
-        <div style="display: flex; gap: 10px;">
-            <div style="flex: 1;">
-                <label style="display: block; font-size: 12px; color: var(--text-dim); margin-bottom: 5px;">PRECIO ($)</label>
-                <input type="number" id="edit_price" style="width: 100%; background: #1a1a1a; border: 1px solid #333; color: white; padding: 8px; border-radius: 5px;">
+        <form id="editForm" style="display: flex; flex-direction: column; gap: 15px;">
+            <input type="hidden" id="edit_id">
+            <div>
+                <label style="display: block; font-size: 12px; color: var(--text-dim); margin-bottom: 5px;">NOMBRE_DISPLAY</label>
+                <input type="text" id="edit_name" style="width: 100%; background: #1a1a1a; border: 1px solid #333; color: white; padding: 8px; border-radius: 5px;">
             </div>
-            <div style="flex: 1;">
-                <label style="display: block; font-size: 12px; color: var(--text-dim); margin-bottom: 5px;">VENCIMIENTO</label>
-                <input type="date" id="edit_expiry" style="width: 100%; background: #1a1a1a; border: 1px solid #333; color: white; padding: 8px; border-radius: 5px;">
+            <div style="display: flex; gap: 10px;">
+                <div style="flex: 1;">
+                    <label style="display: block; font-size: 12px; color: var(--text-dim); margin-bottom: 5px;">PRECIO ($)</label>
+                    <input type="number" id="edit_price" style="width: 100%; background: #1a1a1a; border: 1px solid #333; color: white; padding: 8px; border-radius: 5px;">
+                </div>
+                <div style="flex: 1;">
+                    <label style="display: block; font-size: 12px; color: var(--text-dim); margin-bottom: 5px;">VENCIMIENTO</label>
+                    <input type="date" id="edit_expiry" style="width: 100%; background: #1a1a1a; border: 1px solid #333; color: white; padding: 8px; border-radius: 5px;">
+                </div>
             </div>
-        </div>
-        <div>
-            <label style="display: block; font-size: 12px; color: var(--text-dim); margin-bottom: 5px;">INSTAGRAM</label>
-            <input type="text" id="edit_ig" style="width: 100%; background: #1a1a1a; border: 1px solid #333; color: white; padding: 8px; border-radius: 5px;">
-        </div>
-        <div>
-            <label style="display: block; font-size: 12px; color: var(--text-dim); margin-bottom: 5px;">ONLYFANS</label>
-            <input type="text" id="edit_of" style="width: 100%; background: #1a1a1a; border: 1px solid #333; color: white; padding: 8px; border-radius: 5px;">
-        </div>
-        <div style="display: flex; gap: 10px; margin-top: 10px;">
-            <button type="button" onclick="closeModal()" style="flex: 1; padding: 10px; background: #222; color: white; border: none; border-radius: 5px; cursor: pointer;">CANCELAR</button>
-            <button type="submit" style="flex: 1; padding: 10px; background: var(--primary); color: black; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">GUARDAR</button>
-        </div>
-    </form>
-</div>
-```
-
+            <div>
+                <label style="display: block; font-size: 12px; color: var(--text-dim); margin-bottom: 5px;">INSTAGRAM</label>
+                <input type="text" id="edit_ig" style="width: 100%; background: #1a1a1a; border: 1px solid #333; color: white; padding: 8px; border-radius: 5px;">
+            </div>
+            <div>
+                <label style="display: block; font-size: 12px; color: var(--text-dim); margin-bottom: 5px;">ONLYFANS</label>
+                <input type="text" id="edit_of" style="width: 100%; background: #1a1a1a; border: 1px solid #333; color: white; padding: 8px; border-radius: 5px;">
+            </div>
+            <div style="display: flex; gap: 10px; margin-top: 10px;">
+                <button type="button" onclick="closeModal()" style="flex: 1; padding: 10px; background: #222; color: white; border: none; border-radius: 5px; cursor: pointer;">CANCELAR</button>
+                <button type="submit" style="flex: 1; padding: 10px; background: var(--primary); color: black; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">GUARDAR</button>
+            </div>
+        </form>
+    </div>
 </div>
 
 <script>
-
-
-
     function openEditModal(button) {
         const data = button.dataset;
         document.getElementById('edit_id').value = data.id;
@@ -145,103 +129,97 @@ tr>
         document.getElementById('editModal').style.display = 'none';
     }
 
-
-            // ✅ ENCENDER / APAGAR SERVICIO (status active <-> pending_payment)
-            async function toggleService(id, currentStatus) {
-            try {
-                const response = await fetch(`/admin/links/toggle/${id}`, {
+    // ✅ ENCENDER / APAGAR SERVICIO (status active <-> pending_payment)
+    async function toggleService(id, currentStatus) {
+        try {
+            const response = await fetch(`/admin/links/toggle/${id}`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ currentStatus }),
-                });
-
-                const result = await response.json();
-
-                if (result.success) {
-                alert(`Estado cambiado ✅ Ahora está: ${result.newStatus}`);
-                location.reload(); // recarga para que cambie el botón ON/OFF
-                } else {
-                alert("Error: " + result.error);
-                }
-            } catch (error) {
-                console.error("toggleService error:", error);
-                alert("Error de conexión ❌");
-            }
-            }
-
-            // ✅ ELIMINAR LINK
-            async function deleteLink(id) {
-            const confirmDelete = confirm("¿Seguro que deseas eliminar este link? 🗑️");
-            if (!confirmDelete) return;
-
-            try {
-                const response = await fetch(`/admin/links/${id}`, {
-                method: "DELETE",
-                });
-
-                const result = await response.json();
-
-                if (result.success) {
-                alert("Link eliminado ✅");
-                location.reload();
-                } else {
-                alert("Error: " + result.error);
-                }
-            } catch (error) {
-                console.error("deleteLink error:", error);
-                alert("Error de conexión ❌");
-            }
-            }
-
-                    
-
-        // Cerrar modal si se hace clic fuera de la caja
-        window.onclick = function(event) {
-            const modal = document.getElementById('editModal');
-            if (event.target == modal) closeModal();
-        }
-
-
-
-            // Capturar el envío del formulario de edición
-            document.getElementById('editForm').addEventListener('submit', async (e) => {
-                e.preventDefault();
-
-                // 1. Capturamos el ID
-                const id = document.getElementById('edit_id').value;
-
-                // 2. Manejamos la fecha para que no envíe un texto vacío ""
-                const rawExpiry = document.getElementById('edit_expiry').value;
-                const finalExpiry = rawExpiry === "" ? null : rawExpiry;
-
-                // 3. Construimos el objeto con los nombres exactos de tu DB
-                const formData = {
-                    display_name: document.getElementById('edit_name').value,
-                    price: parseFloat(document.getElementById('edit_price').value) || 0,
-                    fecha_vencimiento: finalExpiry,
-                    instagram: document.getElementById('edit_ig').value,
-                    onlyfans: document.getElementById('edit_of').value
-                };
-
-                try {
-                    const response = await fetch(`/admin/links/edit/${id}`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(formData)
-                    });
-
-                    const result = await response.json();
-
-                    if (result.success) {
-                        alert('¡Link actualizado! ✅');
-                        location.reload();
-                    } else {
-                        alert('Error del servidor: ' + result.error);
-                    }
-                } catch (error) {
-                    console.error('Error en fetch:', error);
-                    alert('Hubo un error de conexión ❌');
-                }
             });
 
+            const result = await response.json();
+
+            if (result.success) {
+                alert(`Estado cambiado ✅ Ahora está: ${result.newStatus}`);
+                location.reload(); // recarga para que cambie el botón ON/OFF
+            } else {
+                alert("Error: " + result.error);
+            }
+        } catch (error) {
+            console.error("toggleService error:", error);
+            alert("Error de conexión ❌");
+        }
+    }
+
+    // ✅ ELIMINAR LINK
+    async function deleteLink(id) {
+        const confirmDelete = confirm("¿Seguro que deseas eliminar este link? 🗑️");
+        if (!confirmDelete) return;
+
+        try {
+            const response = await fetch(`/admin/links/${id}`, {
+                method: "DELETE",
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                alert("Link eliminado ✅");
+                location.reload();
+            } else {
+                alert("Error: " + result.error);
+            }
+        } catch (error) {
+            console.error("deleteLink error:", error);
+            alert("Error de conexión ❌");
+        }
+    }
+
+    // Cerrar modal si se hace clic fuera de la caja
+    window.onclick = function(event) {
+        const modal = document.getElementById('editModal');
+        if (event.target == modal) closeModal();
+    }
+
+    // Capturar el envío del formulario de edición
+    document.getElementById('editForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        // 1. Capturamos el ID
+        const id = document.getElementById('edit_id').value;
+
+        // 2. Manejamos la fecha para que no envíe un texto vacío ""
+        const rawExpiry = document.getElementById('edit_expiry').value;
+        const finalExpiry = rawExpiry === "" ? null : rawExpiry;
+
+        // 3. Construimos el objeto con los nombres exactos de tu DB
+        const formData = {
+            display_name: document.getElementById('edit_name').value,
+            price: parseFloat(document.getElementById('edit_price').value) || 0,
+            fecha_vencimiento: finalExpiry,
+            instagram: document.getElementById('edit_ig').value,
+            onlyfans: document.getElementById('edit_of').value
+        };
+
+        try {
+            const response = await fetch(`/admin/links/edit/${id}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData)
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                alert('¡Link actualizado! ✅');
+                location.reload();
+            } else {
+                alert('Error del servidor: ' + result.error);
+            }
+        } catch (error) {
+            console.error('Error en fetch:', error);
+            alert('Hubo un error de conexión ❌');
+        }
+    });
 </script>

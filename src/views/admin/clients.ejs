@@ -84,7 +84,7 @@
 
             <td style="padding:20px; text-align:center;">
               <span style="background:#333; padding:4px 12px; border-radius:20px;">
-                <%= client.off_links || 0 %>
+                <%= (client.total_links || 0) - (client.active_links || 0) %>
               </span>
             </td>
 
