@@ -222,14 +222,15 @@
     }
 
     /* =========================================
-       🔥 SAFETY GATE - NEUROMARKETING REDESIGN
+       🔥 SAFETY GATE - LIGHTER / VIBRANT STYLE
        ========================================= */
     #safety-gate {
       position: fixed;
       inset: 0;
-      background: rgba(10, 0, 5, 0.98); /* Fondo muy oscuro con tinte rosado */
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
+      /* Fondo semitransparente para que se vea la foto de fondo borrosa */
+      background: rgba(20, 5, 15, 0.65);
+      backdrop-filter: blur(25px);
+      -webkit-backdrop-filter: blur(25px);
       z-index: 10000;
       display: flex;
       align-items: center;
@@ -239,29 +240,30 @@
     }
 
     .gate-card {
-      background: linear-gradient(145deg, #1a000d, #000000);
-      border: 1px solid #33001a;
+      /* Efecto cristal con tinte púrpura/rosa, no negro */
+      background: linear-gradient(135deg, rgba(60, 10, 40, 0.85), rgba(30, 5, 20, 0.9));
+      border: 1px solid rgba(255, 100, 180, 0.3);
       padding: 40px 25px;
       border-radius: 28px;
       max-width: 360px;
       width: 100%;
       text-align: center;
       color: white;
-      box-shadow: 0 0 50px rgba(255, 0, 128, 0.2);
+      box-shadow: 0 20px 60px rgba(255, 0, 128, 0.25);
       position: relative;
-      overflow: visible; /* Para que la flecha pueda salir */
+      overflow: visible;
     }
 
-    /* Flecha animada apuntando a la esquina superior derecha */
+    /* Flecha animada */
     .arrow-pointer {
       position: absolute;
-      top: -20px;
+      top: -60px;
       right: -20px;
-      font-size: 6rem;
-      color: #ff007f;
+      font-size: 3.5rem;
+      color: #ff3399; /* Rosa más brillante */
       transform: rotate(-45deg);
       animation: bounceArrow 1.5s infinite ease-in-out;
-      filter: drop-shadow(0 0 10px #ff007f);
+      filter: drop-shadow(0 0 15px #ff3399);
       z-index: 10001;
     }
 
@@ -269,34 +271,36 @@
       font-size: 3.5rem;
       margin-bottom: 15px;
       display: block;
-      filter: drop-shadow(0 0 15px rgba(255, 0, 128, 0.6));
+      filter: drop-shadow(0 0 20px rgba(255, 50, 150, 0.6));
       animation: pulse 2s infinite;
     }
 
     .gate-title {
-      font-size: 1.5rem;
+      font-size: 1.6rem;
       font-weight: 800;
-      color: #ff007f; /* Rosa Neón */
+      background: linear-gradient(to right, #ff66b2, #ffccdd);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
       text-transform: uppercase;
       margin-bottom: 10px;
       letter-spacing: 1px;
-      text-shadow: 0 0 10px rgba(255, 0, 127, 0.4);
     }
 
     .gate-desc {
       font-size: 1rem;
-      color: #e0e0e0;
+      color: #ffd9e6; /* Texto rosado muy claro */
       margin-bottom: 30px;
       line-height: 1.6;
+      font-weight: 500;
     }
 
     .steps-container {
-      background: rgba(255, 0, 128, 0.05);
+      background: rgba(255, 255, 255, 0.08); /* Fondo más claro */
       border-radius: 18px;
       padding: 20px;
       text-align: left;
       margin-bottom: 25px;
-      border: 1px solid rgba(255, 0, 128, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.15);
     }
 
     .step-item {
@@ -305,11 +309,12 @@
       margin-bottom: 18px;
       font-size: 0.95rem;
       align-items: center;
+      color: #fff;
     }
     .step-item:last-child { margin-bottom: 0; }
 
     .step-num {
-      background: #ff007f;
+      background: #ff3399;
       color: white;
       min-width: 28px;
       height: 28px;
@@ -319,15 +324,16 @@
       justify-content: center;
       font-size: 0.9rem;
       font-weight: 800;
-      box-shadow: 0 0 12px rgba(255, 0, 128, 0.5);
+      box-shadow: 0 0 15px rgba(255, 51, 153, 0.6);
     }
 
     .footer-brand {
       font-size: 0.75rem;
-      color: #666;
+      color: #ff99cc;
       margin-top: 20px;
       text-transform: uppercase;
       letter-spacing: 1.5px;
+      opacity: 0.8;
     }
 
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
@@ -423,7 +429,7 @@
           <span class="gate-icon">💋</span>
           <div class="gate-title">Acceso VIP</div>
           <p class="gate-desc">
-            Estás a un paso de ver mi <b>contenido</b>. 🔥<br>
+            Estás a un paso de ver mi <b>contenido sin censura</b>. 🔥<br>
             Desbloquéalo gratis abriendo el navegador.
           </p>
 
@@ -434,7 +440,7 @@
             </div>
             <div class="step-item">
               <div class="step-num">2</div>
-              <div>Elige <b>"Abrir en el navegador"</b> para entrar. 🔥</div>
+              <div>Elige <b>"Abrir en el navegador"</b> para entrar. 🍑</div>
             </div>
           </div>
 
