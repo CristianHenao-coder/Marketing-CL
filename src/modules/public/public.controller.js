@@ -13,10 +13,19 @@ export const publicController = {
       const { slug } = req.params;
       const host = normalizeHost(req.headers.host);
 
-      // 1. Buscamos el link (ya sea por slug o por dominio propio)
-      const link = slug
-        ? await linksService.getBySlug(slug)
-        : await linksService.getByDomain(host);
+      // Si no hay slug y estamos en la raíz del dominio principal (no un dominio custom), redirigir al admin
+      // Asumimos que si no hay slug y no se encuentra un link por dominio, es la home del sistema
+      if (!slug) {
+          const linkByDomain = await linksService.getByDomain(host);
+          if (!linkByDomain) {
+              return res.redirect('/admin/login');
+          }
+          // Si hay link por dominio, seguimos con la lógica normal usando ese link
+          var link = linkByDomain;
+      } else {
+          // 1. Buscamos el link (ya sea por slug o por dominio propio)
+          var link = await linksService.getBySlug(slug);
+      }
 
       if (!link) return res.status(404).send('Not Found');
 

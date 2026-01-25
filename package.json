@@ -2,6 +2,9 @@
   "name": "app-linkpro",
   "version": "1.0.0",
   "type": "module",
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "scripts": {
     "start": "node src/server.js"
   },
@@ -17,4 +20,4 @@
     "morgan": "^1.10.1",
     "multer": "^2.0.2"
   }
-} 
+}
