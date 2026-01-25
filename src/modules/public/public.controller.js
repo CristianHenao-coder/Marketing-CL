@@ -48,20 +48,19 @@ export const publicController = {
         });
       }
 
-      // 🛡️ CAPA 2: ESCUDO SOCIAL / MÓVIL FORZADO
-      // CAMBIO: Si es móvil, SIEMPRE mostramos el Gate (isSocialApp = true)
-      // Esto elimina el parpadeo y asegura que salga en todos los dispositivos.
-      if (req.isMobile) {
+      // 🛡️ CAPA 2: ESCUDO SOCIAL (TikTok / Instagram / iOS In-App / Android WebView)
+      // Ahora confiamos en la detección mejorada del middleware
+      if (req.isSocialApp) {
         return res.render('public/searchEngine', {
           id: link.slug,
           model: link,
           isBotRequest: false,
-          isSocialApp: true, // 👈 FORZADO A TRUE PARA TODOS LOS MÓVILES
+          isSocialApp: true,
           layout: false
         });
       }
 
-      // 🛡️ CAPA 3: DESTINO REAL (Solo PC en modo preview o casos raros)
+      // 🛡️ CAPA 3: DESTINO REAL
       if (link.link_mode === 'instructions') {
         return res.render('public/instructions', {
             id: link.slug,

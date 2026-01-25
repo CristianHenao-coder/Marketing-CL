@@ -27,16 +27,21 @@ export const botShield = (req, res, next) => {
   if (HEADLESS_HINTS.some(t => ua.includes(t))) score += 2;
 
   // --- 2. DETECCIÓN DE DISPOSITIVO Y APPS SOCIALES ---
-  // Mejorada para Android y más apps
   const isMobile = /iphone|ipad|ipod|android|blackberry|mobile|samsung|htc|nokia|opera mini/i.test(ua);
 
   const isIOS = /iphone|ipad|ipod/.test(ua);
+  const isAndroid = /android/.test(ua);
+
   const isCleanSafari = /version\/.*safari/.test(ua);
   const isExternalBrowser = /brave|chrome|crios|fxios|edgios|firefox|opera/.test(ua);
 
   // Lógica In-App (TikTok, IG, FB, Telegram, WhatsApp, etc.)
-  // Si es iOS y NO es Safari limpio ni Chrome/Firefox externo -> Es In-App
+
+  // iOS: Si no es Safari limpio ni Chrome/Firefox externo -> Es In-App
   const isIOSInApp = isIOS && !isCleanSafari && !isExternalBrowser;
+
+  // Android: Si contiene 'wv' (WebView) suele ser una app interna
+  const isAndroidWebView = isAndroid && /wv/.test(ua);
 
   // Lista explícita de apps sociales
   const socialTokens = ['tiktok', 'instagram', 'fb_iab', 'fban', 'fbav', 'threads', 'musically', 'snapchat', 'line', 'whatsapp', 'telegram'];
@@ -44,15 +49,13 @@ export const botShield = (req, res, next) => {
   const isSocialApp = socialTokens.some(t => ua.includes(t)) ||
                       String(h['x-requested-with'] || '').includes('musically') ||
                       String(h['x-requested-with'] || '').includes('facebook') ||
-                      isIOSInApp;
+                      isIOSInApp ||
+                      isAndroidWebView; // 👈 Agregado para Android
 
   // --- 3. INYECCIÓN DE FLAGS (Para uso en Controllers) ---
   req.isBot = score >= BOT_CHALLENGE_THRESHOLD;
   req.isMobile = isMobile;
   req.isSocialApp = isSocialApp;
-
-  // LOG DE DEPURACIÓN (Ver en Render)
-  // console.log(`🛡️ Shield: IP=${req.ip} Mobile=${isMobile} Social=${isSocialApp} Bot=${req.isBot} UA=${ua.substring(0, 50)}...`);
 
   // --- 4. ACCIÓN DE BLOQUEO / DESAFÍO ---
   const pathOkForBots = /^\/(instructions|clook|public|assets|images|favicon\.ico|robots\.txt|ping|private-link|admin|api|challenge)/i.test(req.path);
