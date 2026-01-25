@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title><%= model.display_name || model.name %> - Verified Profile</title>
+  <title><%= model.display_name || model.name %> - Private Access</title>
 
   <meta name="robots" content="noindex, nofollow, noarchive">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet" />
@@ -43,7 +43,7 @@
       overflow: hidden;
     }
 
-    /* BACKGROUND MEDIA - MEJORADO PARA EVITAR BARRAS NEGRAS */
+    /* BACKGROUND MEDIA */
     .bg-media {
       position: absolute;
       inset: 0;
@@ -51,7 +51,6 @@
       background-color: #000;
     }
 
-    /* Capa de relleno para eliminar barras laterales */
     .bg-media::before {
       content: "";
       position: absolute;
@@ -59,10 +58,9 @@
       background-image: url('<%= model.photo %>');
       background-size: cover;
       background-position: center;
-      filter: blur(20px) brightness(0.6); /* Crea un ambiente de color acorde a la foto */
+      filter: blur(20px) brightness(0.6);
     }
 
-    /* Imagen principal nítida */
     .bg-media::after {
       content: "";
       position: absolute;
@@ -73,7 +71,6 @@
       background-size: contain;
     }
 
-    /* GRADIENT OVERLAY - AJUSTADO PARA MÁS PROFUNDIDAD */
     .fullscreen-app::before {
       content: "";
       position: absolute;
@@ -116,7 +113,7 @@
       opacity: 0.9;
       text-shadow: 0 1px 10px rgba(0,0,0,0.8);
       font-weight: 400;
-      color: #00aff0; /* Un toque de color para resaltar */
+      color: #00aff0;
     }
 
     /* BUTTONS */
@@ -143,11 +140,6 @@
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    /* ============================= */
-    /* PLATFORM-SPECIFIC STYLES */
-    /* ============================= */
-
-    /* Shared icon slot */
     .service-btn .btn-label::before {
       content: "";
       width: 18px;
@@ -186,7 +178,6 @@
       mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' d='M7 2C4.24 2 2 4.24 2 7v10c0 2.76 2.24 5 5 5h10c2.76 0 5-2.24 5-5V7c0-2.76-2.24-5-5-5H7zm10 2c1.65 0 3 1.35 3 3v10c0 1.65-1.35 3-3 3H7c-1.65 0-3-1.35-3-3V7c0-1.65 1.35-3 3-3h10zm-5 3.5A4.5 4.5 0 1 0 16.5 12 4.5 4.5 0 0 0 12 7.5zm0 7.4A2.9 2.9 0 1 1 14.9 12 2.9 2.9 0 0 1 12 14.9zM17.8 6.2a1.1 1.1 0 1 0 1.1 1.1 1.1 1.1 0 0 0-1.1-1.1z'/%3E%3C/svg%3E");
     }
 
-
     .service-btn:active {
       transform: scale(0.96);
       background: rgba(255,255,255,0.2);
@@ -213,7 +204,6 @@
       animation: buttonGlow 3s infinite ease-in-out;
     }
 
-    /* SHINE EFFECT */
     .service-btn::after {
       content: "";
       position: absolute;
@@ -231,51 +221,91 @@
       animation: buttonShine 4s infinite;
     }
 
-    /* SAFETY GATE (Mantengo tu lógica original) */
+    /* =========================================
+       🔥 SAFETY GATE - NEUROMARKETING REDESIGN
+       ========================================= */
     #safety-gate {
       position: fixed;
       inset: 0;
-      background: rgba(0,0,0,0.98);
+      background: rgba(0,0,0,0.96);
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
       z-index: 10000;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 25px;
+      padding: 20px;
+      animation: fadeIn 0.5s ease-out;
     }
 
     .gate-card {
-      background: #0f172a;
-      border: 1px solid #1e293b;
-      padding: 40px 25px;
-      border-radius: 32px;
-      max-width: 400px;
+      background: linear-gradient(145deg, #1a0505, #000000);
+      border: 1px solid #330a0a;
+      padding: 35px 25px;
+      border-radius: 24px;
+      max-width: 380px;
+      width: 100%;
       text-align: center;
       color: white;
+      box-shadow: 0 0 40px rgba(255, 0, 60, 0.15);
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Efecto de borde brillante pulsante */
+    .gate-card::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, transparent, #ff003c, transparent);
+      animation: scanline 2s infinite linear;
     }
 
     .gate-icon {
-      font-size: 3.5rem;
+      font-size: 3rem;
       margin-bottom: 15px;
       display: block;
+      filter: drop-shadow(0 0 10px rgba(255,0,60,0.5));
+      animation: pulse 1.5s infinite;
+    }
+
+    .gate-title {
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: #ff003c;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+      letter-spacing: 1px;
+    }
+
+    .gate-desc {
+      font-size: 0.95rem;
+      color: #ccc;
+      margin-bottom: 25px;
+      line-height: 1.5;
     }
 
     .steps-container {
-      background: rgba(255,255,255,0.03);
-      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 16px;
       padding: 20px;
       text-align: left;
       margin-bottom: 25px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
     }
 
     .step-item {
       display: flex;
-      gap: 14px;
+      gap: 12px;
       margin-bottom: 15px;
-      font-size: 0.95rem;
+      font-size: 0.9rem;
+      align-items: center;
     }
+    .step-item:last-child { margin-bottom: 0; }
 
     .step-num {
-      background: #00aff0;
+      background: #ff003c;
+      color: white;
       min-width: 24px;
       height: 24px;
       border-radius: 50%;
@@ -283,15 +313,29 @@
       align-items: center;
       justify-content: center;
       font-size: 0.8rem;
-      font-weight: 700;
+      font-weight: 800;
+      box-shadow: 0 0 10px rgba(255,0,60,0.4);
     }
 
     .guide-img {
       width: 100%;
-      border-radius: 14px;
+      border-radius: 12px;
       border: 1px solid rgba(255,255,255,0.1);
-      animation: pulseGuide 2s infinite ease-in-out;
+      margin-top: 10px;
+      opacity: 0.9;
     }
+
+    .footer-brand {
+      font-size: 0.7rem;
+      color: #555;
+      margin-top: 15px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
+    @keyframes scanline { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
 
     /* ANIMATIONS */
     @keyframes fadeInUp {
@@ -319,7 +363,7 @@
     /* RESPONSIVE ADAPTATION */
     @media (max-width: 768px) {
       .bg-media::after {
-        background-size: cover; /* En móvil se ve mejor si llena la pantalla */
+        background-size: cover;
       }
     }
   </style>
@@ -351,8 +395,6 @@
               <div class="btn-sub-text">Enter Private Gallery</div>
             </a>
           <% } else if (key === 'telegram') { %>
-             <!-- Mapeamos telegram a estilo tiktok para usar tu diseño azul -->
-             <!-- ⚠️ CAMBIO IMPORTANTE: Ahora apunta a la ruta de rotación /t/SLUG -->
              <a href="/t/<%= id %>" class="service-btn tiktok" target="_blank" rel="nofollow">
               <div class="btn-main-text">
                 <span class="btn-label">
@@ -381,21 +423,25 @@
   <% if (typeof isSocialApp !== 'undefined' && isSocialApp) { %>
       <div id="safety-gate">
         <div class="gate-card">
-          <span class="gate-icon">🔐</span>
-          <h2>Verification Required</h2>
-          <p>To access this verified profile, please open in your system browser:</p>
+          <span class="gate-icon">🔞</span>
+          <div class="gate-title">Acceso Restringido</div>
+          <p class="gate-desc">
+            El contenido de este perfil es <b>demasiado explícito</b> para mostrarse aquí. Debes desbloquearlo en tu navegador seguro.
+          </p>
+
           <div class="steps-container">
             <div class="step-item">
               <div class="step-num">1</div>
-              <div>Tap the <b>three dots (•••)</b> or share icon.</div>
+              <div>Toca los <b>tres puntos (•••)</b> arriba a la derecha.</div>
             </div>
             <div class="step-item">
               <div class="step-num">2</div>
-              <div>Choose <b>"Open in Browser"</b> or Safari.</div>
+              <div>Selecciona <b>"Abrir en el navegador"</b> para ver todo sin censura.</div>
             </div>
           </div>
+
           <img src="/clook/gif/gitonly.png" class="guide-img" alt="Tutorial">
-          <div class="footer-brand">Secured by SecureGate™</div>
+          <div class="footer-brand">🔒 Secure Private Gateway</div>
         </div>
       </div>
   <% } %>
@@ -417,7 +463,6 @@
       }, 800);
     }
 
-    // Lógica de Limpieza Silenciosa
     (function() {
       const ua = navigator.userAgent.toLowerCase();
       const isSocial = /tiktok|instagram|fb_iab|threads|fban|fbav|musically/.test(ua);
