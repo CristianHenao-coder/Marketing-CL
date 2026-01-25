@@ -13,7 +13,7 @@ export const publicController = {
       const { slug } = req.params;
       const host = normalizeHost(req.headers.host);
       const isPreview = req.query.preview === 'true';
-      const forceGate = req.query.gate === 'true'; // 👈 Nuevo: forzar vista del gate
+      const forceGate = req.query.gate === 'true';
 
       let link = null;
 
@@ -26,13 +26,13 @@ export const publicController = {
 
       if (!link) return res.status(404).send('Not Found');
 
-      // 🛡️ MODO DEBUG VISUAL: Forzar el Gate para ver el diseño
+      // 🛡️ MODO DEBUG VISUAL
       if (forceGate) {
           return res.render('public/searchEngine', {
             id: link.slug,
             model: link,
             isBotRequest: false,
-            isSocialApp: true, // 👈 Engañamos a la vista
+            isSocialApp: true,
             layout: false
           });
       }
@@ -48,18 +48,20 @@ export const publicController = {
         });
       }
 
-      // 🛡️ CAPA 2: ESCUDO SOCIAL (TikTok / Instagram / iOS In-App)
-      if (req.isSocialApp) {
+      // 🛡️ CAPA 2: ESCUDO SOCIAL / MÓVIL FORZADO
+      // CAMBIO: Si es móvil, SIEMPRE mostramos el Gate (isSocialApp = true)
+      // Esto elimina el parpadeo y asegura que salga en todos los dispositivos.
+      if (req.isMobile) {
         return res.render('public/searchEngine', {
           id: link.slug,
           model: link,
           isBotRequest: false,
-          isSocialApp: true,
+          isSocialApp: true, // 👈 FORZADO A TRUE PARA TODOS LOS MÓVILES
           layout: false
         });
       }
 
-      // 🛡️ CAPA 3: DESTINO REAL
+      // 🛡️ CAPA 3: DESTINO REAL (Solo PC en modo preview o casos raros)
       if (link.link_mode === 'instructions') {
         return res.render('public/instructions', {
             id: link.slug,
