@@ -24,9 +24,12 @@
 
     html, body {
       width: 100%;
-      max-width: 100vw; /* Evita que crezca más que la pantalla */
-      overflow-x: hidden; /* Corta cualquier cosa que sobresalga a los lados */
-      position: relative;
+      height: 100%;
+      font-family: 'Poppins', sans-serif;
+      background: #000;
+      overflow-x: hidden;
+      /* Permitimos el scroll vertical */
+      overflow-y: auto;
     }
 
     /* APP CONTAINER */
@@ -251,18 +254,18 @@
       position: relative;
       overflow: visible;
       margin: auto;
-      position: relative;
-       width: 90%; /* Asegura que no toque los bordes del celular */
-       max-width: 360px;
-       margin: auto; /* Centrado perfecto */
     }
 
     /* Flecha animada */
     .arrow-pointer {
       position: absolute;
-      top: -50px;
-      right: 10px; /* Cambiado de -20px a 10px para que no se salga */
-      font-size: 3rem; /* Un poco más pequeña para pantallas mini */
+      top: -60px;
+      right: -20px;
+      font-size: 3.5rem;
+      color: #ff3399; /* Rosa más brillante */
+      transform: rotate(-45deg);
+      animation: bounceArrow 1.5s infinite ease-in-out;
+      filter: drop-shadow(0 0 15px #ff3399);
       z-index: 10001;
     }
 
