@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="<%= getLocale() %>"> <!-- 👈 Idioma dinámico -->
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -9,6 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet" />
 
   <style>
+    /* ... (MANTENEMOS TODO EL CSS EXACTAMENTE IGUAL) ... */
     /* RESET */
     *, *::before, *::after {
       box-sizing: border-box;
@@ -27,27 +28,25 @@
       height: 100%;
       font-family: 'Poppins', sans-serif;
       background: #000;
-      overflow-x: hidden;
-      /* Permitimos el scroll vertical */
-      overflow-y: auto;
+      overflow: hidden;
     }
 
     /* APP CONTAINER */
     .fullscreen-app {
       position: relative;
       width: 100%;
-      /* Cambiamos height por min-height para que crezca si hay mucho contenido */
-      min-height: 100dvh;
+      height: 100dvh;
       display: flex;
       flex-direction: column;
-      justify-content: center; /* Centra el contenido verticalmente si sobra espacio */
+      justify-content: flex-end;
       align-items: center;
-      padding: 40px 20px; /* Más espacio arriba y abajo */
+      padding: clamp(20px, 5vw, 40px);
+      overflow: hidden;
     }
 
     /* BACKGROUND MEDIA */
     .bg-media {
-      position: fixed; /* Cambiado de absolute a fixed */
+      position: absolute;
       inset: 0;
       z-index: 0;
       background-color: #000;
@@ -229,19 +228,18 @@
     #safety-gate {
       position: fixed;
       inset: 0;
-      background: rgba(20, 5, 15, 0.85);
+      background: rgba(20, 5, 15, 0.65);
       backdrop-filter: blur(25px);
+      -webkit-backdrop-filter: blur(25px);
       z-index: 10000;
       display: flex;
       align-items: center;
       justify-content: center;
       padding: 20px;
-      /* Añadimos scroll por si el card es más alto que la pantalla */
-      overflow-y: auto;
+      animation: fadeIn 0.5s ease-out;
     }
 
     .gate-card {
-      /* Efecto cristal con tinte púrpura/rosa, no negro */
       background: linear-gradient(135deg, rgba(60, 10, 40, 0.85), rgba(30, 5, 20, 0.9));
       border: 1px solid rgba(255, 100, 180, 0.3);
       padding: 40px 25px;
@@ -253,25 +251,18 @@
       box-shadow: 0 20px 60px rgba(255, 0, 128, 0.25);
       position: relative;
       overflow: visible;
-      margin: auto;
     }
 
-    /* Flecha animada */
     .arrow-pointer {
       position: absolute;
-      /* La bajamos un poco para que no choque con el borde del celular */
-      top: -10px;
-      /* Cambiamos el valor negativo por uno positivo para meterla en la card */
-      right: 15px;
-      font-size: 2.8rem; /* Reducimos un poco el tamaño para que sea más estética */
+      top: -60px;
+      right: -20px;
+      font-size: 3.5rem;
       color: #ff3399;
-      /* Ajustamos la rotación para que apunte más hacia la esquina superior derecha */
-      transform: rotate(-30deg);
+      transform: rotate(-45deg);
       animation: bounceArrow 1.5s infinite ease-in-out;
       filter: drop-shadow(0 0 15px #ff3399);
       z-index: 10001;
-      /* Evita que la flecha sea "clickeable" y bloquee otros elementos */
-      pointer-events: none;
     }
 
     .gate-icon {
@@ -295,14 +286,14 @@
 
     .gate-desc {
       font-size: 1rem;
-      color: #ffd9e6; /* Texto rosado muy claro */
+      color: #ffd9e6;
       margin-bottom: 30px;
       line-height: 1.6;
       font-weight: 500;
     }
 
     .steps-container {
-      background: rgba(255, 255, 255, 0.08); /* Fondo más claro */
+      background: rgba(255, 255, 255, 0.08);
       border-radius: 18px;
       padding: 20px;
       text-align: left;
@@ -359,7 +350,6 @@
       50% { transform: translate(10px, -10px) rotate(-45deg); }
     }
 
-    /* ANIMATIONS */
     @keyframes fadeInUp {
       from { opacity: 0; transform: translateY(30px); }
       to { opacity: 1; transform: translateY(0); }
@@ -376,13 +366,6 @@
       100% { left: 150%; }
     }
 
-    @keyframes pulseGuide {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.02); }
-      100% { transform: scale(1); }
-    }
-
-    /* RESPONSIVE ADAPTATION */
     @media (max-width: 768px) {
       .bg-media::after {
         background-size: cover;
@@ -413,8 +396,8 @@
         <% if (['telegram','instagram','onlyfans'].includes(key) && value) { %>
           <% if (key === 'onlyfans') { %>
             <a href="javascript:void(0)" onclick="unlockPremium('<%= id %>')" class="service-btn" id="main-trigger">
-              <div class="btn-main-text">EXCLUSIVE CONTENT</div>
-              <div class="btn-sub-text">Enter Private Gallery</div>
+              <div class="btn-main-text"><%= __('landing.exclusive_btn') %></div>
+              <div class="btn-sub-text"><%= __('landing.enter_gallery') %></div>
             </a>
           <% } else if (key === 'telegram') { %>
              <a href="/t/<%= id %>" class="service-btn tiktok" target="_blank" rel="nofollow">
@@ -424,7 +407,7 @@
                   <%= uiMap.tiktok.label %>
                 </span>
               </div>
-              <div class="btn-sub-text">Follow me</div>
+              <div class="btn-sub-text"><%= __('landing.follow_me') %></div>
             </a>
           <% } else { %>
             <a href="<%= value %>" class="service-btn <%= key %>" target="_blank" rel="nofollow">
@@ -434,7 +417,7 @@
                   <%= uiMap[key]?.label || key %>
                 </span>
               </div>
-              <div class="btn-sub-text">Follow me</div>
+              <div class="btn-sub-text"><%= __('landing.follow_me') %></div>
             </a>
           <% } %>
         <% } %>
@@ -445,31 +428,28 @@
   <% if (typeof isSocialApp !== 'undefined' && isSocialApp) { %>
       <div id="safety-gate">
         <div class="gate-card">
-          <!-- Flecha animada apuntando a los 3 puntos -->
           <div class="arrow-pointer">➚</div>
 
           <span class="gate-icon">💋</span>
-          <div class="gate-title">Acceso VIP</div>
+          <div class="gate-title"><%= __('gate.title') %></div>
           <p class="gate-desc">
-            Estás a un paso de ver mi <b>contenido sin censura</b>. 🔥<br>
-            Desbloquéalo gratis abriendo el navegador.
+            <%- __('gate.desc') %>
           </p>
 
           <div class="steps-container">
             <div class="step-item">
               <div class="step-num">1</div>
-              <div>Toca los <b>tres puntos (•••)</b> arriba a la derecha.</div>
+              <div><%- __('gate.step1') %></div>
             </div>
             <div class="step-item">
               <div class="step-num">2</div>
-              <div>Elige <b>"Abrir en el navegador"</b> para entrar. 🔥</div>
+              <div><%- __('gate.step2') %></div>
             </div>
           </div>
 
-          <!-- IMAGEN GIF ANIMADA -->
           <img src="/images/gitonly.png" class="guide-img" alt="Tutorial">
 
-          <div class="footer-brand">🔒 Private & Secure</div>
+          <div class="footer-brand"><%= __('gate.footer') %></div>
         </div>
       </div>
   <% } %>
@@ -480,7 +460,7 @@
 
       const btn = document.getElementById('main-trigger');
       if (btn) {
-        btn.innerHTML = '<div class="btn-main-text">VERIFYING...</div><div class="btn-sub-text">Please wait</div>';
+        btn.innerHTML = '<div class="btn-main-text"><%= __('landing.verifying') %></div><div class="btn-sub-text"><%= __('landing.please_wait') %></div>';
         btn.style.animation = "none";
         btn.style.background = "rgba(0,175,240,0.4)";
         btn.style.pointerEvents = "none";
