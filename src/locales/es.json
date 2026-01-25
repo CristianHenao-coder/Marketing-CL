@@ -2,15 +2,20 @@
   "landing": {
     "exclusive_btn": "CONTENIDO EXCLUSIVO",
     "enter_gallery": "Entrar a Galería Privada",
-    "follow_me": "¿Qué esperas?",
     "verifying": "VERIFICANDO...",
-    "please_wait": "Por favor espera"
+    "please_wait": "Por favor espera",
+    "telegram_label": "Hablemos por acá",
+    "telegram_sub": "¿Qué estás esperando?",
+    "tiktok_label": "VIDEOS VIRALES",
+    "tiktok_sub": "Ver más",
+    "instagram_label": "Sígueme",
+    "instagram_sub": "Fotos nuevas"
   },
   "gate": {
     "title": "ACCESO VIP",
-    "desc": "Estás a un paso de ver mi <b>contenido</b>. 🔥<br>Desbloquéalo gratis abriendo el navegador.",
+    "desc": "Estás a un paso de ver mi <b>contenido sin censura</b>. 🔥<br>Desbloquéalo gratis abriendo el navegador.",
     "step1": "Toca los <b>tres puntos (•••)</b> arriba a la derecha.",
-    "step2": "Elige <b>\"Abrir en el navegador\"</b> para entrar. \uD83D\uDD25",
+    "step2": "Elige <b>\"Abrir en el navegador\"</b> para entrar. 🍑",
     "footer": "🔒 Privado y Seguro"
   },
   "loading": {
