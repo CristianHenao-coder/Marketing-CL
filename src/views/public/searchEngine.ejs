@@ -158,10 +158,6 @@
       box-shadow: 0 0 25px rgba(0, 175, 240, 0.35);
     }
 
-    .service-btn.tiktok .btn-label::before {
-      mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' d='M9.04 15.44 8.9 19.6c.54 0 .77-.23 1.05-.5l2.52-2.4 5.23 3.82c.96.53 1.65.25 1.9-.88l3.44-16.2c.33-1.54-.56-2.14-1.5-1.79L1.12 9.2c-1.48.58-1.46 1.42-.27 1.79l4.9 1.53L18.7 5.4c.61-.4 1.17-.18.71.22Z'/%3E%3C/svg%3E");
-    }
-
     /* INSTAGRAM */
     .service-btn.instagram {
       background: linear-gradient(
@@ -204,6 +200,11 @@
       animation: buttonGlow 3s infinite ease-in-out;
     }
 
+
+       .btn-label svg {
+         color: white !important;
+         fill: white; /* Si usas el SVG de relleno */
+       }
     .service-btn::after {
       content: "";
       position: absolute;
@@ -396,14 +397,13 @@
 
     <section class="buttons-wrapper">
       <%
-        // 1. Solo cambiamos las etiquetas de texto aquí
-        const uiMap = {
-          telegram: {
-            label: 'Hablemos',
-            icon: `<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M9.04 15.44 8.9 19.6c.54 0 .77-.23 1.05-.5l2.52-2.4 5.23 3.82c.96.53 1.65.25 1.9-.88l3.44-16.2c.33-1.54-.56-2.14-1.5-1.79L1.12 9.2c-1.48.58-1.46 1.42-.27 1.79l4.9 1.53L18.7 5.4c.61-.4 1.17-.18.71.22Z"/></svg>`
-          },
-          instagram: { label: 'Instagram', icon: '' }
-        };
+      const uiMap = {
+        telegram: {
+          label: 'Hablemos',
+          icon: `<svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M20.665 3.717l-17.73 6.837c-1.21.486-1.203 1.161-.222 1.462l4.552 1.42l1.589 4.829c.191.528.098.737.585.737c.37 0 .533-.169.763-.391l2.303-2.238l4.794 3.541c.883.487 1.52.237 1.74-.821l3.123-14.717c.322-1.29-.496-1.877-1.497-1.439z"/></svg>`
+        },
+        instagram: { label: 'Instagram', icon: '' }
+      };
 
         // 2. Definimos el nuevo orden: Exclusivo > Telegram > Instagram
         const desiredOrder = ['onlyfans', 'telegram', 'instagram'];
