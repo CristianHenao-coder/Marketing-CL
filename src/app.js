@@ -32,6 +32,9 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, '../public')));
 app.use('/clook/gif', express.static(path.join(__dirname, '../gif')));
 
+// ⚠️ NUEVO: Servir imágenes desde src/views/public/images para el Safety Gate
+app.use('/images', express.static(path.join(__dirname, 'views/public/images')));
+
 // 5. RUTAS DEL SISTEMA 🔐
 
 // Panel de Administración (Login y Gestión)

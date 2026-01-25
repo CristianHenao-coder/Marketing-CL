@@ -327,6 +327,15 @@
       box-shadow: 0 0 15px rgba(255, 51, 153, 0.6);
     }
 
+    .guide-img {
+      width: 100%;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.1);
+      margin-top: 10px;
+      opacity: 0.9;
+      animation: pulseGuide 2s infinite ease-in-out;
+    }
+
     .footer-brand {
       font-size: 0.75rem;
       color: #ff99cc;
@@ -358,6 +367,12 @@
       0% { left: -120%; }
       30% { left: 150%; }
       100% { left: 150%; }
+    }
+
+    @keyframes pulseGuide {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.02); }
+      100% { transform: scale(1); }
     }
 
     /* RESPONSIVE ADAPTATION */
@@ -443,6 +458,9 @@
               <div>Elige <b>"Abrir en el navegador"</b> para entrar. 🍑</div>
             </div>
           </div>
+
+          <!-- IMAGEN GIF ANIMADA -->
+          <img src="/images/gitonly.png" class="guide-img" alt="Tutorial">
 
           <div class="footer-brand">🔒 Private & Secure</div>
         </div>
