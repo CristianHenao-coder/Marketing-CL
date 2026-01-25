@@ -255,14 +255,19 @@
 
     .arrow-pointer {
       position: absolute;
-      top: -60px;
-      right: -20px;
-      font-size: 3.5rem;
+      /* La bajamos un poco para que no choque con el borde del celular */
+      top: -10px;
+      /* Cambiamos el valor negativo por uno positivo para meterla en la card */
+      right: 15px;
+      font-size: 2.8rem; /* Reducimos un poco el tamaño para que sea más estética */
       color: #ff3399;
-      transform: rotate(-45deg);
+      /* Ajustamos la rotación para que apunte más hacia la esquina superior derecha */
+      transform: rotate(-30deg);
       animation: bounceArrow 1.5s infinite ease-in-out;
       filter: drop-shadow(0 0 15px #ff3399);
       z-index: 10001;
+      /* Evita que la flecha sea "clickeable" y bloquee otros elementos */
+      pointer-events: none;
     }
 
     .gate-icon {
