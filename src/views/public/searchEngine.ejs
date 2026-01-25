@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title><%= model.display_name || model.name %> - Private Access</title>
+  <title><%= model.display_name || model.name %> - Verified Profile</title>
 
   <meta name="robots" content="noindex, nofollow, noarchive">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet" />
@@ -227,9 +227,9 @@
     #safety-gate {
       position: fixed;
       inset: 0;
-      background: rgba(0,0,0,0.96);
-      backdrop-filter: blur(15px);
-      -webkit-backdrop-filter: blur(15px);
+      background: rgba(10, 0, 5, 0.98); /* Fondo muy oscuro con tinte rosado */
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
       z-index: 10000;
       display: flex;
       align-items: center;
@@ -239,103 +239,103 @@
     }
 
     .gate-card {
-      background: linear-gradient(145deg, #1a0505, #000000);
-      border: 1px solid #330a0a;
-      padding: 35px 25px;
-      border-radius: 24px;
-      max-width: 380px;
+      background: linear-gradient(145deg, #1a000d, #000000);
+      border: 1px solid #33001a;
+      padding: 40px 25px;
+      border-radius: 28px;
+      max-width: 360px;
       width: 100%;
       text-align: center;
       color: white;
-      box-shadow: 0 0 40px rgba(255, 0, 60, 0.15);
+      box-shadow: 0 0 50px rgba(255, 0, 128, 0.2);
       position: relative;
-      overflow: hidden;
+      overflow: visible; /* Para que la flecha pueda salir */
     }
 
-    /* Efecto de borde brillante pulsante */
-    .gate-card::before {
-      content: "";
+    /* Flecha animada apuntando a la esquina superior derecha */
+    .arrow-pointer {
       position: absolute;
-      top: 0; left: 0; right: 0; height: 2px;
-      background: linear-gradient(90deg, transparent, #ff003c, transparent);
-      animation: scanline 2s infinite linear;
+      top: -60px;
+      right: -20px;
+      font-size: 3rem;
+      color: #ff007f;
+      transform: rotate(-45deg);
+      animation: bounceArrow 1.5s infinite ease-in-out;
+      filter: drop-shadow(0 0 10px #ff007f);
+      z-index: 10001;
     }
 
     .gate-icon {
-      font-size: 3rem;
+      font-size: 3.5rem;
       margin-bottom: 15px;
       display: block;
-      filter: drop-shadow(0 0 10px rgba(255,0,60,0.5));
-      animation: pulse 1.5s infinite;
+      filter: drop-shadow(0 0 15px rgba(255, 0, 128, 0.6));
+      animation: pulse 2s infinite;
     }
 
     .gate-title {
-      font-size: 1.4rem;
+      font-size: 1.5rem;
       font-weight: 800;
-      color: #ff003c;
+      color: #ff007f; /* Rosa Neón */
       text-transform: uppercase;
-      margin-bottom: 8px;
+      margin-bottom: 10px;
       letter-spacing: 1px;
+      text-shadow: 0 0 10px rgba(255, 0, 127, 0.4);
     }
 
     .gate-desc {
-      font-size: 0.95rem;
-      color: #ccc;
-      margin-bottom: 25px;
-      line-height: 1.5;
+      font-size: 1rem;
+      color: #e0e0e0;
+      margin-bottom: 30px;
+      line-height: 1.6;
     }
 
     .steps-container {
-      background: rgba(255, 255, 255, 0.05);
-      border-radius: 16px;
+      background: rgba(255, 0, 128, 0.05);
+      border-radius: 18px;
       padding: 20px;
       text-align: left;
       margin-bottom: 25px;
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 0, 128, 0.15);
     }
 
     .step-item {
       display: flex;
-      gap: 12px;
-      margin-bottom: 15px;
-      font-size: 0.9rem;
+      gap: 14px;
+      margin-bottom: 18px;
+      font-size: 0.95rem;
       align-items: center;
     }
     .step-item:last-child { margin-bottom: 0; }
 
     .step-num {
-      background: #ff003c;
+      background: #ff007f;
       color: white;
-      min-width: 24px;
-      height: 24px;
+      min-width: 28px;
+      height: 28px;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 0.8rem;
+      font-size: 0.9rem;
       font-weight: 800;
-      box-shadow: 0 0 10px rgba(255,0,60,0.4);
-    }
-
-    .guide-img {
-      width: 100%;
-      border-radius: 12px;
-      border: 1px solid rgba(255,255,255,0.1);
-      margin-top: 10px;
-      opacity: 0.9;
+      box-shadow: 0 0 12px rgba(255, 0, 128, 0.5);
     }
 
     .footer-brand {
-      font-size: 0.7rem;
-      color: #555;
-      margin-top: 15px;
+      font-size: 0.75rem;
+      color: #666;
+      margin-top: 20px;
       text-transform: uppercase;
-      letter-spacing: 1px;
+      letter-spacing: 1.5px;
     }
 
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-    @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
-    @keyframes scanline { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+    @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+    @keyframes bounceArrow {
+      0%, 100% { transform: translate(0, 0) rotate(-45deg); }
+      50% { transform: translate(10px, -10px) rotate(-45deg); }
+    }
 
     /* ANIMATIONS */
     @keyframes fadeInUp {
@@ -352,12 +352,6 @@
       0% { left: -120%; }
       30% { left: 150%; }
       100% { left: 150%; }
-    }
-
-    @keyframes pulseGuide {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.02); }
-      100% { transform: scale(1); }
     }
 
     /* RESPONSIVE ADAPTATION */
@@ -423,10 +417,14 @@
   <% if (typeof isSocialApp !== 'undefined' && isSocialApp) { %>
       <div id="safety-gate">
         <div class="gate-card">
-          <span class="gate-icon">🔞</span>
-          <div class="gate-title">Acceso Restringido</div>
+          <!-- Flecha animada apuntando a los 3 puntos -->
+          <div class="arrow-pointer">➚</div>
+
+          <span class="gate-icon">💋</span>
+          <div class="gate-title">Acceso VIP</div>
           <p class="gate-desc">
-            El contenido de este perfil es <b>demasiado explícito</b> para mostrarse aquí. Debes desbloquearlo en tu navegador seguro.
+            Estás a un paso de ver mi <b>contenido sin censura</b>. 🔥<br>
+            Desbloquéalo gratis abriendo el navegador.
           </p>
 
           <div class="steps-container">
@@ -436,12 +434,11 @@
             </div>
             <div class="step-item">
               <div class="step-num">2</div>
-              <div>Selecciona <b>"Abrir en el navegador"</b> para ver todo sin censura.</div>
+              <div>Elige <b>"Abrir en el navegador"</b> para entrar. 🍑</div>
             </div>
           </div>
 
-          <img src="/clook/gif/gitonly.png" class="guide-img" alt="Tutorial">
-          <div class="footer-brand">🔒 Secure Private Gateway</div>
+          <div class="footer-brand">🔒 Private & Secure</div>
         </div>
       </div>
   <% } %>
