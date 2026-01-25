@@ -10,9 +10,10 @@ export const telegramController = {
       const { linkId } = req.params;
 
       // Obtener configuración del link
+      // CAMBIO: Usamos select('*') para evitar errores si falta alguna columna nueva
       const { data: link, error: lErr } = await supabase
         .from('smart_links')
-        .select('telegram_rotation_limit, telegram_max_capacity, current_bot_index')
+        .select('*')
         .eq('id', linkId)
         .single();
 
@@ -166,9 +167,10 @@ export const telegramController = {
       const { slug } = req.params;
 
       // 1. Obtener Link y Configuración
+      // CAMBIO: Usamos select('*') aquí también por seguridad
       const { data: link, error } = await supabase
         .from('smart_links')
-        .select('id, is_active, status, telegram_rotation_limit, telegram_max_capacity, current_bot_index')
+        .select('*')
         .eq('slug', slug)
         .single();
 
@@ -203,10 +205,6 @@ export const telegramController = {
           currentIndex = (currentIndex + 1) % bots.length;
           attempts++;
       }
-
-      // Si todos están llenos, usamos el último (o podríamos redirigir a soporte)
-      // Por ahora, usaremos el que toque aunque esté lleno para no perder tráfico,
-      // pero el admin verá que está rojo en el panel.
 
       const currentBot = bots[currentIndex];
 

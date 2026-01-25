@@ -102,20 +102,19 @@
                     const payloadStr = atob(json.data);
                     const payload = JSON.parse(payloadStr);
 
-                    // 3. Redirigimos al destino final (u = url, d = deeplink)
-                    // Priorizamos deeplink si estamos en móvil, o url normal
-                    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+                    // 3. Redirigimos SIEMPRE a la URL web (payload.u)
+                    // Eliminamos la lógica de Deep Link (payload.d) porque OnlyFans no tiene app oficial
+                    // y eso causa que se abra la PlayStore.
 
-                    if (isMobile && payload.d) {
-                        window.location.href = payload.d;
-                        // Fallback por si el deeplink falla
-                        setTimeout(() => { window.location.href = payload.u; }, 500);
-                    } else {
+                    if (payload.u) {
                         window.location.href = payload.u;
+                    } else {
+                        console.error("Error: URL not found in payload");
+                        window.location.href = '/';
                     }
+
                 } else {
                     console.error("Error: No data received");
-                    // Fallback a la home si falla
                     window.location.href = '/';
                 }
             } catch (e) {
