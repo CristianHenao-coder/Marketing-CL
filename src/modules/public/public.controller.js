@@ -32,51 +32,13 @@ export const publicController = {
       if (!link) return res.status(404).send('Not Found');
 
       // 🛡️ CAPA 1: CLOAKING (Bots y PC)
-      // Si NO es preview y (es bot O no es móvil), mostramos searchEngine (tu plantilla bonita)
-      // NOTA: En tu lógica original, searchEngine ES la página bonita que quieres mostrar a los usuarios reales.
-      // Pero si quieres ocultarla a bots/PC, deberías tener OTRA vista falsa.
-      // ASUMO que 'searchEngine' es la vista REAL que acabas de pasarme.
-
-      // REVISIÓN DE TU LÓGICA ORIGINAL:
-      // if (req.isBot || !req.isMobile) -> render('public/searchEngine')
-      // if (req.isSocialApp) -> render('public/searchEngine')
-      // if (link.link_mode === 'instructions') -> render('public/instructions')
-      // else -> render('public/loading')
-
-      // Esto significa que 'searchEngine' se usa para CLOAKING (ocultar) o para Social Apps.
-      // Y 'loading' es la que lleva al destino final.
-
-      // PERO acabas de pedirme que ponga tu plantilla HTML en 'searchEngine.ejs'.
-      // Esa plantilla tiene botones de OnlyFans, Telegram, etc. ¡Esa es la página REAL!
-
-      // ENTONCES, la lógica debería ser:
-      // Si es Bot/PC -> Mostrar algo FALSO (no tu plantilla bonita).
-      // Si es Móvil -> Mostrar tu plantilla bonita ('searchEngine').
-
-      // Voy a asumir que quieres que 'searchEngine' sea la página de aterrizaje (Landing Page) visible.
-
       if (!isPreview && (req.isBot || !req.isMobile)) {
-         // Aquí deberíamos mostrar una página FALSA si quieres proteger el contenido.
-         // Si 'searchEngine' es tu página real, entonces aquí deberías renderizar OTRA cosa.
-         // Por ahora, para respetar tu código anterior, dejaré que renderice 'searchEngine',
-         // pero ten en cuenta que si 'searchEngine' es la página real, entonces los bots LA VERÁN.
-
-         // Si quieres que los bots NO vean la página real, cambia esto por una vista 'fake'.
-         // Como me pediste "que funcione", voy a renderizar 'searchEngine' aquí también si es lo que tenías,
-         // O si prefieres que los bots vean una página de error, dímelo.
-
-         // VOY A ASUMIR que quieres que los bots vean una página de carga falsa o error.
-         // Pero como acabas de pegar el código en searchEngine.ejs, entiendo que esa es la Landing.
-
-         // AJUSTE: Si es Bot/PC, mostramos una página simple de "Cargando..." que nunca carga,
-         // O una página de búsqueda de Google falsa.
-         // Para no romper nada, usaré 'searchEngine' pero con un flag isBotRequest=true
-
          return res.render('public/searchEngine', {
           id: link.slug,
           model: link,
           isBotRequest: true,
-          isSocialApp: false
+          isSocialApp: false,
+          layout: false // 👈 IMPORTANTE: Desactivar layout de admin
         });
       }
 
@@ -86,26 +48,26 @@ export const publicController = {
           id: link.slug,
           model: link,
           isBotRequest: false,
-          isSocialApp: true
+          isSocialApp: true,
+          layout: false // 👈 IMPORTANTE: Desactivar layout de admin
         });
       }
 
       // 🛡️ CAPA 3: DESTINO REAL (Mobile + Navegador Externo)
-      // Si el modo es 'instructions', mostramos instrucciones.
       if (link.link_mode === 'instructions') {
-        return res.render('public/instructions', { id: link.slug, model: link });
+        return res.render('public/instructions', {
+            id: link.slug,
+            model: link,
+            layout: false // 👈 IMPORTANTE: Desactivar layout de admin
+        });
       }
 
-      // Si no, mostramos la Landing Page (que es searchEngine)
-      // Espera, tu código original redirigía a 'loading' aquí.
-      // return res.render('public/loading', { id: link.slug, model: link });
-
-      // Si 'searchEngine' es la Landing con los botones, entonces deberíamos renderizarla aquí.
       return res.render('public/searchEngine', {
           id: link.slug,
           model: link,
           isBotRequest: false,
-          isSocialApp: false
+          isSocialApp: false,
+          layout: false // 👈 IMPORTANTE: Desactivar layout de admin
       });
 
     } catch (e) {
@@ -158,7 +120,11 @@ export const publicController = {
           const { id } = req.params;
           const link = await linksService.getBySlug(id);
           if (!link) return res.status(404).send('Not Found');
-          res.render('public/loading', { id: link.slug, model: link });
+          res.render('public/loading', {
+              id: link.slug,
+              model: link,
+              layout: false // 👈 IMPORTANTE: Desactivar layout de admin
+          });
       } catch (e) {
           console.error("[PublicController Error]", e);
           res.status(500).send('Maintenance');
