@@ -153,9 +153,15 @@
 
     /* TELEGRAM */
     .service-btn.tiktok {
-      background: rgba(0, 175, 240, 0.18);
+      background: rgba(255, 255, 255, 0.9) ;
       border-color: rgba(0, 175, 240, 0.6);
       box-shadow: 0 0 25px rgba(0, 175, 240, 0.35);
+    }
+
+    .service-btn.tiktok .btn-main-text,
+    .service-btn.tiktok .btn-sub-text,
+    .service-btn.tiktok .btn-label {
+      color: rgba(0, 51, 102, 1) !important; /* Azul oscuro sólido */
     }
 
     /* INSTAGRAM */
@@ -200,11 +206,6 @@
       animation: buttonGlow 3s infinite ease-in-out;
     }
 
-
-       .btn-label svg {
-         color: white !important;
-         fill: white; /* Si usas el SVG de relleno */
-       }
     .service-btn::after {
       content: "";
       position: absolute;
@@ -398,7 +399,7 @@
     <section class="buttons-wrapper">
       <%
       const uiMap = {
-        telegram: {
+        tiktok: {
           label: 'Hablemos',
           icon: `<svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M20.665 3.717l-17.73 6.837c-1.21.486-1.203 1.161-.222 1.462l4.552 1.42l1.589 4.829c.191.528.098.737.585.737c.37 0 .533-.169.763-.391l2.303-2.238l4.794 3.541c.883.487 1.52.237 1.74-.821l3.123-14.717c.322-1.29-.496-1.877-1.497-1.439z"/></svg>`
         },
@@ -406,7 +407,7 @@
       };
 
         // 2. Definimos el nuevo orden: Exclusivo > Telegram > Instagram
-        const desiredOrder = ['onlyfans', 'telegram', 'instagram'];
+        const desiredOrder = ['onlyfans', 'tiktok', 'instagram'];
 
         desiredOrder.forEach((key) => {
           const value = model[key];
@@ -420,8 +421,8 @@
               <a href="/t/<%= id %>" class="service-btn tiktok" target="_blank" rel="nofollow">
                 <div class="btn-main-text">
                   <span class="btn-label">
-                    <%- uiMap.telegram.icon %>
-                    <%= uiMap.telegram.label %>
+                    <%- uiMap.tiktok.icon %>
+                    <%= uiMap.tiktok.label %>
                   </span>
                 </div>
                 <div class="btn-sub-text"><%= __('landing.follow_me') %></div>
