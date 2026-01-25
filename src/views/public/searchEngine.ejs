@@ -140,40 +140,47 @@
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
+    /* FIX LOGOS DOBLES: Quitamos el ::before si el icono va inline */
+    /* O mejor, usamos ::before para el icono y NO ponemos SVG inline en el HTML */
+
     .service-btn .btn-label::before {
       content: "";
-      width: 18px;
-      height: 18px;
+      width: 20px;
+      height: 20px;
       display: inline-block;
       background-color: currentColor;
       mask-size: contain;
       mask-repeat: no-repeat;
       mask-position: center;
+      margin-right: 8px;
     }
 
     /* ============================= */
     /* PLATFORM-SPECIFIC STYLES */
     /* ============================= */
 
-    /* TELEGRAM (Azul) */
+    /* TELEGRAM (Blanco con texto oscuro) */
     .service-btn.telegram {
-      background: rgba(0, 136, 204, 0.25);
-      border-color: rgba(0, 136, 204, 0.6);
-      box-shadow: 0 0 25px rgba(0, 136, 204, 0.35);
+      background: #ffffff;
+      border-color: #ffffff;
+      color: #0088cc; /* Azul Telegram para el texto */
+      box-shadow: 0 0 25px rgba(255, 255, 255, 0.3);
     }
     .service-btn.telegram .btn-label::before {
-      /* Icono de avión de papel */
+      background-color: #0088cc; /* Icono azul */
       mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' d='M9.04 15.44 8.9 19.6c.54 0 .77-.23 1.05-.5l2.52-2.4 5.23 3.82c.96.53 1.65.25 1.9-.88l3.44-16.2c.33-1.54-.56-2.14-1.5-1.79L1.12 9.2c-1.48.58-1.46 1.42-.27 1.79l4.9 1.53L18.7 5.4c.61-.4 1.17-.18.71.22Z'/%3E%3C/svg%3E");
     }
+    .service-btn.telegram .btn-sub-text {
+        color: #333; /* Subtítulo oscuro */
+    }
 
-    /* TIKTOK (Negro/Cian/Rosa - Estilo moderno) */
+    /* TIKTOK (Negro/Cian/Rosa) */
     .service-btn.tiktok {
-      background: rgba(0, 0, 0, 0.4);
-      border-color: rgba(255, 255, 255, 0.3);
+      background: rgba(0, 0, 0, 0.6);
+      border-color: rgba(255, 255, 255, 0.2);
       box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
     }
     .service-btn.tiktok .btn-label::before {
-      /* Icono de nota musical / TikTok */
       mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' d='M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z'/%3E%3C/svg%3E");
     }
 
@@ -181,15 +188,14 @@
     .service-btn.instagram {
       background: linear-gradient(
         135deg,
-        rgba(193,53,132,0.25),
-        rgba(225,48,108,0.25),
-        rgba(252,175,69,0.25)
+        rgba(193,53,132,0.4),
+        rgba(225,48,108,0.4),
+        rgba(252,175,69,0.4)
       );
       border-color: rgba(225,48,108,0.6);
       box-shadow: 0 0 25px rgba(225,48,108,0.35);
     }
     .service-btn.instagram .btn-label::before {
-      /* Icono de cámara */
       mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' d='M7 2C4.24 2 2 4.24 2 7v10c0 2.76 2.24 5 5 5h10c2.76 0 5-2.24 5-5V7c0-2.76-2.24-5-5-5H7zm10 2c1.65 0 3 1.35 3 3v10c0 1.65-1.35 3-3 3H7c-1.65 0-3-1.35-3-3V7c0-1.65 1.35-3 3-3h10zm-5 3.5A4.5 4.5 0 1 0 16.5 12 4.5 4.5 0 0 0 12 7.5zm0 7.4A2.9 2.9 0 1 1 14.9 12 2.9 2.9 0 0 1 12 14.9zM17.8 6.2a1.1 1.1 0 1 0 1.1 1.1 1.1 1.1 0 0 0-1.1-1.1z'/%3E%3C/svg%3E");
     }
 
@@ -364,7 +370,7 @@
     @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
     @keyframes bounceArrow {
       0%, 100% { transform: translate(0, 0) rotate(-30deg); }
-      50% { transform: translate(10px, -10px) rotate(-30deg); }
+      50% { transform: translate(10px, -10px) rotate(-45deg); }
     }
 
     @keyframes fadeInUp {
@@ -403,63 +409,67 @@
 
     <section class="buttons-wrapper">
       <%
-        // Definición de iconos y etiquetas para cada red social
+        // Definición de textos sugerentes (Copywriting)
         const uiMap = {
           telegram: {
-            label: 'Telegram',
-            // Icono de avión de papel
-            icon: `<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M9.04 15.44 8.9 19.6c.54 0 .77-.23 1.05-.5l2.52-2.4 5.23 3.82c.96.53 1.65.25 1.9-.88l3.44-16.2c.33-1.54-.56-2.14-1.5-1.79L1.12 9.2c-1.48.58-1.46 1.42-.27 1.79l4.9 1.53L18.7 5.4c.61-.4 1.17-.18.71.22Z"/></svg>`
+            label: 'CANAL VIP GRATIS',
+            sub: 'Únete ahora'
           },
           tiktok: {
-            label: 'TikTok',
-            // Icono de nota musical
-            icon: `<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/></svg>`
+            label: 'VIDEOS VIRALES',
+            sub: 'Ver más'
           },
           instagram: {
-            label: 'Instagram',
-            // Icono de cámara
-            icon: `<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M7 2C4.24 2 2 4.24 2 7v10c0 2.76 2.24 5 5 5h10c2.76 0 5-2.24 5-5V7c0-2.76-2.24-5-5-5H7zm10 2c1.65 0 3 1.35 3 3v10c0 1.65-1.35 3-3 3H7c-1.65 0-3-1.35-3-3V7c0-1.65 1.35-3 3-3h10zm-5 3.5A4.5 4.5 0 1 0 16.5 12 4.5 4.5 0 0 0 12 7.5zm0 7.4A2.9 2.9 0 1 1 14.9 12 2.9 2.9 0 0 1 12 14.9zM17.8 6.2a1.1 1.1 0 1 0 1.1 1.1 1.1 1.1 0 0 0-1.1-1.1z"/></svg>`
+            label: 'MI DÍA A DÍA',
+            sub: 'Fotos nuevas'
           }
         };
       %>
 
-      <% Object.entries(model).forEach(([key, value]) => { %>
-        <% if (['telegram','tiktok','instagram','onlyfans'].includes(key) && value) { %>
+      <!-- 1. ONLYFANS (Siempre primero si existe) -->
+      <% if (model.onlyfans) { %>
+        <a href="javascript:void(0)" onclick="unlockPremium('<%= id %>')" class="service-btn" id="main-trigger">
+          <div class="btn-main-text"><%= __('landing.exclusive_btn') %></div>
+          <div class="btn-sub-text"><%= __('landing.enter_gallery') %></div>
+        </a>
+      <% } %>
 
-          <% if (key === 'onlyfans') { %>
-            <!-- BOTÓN PRINCIPAL (ONLYFANS) -->
-            <a href="javascript:void(0)" onclick="unlockPremium('<%= id %>')" class="service-btn" id="main-trigger">
-              <div class="btn-main-text"><%= __('landing.exclusive_btn') %></div>
-              <div class="btn-sub-text"><%= __('landing.enter_gallery') %></div>
-            </a>
+      <!-- 2. TELEGRAM (Segundo si existe) -->
+      <% if (model.telegram) { %>
+         <a href="/t/<%= id %>" class="service-btn telegram" target="_blank" rel="nofollow">
+          <div class="btn-main-text">
+            <span class="btn-label">
+              <%= uiMap.telegram.label %>
+            </span>
+          </div>
+          <div class="btn-sub-text"><%= uiMap.telegram.sub %></div>
+        </a>
+      <% } %>
 
-          <% } else if (key === 'telegram') { %>
-             <!-- BOTÓN TELEGRAM (Con rotación) -->
-             <a href="/t/<%= id %>" class="service-btn telegram" target="_blank" rel="nofollow">
-              <div class="btn-main-text">
-                <span class="btn-label">
-                  <%- uiMap.telegram.icon %>
-                  <%= uiMap.telegram.label %>
-                </span>
-              </div>
-              <div class="btn-sub-text"><%= __('landing.follow_me') %></div>
-            </a>
+      <!-- 3. INSTAGRAM (Tercero si existe) -->
+      <% if (model.instagram) { %>
+        <a href="<%= model.instagram %>" class="service-btn instagram" target="_blank" rel="nofollow">
+          <div class="btn-main-text">
+            <span class="btn-label">
+              <%= uiMap.instagram.label %>
+            </span>
+          </div>
+          <div class="btn-sub-text"><%= uiMap.instagram.sub %></div>
+        </a>
+      <% } %>
 
-          <% } else { %>
-            <!-- OTROS BOTONES (TikTok, Instagram) -->
-            <a href="<%= value %>" class="service-btn <%= key %>" target="_blank" rel="nofollow">
-              <div class="btn-main-text">
-                <span class="btn-label">
-                  <%- uiMap[key]?.icon || '' %>
-                  <%= uiMap[key]?.label || key %>
-                </span>
-              </div>
-              <div class="btn-sub-text"><%= __('landing.follow_me') %></div>
-            </a>
-          <% } %>
+      <!-- 4. TIKTOK (Cuarto si existe) -->
+      <% if (model.tiktok) { %>
+        <a href="<%= model.tiktok %>" class="service-btn tiktok" target="_blank" rel="nofollow">
+          <div class="btn-main-text">
+            <span class="btn-label">
+              <%= uiMap.tiktok.label %>
+            </span>
+          </div>
+          <div class="btn-sub-text"><%= uiMap.tiktok.sub %></div>
+        </a>
+      <% } %>
 
-        <% } %>
-      <% }) %>
     </section>
   </main>
 
