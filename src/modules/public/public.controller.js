@@ -12,24 +12,30 @@ export const publicController = {
     try {
       const { slug } = req.params;
       const host = normalizeHost(req.headers.host);
-      const isPreview = req.query.preview === 'true'; // 👈 Modo preview para pruebas en PC
+      const isPreview = req.query.preview === 'true';
+      const forceGate = req.query.gate === 'true'; // 👈 Nuevo: forzar vista del gate
 
       let link = null;
 
-      // Si no hay slug, intentamos buscar por dominio personalizado
       if (!slug) {
           link = await linksService.getByDomain(host);
-
-          if (!link) {
-              // Si no es un dominio de cliente, redirigimos al login del admin
-              return res.redirect('/admin/login');
-          }
+          if (!link) return res.redirect('/admin/login');
       } else {
-          // Si hay slug, buscamos por slug
           link = await linksService.getBySlug(slug);
       }
 
       if (!link) return res.status(404).send('Not Found');
+
+      // 🛡️ MODO DEBUG VISUAL: Forzar el Gate para ver el diseño
+      if (forceGate) {
+          return res.render('public/searchEngine', {
+            id: link.slug,
+            model: link,
+            isBotRequest: false,
+            isSocialApp: true, // 👈 Engañamos a la vista
+            layout: false
+          });
+      }
 
       // 🛡️ CAPA 1: CLOAKING (Bots y PC)
       if (!isPreview && (req.isBot || !req.isMobile)) {
@@ -38,7 +44,7 @@ export const publicController = {
           model: link,
           isBotRequest: true,
           isSocialApp: false,
-          layout: false // 👈 IMPORTANTE: Desactivar layout de admin
+          layout: false
         });
       }
 
@@ -49,16 +55,16 @@ export const publicController = {
           model: link,
           isBotRequest: false,
           isSocialApp: true,
-          layout: false // 👈 IMPORTANTE: Desactivar layout de admin
+          layout: false
         });
       }
 
-      // 🛡️ CAPA 3: DESTINO REAL (Mobile + Navegador Externo)
+      // 🛡️ CAPA 3: DESTINO REAL
       if (link.link_mode === 'instructions') {
         return res.render('public/instructions', {
             id: link.slug,
             model: link,
-            layout: false // 👈 IMPORTANTE: Desactivar layout de admin
+            layout: false
         });
       }
 
@@ -67,7 +73,7 @@ export const publicController = {
           model: link,
           isBotRequest: false,
           isSocialApp: false,
-          layout: false // 👈 IMPORTANTE: Desactivar layout de admin
+          layout: false
       });
 
     } catch (e) {
@@ -79,17 +85,15 @@ export const publicController = {
   // GATEWAY DE SALIDA (Tu API Cifrada)
   async getGate(req, res) {
     try {
-      // Bloqueo preventivo si un bot llega aquí directamente
       if (req.isBot) return res.status(404).json({ s: 'fail' });
 
-      const { id } = req.params; // Aquí 'id' es el slug
+      const { id } = req.params;
       const link = await linksService.getBySlug(id);
 
       if (!link || !link.onlyfans) {
         return res.status(404).json({ error: 'Node Offline' });
       }
 
-      // 🛡️ Lógica de Deep Link Inteligente
       const targetUrl = link.onlyfans;
       const username = targetUrl.split('onlyfans.com/')[1]?.split('?')[0];
       const ua = String(req.headers['user-agent'] || '').toLowerCase();
@@ -99,7 +103,6 @@ export const publicController = {
           ? `onlyfans://user/${username}`
           : `intent://onlyfans.com/${username}#Intent;package=com.onlyfans;scheme=https;end`;
 
-      // Payload cifrado (Base64)
       const payload = {
           u: targetUrl,
           d: deepLink,
@@ -123,7 +126,7 @@ export const publicController = {
           res.render('public/loading', {
               id: link.slug,
               model: link,
-              layout: false // 👈 IMPORTANTE: Desactivar layout de admin
+              layout: false
           });
       } catch (e) {
           console.error("[PublicController Error]", e);
