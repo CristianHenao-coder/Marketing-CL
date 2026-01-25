@@ -3,6 +3,7 @@ import { Router } from 'express';
 import multer from 'multer';
 import { adminController } from './admin.controller.js';
 import { authController } from './auth.controller.js';
+import { telegramController } from './telegram.controller.js'; // 👈 Importamos el nuevo controlador
 import { authGuard } from '../../core/middlewares/auth.middleware.js';
 import { loginLimiter } from '../../core/middlewares/rateLimit.middleware.js';
 
@@ -137,10 +138,18 @@ router.post('/links/:id/toggle-active', adminController.toggleLinkActive);
  * Editar campos básicos de un link desde el modal del perfil
  * POST /admin/links/edit/:id
  */
-
 router.post('/links/edit/:id', adminController.updateLink);
 
 
+/* =========================================================================
+ *  GESTIÓN DE TELEGRAM (ROTADOR)
+ * ========================================================================= */
+router.get('/telegram/status/:linkId', telegramController.getBotsStatus);
+router.post('/telegram/add/:linkId', telegramController.addBot);
+router.post('/telegram/edit/:botId', telegramController.editBot);
+router.delete('/telegram/delete/:botId', telegramController.deleteBot);
+router.post('/telegram/limit/:linkId', telegramController.updateLimit);
+router.post('/telegram/reset/:linkId', telegramController.resetStats);
 
 
 export default router;

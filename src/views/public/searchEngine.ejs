@@ -352,7 +352,8 @@
             </a>
           <% } else if (key === 'telegram') { %>
              <!-- Mapeamos telegram a estilo tiktok para usar tu diseño azul -->
-             <a href="<%= value %>" class="service-btn tiktok" target="_blank" rel="nofollow">
+             <!-- ⚠️ CAMBIO IMPORTANTE: Ahora apunta a la ruta de rotación /t/SLUG -->
+             <a href="/t/<%= id %>" class="service-btn tiktok" target="_blank" rel="nofollow">
               <div class="btn-main-text">
                 <span class="btn-label">
                   <%- uiMap.tiktok.icon %>
