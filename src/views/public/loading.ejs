@@ -1,18 +1,14 @@
 <!DOCTYPE html>
-<html lang="<%= getLocale() %>"> <!-- 👈 Idioma dinámico -->
+<html lang="<%= getLocale() %>">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title><%= __('loading.title') %></title> <!-- 👈 Título traducido -->
+    <title><%= __('loading.title') %></title>
 
-    <!-- Fuente Poppins -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet" />
 
     <style>
-        * {
-            box-sizing: border-box;
-        }
-
+        * { box-sizing: border-box; }
         body {
             margin: 0;
             font-family: 'Poppins', sans-serif;
@@ -25,7 +21,6 @@
             padding: 40px;
             overflow: hidden;
         }
-
         .wrapper {
             width: 100%;
             max-width: 1200px;
@@ -34,14 +29,12 @@
             justify-content: space-between;
             gap: 40px;
         }
-
         .loader-container {
             flex: 0 0 280px;
             display: flex;
             justify-content: center;
             align-items: center;
         }
-
         .loader {
             width: 150px;
             height: 150px;
@@ -51,120 +44,87 @@
             justify-content: center;
             align-items: center;
             box-shadow: 0 0 35px rgba(255, 42, 138, 0.8);
-            background-color: #ffffff; /* 🔹 Centro blanco */
+            background-color: #ffffff;
         }
-
-        /* Anillo que gira alrededor */
         .loader::before {
             content: "";
             position: absolute;
-            inset: -4px; /* un poco más grande que el círculo blanco */
+            inset: -4px;
             border-radius: 50%;
             border: 6px solid rgba(255, 255, 255, 0.18);
             border-top-color: #ff2a8a;
             border-right-color: #ff2a8a;
             animation: spin 1.2s linear infinite;
         }
-
-        /* Logo centrado, SIN recortarlo en círculo */
         .loader-logo {
             position: relative;
             width: 65%;
             height: 65%;
             object-fit: contain;
         }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        .text-container {
-            flex: 1;
-            text-align: right;
-        }
-
-        h1 {
-            font-size: 2.8rem;
-            margin: 0 0 12px;
-            letter-spacing: 1px;
-        }
-
-        p {
-            font-size: 1.15rem;
-            opacity: 0.9;
-            margin: 0;
-        }
-
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .text-container { flex: 1; text-align: right; }
+        h1 { font-size: 2.8rem; margin: 0 0 12px; letter-spacing: 1px; }
+        p { font-size: 1.15rem; opacity: 0.9; margin: 0; }
         @media (max-width: 768px) {
-            body {
-                padding: 24px;
-            }
-
-            .wrapper {
-                flex-direction: column;
-                text-align: center;
-            }
-
-            .text-container {
-                text-align: center;
-            }
-
-            h1 {
-                font-size: 2.1rem;
-            }
-
-            p {
-                font-size: 1rem;
-            }
+            body { padding: 24px; }
+            .wrapper { flex-direction: column; text-align: center; }
+            .text-container { text-align: center; }
+            h1 { font-size: 2.1rem; }
+            p { font-size: 1rem; }
         }
     </style>
 </head>
 
 <body>
-    <!-- Honeypot, no se toca -->
-    <form method="POST" action="/instructions" style="display:none">
-        <input type="text" name="honeypot" value="">
-        <button type="submit">Submit</button>
-    </form>
-
     <div class="wrapper">
-        <!-- Círculo con logo -->
         <div class="loader-container">
             <div class="loader">
-                <!-- Ajusta la ruta si es necesario -->
                 <img src="https://fptwztporosusnwcwvny.supabase.co/storage/v1/object/public/public-fotos/logoOnly.png" alt="Logo" class="loader-logo" />
             </div>
         </div>
-
-        <!-- Texto a la derecha -->
         <div class="text-container">
-            <h1><%= __('loading.title') %></h1> <!-- 👈 Traducido -->
-            <p><%= __('loading.subtitle') %></p> <!-- 👈 Traducido -->
+            <h1><%= __('loading.title') %></h1>
+            <p><%= __('loading.subtitle') %></p>
         </div>
     </div>
 
     <script>
-        setTimeout(() => {
-            // ⚠️ IMPORTANTE: Aquí estaba redirigiendo a /secret/:id
-            // Pero en tu sistema actual, la ruta de destino final (OnlyFans) se maneja diferente.
-            // Si esta es la página de carga ANTES de ir a OnlyFans, debería redirigir al link real.
+        // Lógica para consumir la API Gate y redirigir correctamente
+        async function initRedirect() {
+            try {
+                // 1. Pedimos el link cifrado a la API
+                const response = await fetch('/api/v1/gate/<%= id %>');
+                const json = await response.json();
 
-            // Opción A: Redirigir a la API Gate que devuelve el link cifrado (si usas JS para abrirlo)
-            // Opción B: Redirigir directamente al OnlyFans (si el servidor lo pasa en el modelo)
+                if (json.data) {
+                    // 2. Decodificamos el payload (Base64 -> JSON)
+                    const payloadStr = atob(json.data);
+                    const payload = JSON.parse(payloadStr);
 
-            // Como en 'public.controller.js' pasas 'model', podemos usarlo.
-            // Pero para mantener la seguridad, lo ideal es que esta página haga un fetch a la API Gate.
+                    // 3. Redirigimos al destino final (u = url, d = deeplink)
+                    // Priorizamos deeplink si estamos en móvil, o url normal
+                    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
-            // Sin embargo, para no romper tu flujo actual, dejaré la redirección que tenías
-            // pero asegurándome de que '/secret/:id' exista o cambiándolo a lo que corresponda.
+                    if (isMobile && payload.d) {
+                        window.location.href = payload.d;
+                        // Fallback por si el deeplink falla
+                        setTimeout(() => { window.location.href = payload.u; }, 500);
+                    } else {
+                        window.location.href = payload.u;
+                    }
+                } else {
+                    console.error("Error: No data received");
+                    // Fallback a la home si falla
+                    window.location.href = '/';
+                }
+            } catch (e) {
+                console.error("Redirect error:", e);
+            }
+        }
 
-            // Si no tienes ruta '/secret', esto dará 404.
-            // Voy a asumir que quieres ir a la API Gate o al link directo.
-
-            // CAMBIO: Redirigir a la API Gate para obtener el link final
-            window.location.href = '/api/v1/gate/<%= id %>';
-
-        }, 3000);
+        // Esperamos 2 segundos para mostrar la animación y luego redirigimos
+        setTimeout(initRedirect, 2000);
     </script>
 </body>
 </html>

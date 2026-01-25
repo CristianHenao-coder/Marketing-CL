@@ -53,6 +53,9 @@ export const linksService = {
       linksCache.delete(linkData.slug);
       if (linkData.custom_domain) {
         linksCache.delete(linkData.custom_domain);
+        // También borramos la versión con/sin www por si acaso
+        linksCache.delete(linkData.custom_domain.replace('www.', ''));
+        linksCache.delete('www.' + linkData.custom_domain.replace('www.', ''));
       }
 
       return { success: true, data };
@@ -64,14 +67,34 @@ export const linksService = {
 
   // 4. Busca por dominio personalizado (ej: mis-links.com)
   async getByDomain(host) {
-    const cached = this._cacheGet(host);
+    // 1. Intento directo
+    let cached = this._cacheGet(host);
     if (cached) return cached;
 
-    const { data, error } = await supabase
+    let { data, error } = await supabase
       .from('smart_links')
       .select('*')
       .eq('custom_domain', host)
       .maybeSingle();
+
+    // 2. Si no encuentra, intentamos la variante con/sin www
+    if (!data) {
+        const altHost = host.startsWith('www.') ? host.slice(4) : `www.${host}`;
+        cached = this._cacheGet(altHost);
+        if (cached) return cached;
+
+        const { data: dataAlt } = await supabase
+          .from('smart_links')
+          .select('*')
+          .eq('custom_domain', altHost)
+          .maybeSingle();
+
+        if (dataAlt) {
+            data = dataAlt;
+            // Guardamos en caché ambas versiones para futuras peticiones rápidas
+            this._cacheSet(host, data);
+        }
+    }
 
     if (error) {
       console.error('❌ Error en getByDomain:', error.message);
