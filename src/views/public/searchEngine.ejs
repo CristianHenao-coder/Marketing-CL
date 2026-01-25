@@ -27,25 +27,27 @@
       height: 100%;
       font-family: 'Poppins', sans-serif;
       background: #000;
-      overflow: hidden;
+      overflow-x: hidden;
+      /* Permitimos el scroll vertical */
+      overflow-y: auto;
     }
 
     /* APP CONTAINER */
     .fullscreen-app {
       position: relative;
       width: 100%;
-      height: 100dvh;
+      /* Cambiamos height por min-height para que crezca si hay mucho contenido */
+      min-height: 100dvh;
       display: flex;
       flex-direction: column;
-      justify-content: flex-end;
+      justify-content: center; /* Centra el contenido verticalmente si sobra espacio */
       align-items: center;
-      padding: clamp(20px, 5vw, 40px);
-      overflow: hidden;
+      padding: 40px 20px; /* Más espacio arriba y abajo */
     }
 
     /* BACKGROUND MEDIA */
     .bg-media {
-      position: absolute;
+      position: fixed; /* Cambiado de absolute a fixed */
       inset: 0;
       z-index: 0;
       background-color: #000;
@@ -227,16 +229,15 @@
     #safety-gate {
       position: fixed;
       inset: 0;
-      /* Fondo semitransparente para que se vea la foto de fondo borrosa */
-      background: rgba(20, 5, 15, 0.65);
+      background: rgba(20, 5, 15, 0.85);
       backdrop-filter: blur(25px);
-      -webkit-backdrop-filter: blur(25px);
       z-index: 10000;
       display: flex;
       align-items: center;
       justify-content: center;
       padding: 20px;
-      animation: fadeIn 0.5s ease-out;
+      /* Añadimos scroll por si el card es más alto que la pantalla */
+      overflow-y: auto;
     }
 
     .gate-card {
@@ -252,6 +253,7 @@
       box-shadow: 0 20px 60px rgba(255, 0, 128, 0.25);
       position: relative;
       overflow: visible;
+      margin: auto;
     }
 
     /* Flecha animada */
