@@ -12,5 +12,9 @@
     "step1": "Toca los <b>tres puntos (•••)</b> arriba a la derecha.",
     "step2": "Elige <b>\"Abrir en el navegador\"</b> para entrar. 🍑",
     "footer": "🔒 Privado y Seguro"
+  },
+  "loading": {
+    "title": "Verificando acceso...",
+    "subtitle": "Un momento... esto vale la pena."
   }
 }

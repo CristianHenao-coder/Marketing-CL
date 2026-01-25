@@ -12,5 +12,9 @@
     "step1": "Tap the <b>three dots (•••)</b> top right.",
     "step2": "Choose <b>\"Open in Browser\"</b> to enter. 🍑",
     "footer": "🔒 Private & Secure"
+  },
+  "loading": {
+    "title": "Verifying access...",
+    "subtitle": "One moment… this is worth it."
   }
 }

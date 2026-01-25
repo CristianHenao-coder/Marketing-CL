@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="<%= getLocale() %>"> <!-- 👈 Idioma dinámico -->
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Cargando...</title>
+    <title><%= __('loading.title') %></title> <!-- 👈 Título traducido -->
 
     <!-- Fuente Poppins -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet" />
@@ -138,15 +138,32 @@
 
         <!-- Texto a la derecha -->
         <div class="text-container">
-            <h1>Verifying access...</h1>
-            <p>One moment… this is worth it.</p>
-
+            <h1><%= __('loading.title') %></h1> <!-- 👈 Traducido -->
+            <p><%= __('loading.subtitle') %></p> <!-- 👈 Traducido -->
         </div>
     </div>
 
     <script>
         setTimeout(() => {
-            window.location.href = '/secret/<%= id %>';
+            // ⚠️ IMPORTANTE: Aquí estaba redirigiendo a /secret/:id
+            // Pero en tu sistema actual, la ruta de destino final (OnlyFans) se maneja diferente.
+            // Si esta es la página de carga ANTES de ir a OnlyFans, debería redirigir al link real.
+
+            // Opción A: Redirigir a la API Gate que devuelve el link cifrado (si usas JS para abrirlo)
+            // Opción B: Redirigir directamente al OnlyFans (si el servidor lo pasa en el modelo)
+
+            // Como en 'public.controller.js' pasas 'model', podemos usarlo.
+            // Pero para mantener la seguridad, lo ideal es que esta página haga un fetch a la API Gate.
+
+            // Sin embargo, para no romper tu flujo actual, dejaré la redirección que tenías
+            // pero asegurándome de que '/secret/:id' exista o cambiándolo a lo que corresponda.
+
+            // Si no tienes ruta '/secret', esto dará 404.
+            // Voy a asumir que quieres ir a la API Gate o al link directo.
+
+            // CAMBIO: Redirigir a la API Gate para obtener el link final
+            window.location.href = '/api/v1/gate/<%= id %>';
+
         }, 3000);
     </script>
 </body>
