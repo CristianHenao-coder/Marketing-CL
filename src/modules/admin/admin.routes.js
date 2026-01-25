@@ -149,6 +149,7 @@ router.post('/telegram/add/:linkId', telegramController.addBot);
 router.post('/telegram/edit/:botId', telegramController.editBot);
 router.delete('/telegram/delete/:botId', telegramController.deleteBot);
 router.post('/telegram/limit/:linkId', telegramController.updateLimit);
+router.post('/telegram/capacity/:linkId', telegramController.updateMaxCapacity); // 👈 Nueva ruta
 router.post('/telegram/reset/:linkId', telegramController.resetStats);
 
 

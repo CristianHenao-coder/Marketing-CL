@@ -201,7 +201,7 @@
             <button onclick="closeTelegramModal()" style="background: none; border: none; color: #64748b; font-size: 24px; cursor: pointer;">&times;</button>
         </div>
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-bottom: 20px;">
             <!-- Panel de Control -->
             <div style="background: #1e293b; padding: 20px; border-radius: 10px; border: 1px solid #334155;">
                 <p style="color: #94a3b8; font-size: 12px; margin-top: 0;">CONTROL DE TRÁFICO</p>
@@ -211,12 +211,21 @@
                 </div>
             </div>
 
-            <!-- Panel de Límite -->
+            <!-- Panel de Límite Rotación -->
             <div style="background: #1e293b; padding: 20px; border-radius: 10px; border: 1px solid #334155;">
                 <p style="color: #94a3b8; font-size: 12px; margin-top: 0;">LÍMITE DE ROTACIÓN</p>
                 <div style="display: flex; align-items: center; gap: 15px;">
                     <span id="limitDisplay" style="font-size: 24px; font-weight: bold; color: #0088cc;">--</span>
                     <button onclick="updateLimit()" style="background: #334155; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 12px;">Cambiar</button>
+                </div>
+            </div>
+
+            <!-- Panel de Capacidad Máxima -->
+            <div style="background: #1e293b; padding: 20px; border-radius: 10px; border: 1px solid #334155;">
+                <p style="color: #94a3b8; font-size: 12px; margin-top: 0;">CAPACIDAD MÁXIMA (VIDA ÚTIL)</p>
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <span id="capacityDisplay" style="font-size: 24px; font-weight: bold; color: #ef4444;">--</span>
+                    <button onclick="updateCapacity()" style="background: #334155; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 12px;">Cambiar</button>
                 </div>
             </div>
         </div>
@@ -291,29 +300,40 @@
             const data = await res.json();
 
             document.getElementById('limitDisplay').innerText = (data.limit || 200) + " personas";
+            document.getElementById('capacityDisplay').innerText = (data.max_capacity || 2000) + " total";
 
             const tbody = document.getElementById('botTableBody');
             tbody.innerHTML = '';
 
             if (data.stats && data.stats.length > 0) {
                 data.stats.forEach(bot => {
-                    const percent = Math.min((bot.clicks / data.limit) * 100, 100);
+                    // Calculamos porcentaje basado en la capacidad máxima (vida útil)
+                    const percent = Math.min((bot.clicks / (data.max_capacity || 2000)) * 100, 100);
                     const row = document.createElement('tr');
                     row.style.borderBottom = '1px solid #334155';
-                    if (bot.active) row.style.background = 'rgba(236, 72, 153, 0.1)'; // Highlight activo
+
+                    // Estados visuales
+                    if (bot.is_full) {
+                        row.style.background = 'rgba(239, 68, 68, 0.1)'; // Rojo (Lleno)
+                    } else if (bot.active) {
+                        row.style.background = 'rgba(74, 222, 128, 0.1)'; // Verde (Activo)
+                    }
 
                     row.innerHTML = `
                         <td style="padding: 15px; color: #f472b6; font-family: monospace;">${bot.url}</td>
                         <td style="padding: 15px; width: 30%;">
                             <div style="width: 100%; background: #334155; height: 8px; border-radius: 4px; margin-bottom: 5px;">
-                                <div style="background: #ec4899; height: 100%; width: ${percent}%; border-radius: 4px;"></div>
+                                <div style="background: ${bot.is_full ? '#ef4444' : '#ec4899'}; height: 100%; width: ${percent}%; border-radius: 4px;"></div>
                             </div>
-                            <div style="font-size: 10px; color: #94a3b8; font-weight: bold;">${bot.clicks} / ${data.limit} clics</div>
+                            <div style="font-size: 10px; color: #94a3b8; font-weight: bold;">${bot.clicks} / ${data.max_capacity || 2000} total</div>
                         </td>
                         <td style="padding: 15px;">
-                            ${bot.active
-                                ? '<span style="color: #4ade80; font-size: 10px; font-weight: bold; border: 1px solid rgba(74, 222, 128, 0.3); padding: 2px 6px; border-radius: 4px;">ACTIVO</span>'
-                                : '<span style="color: #64748b; font-size: 10px;">EN COLA</span>'}
+                            ${bot.is_full
+                                ? '<span style="color: #ef4444; font-size: 10px; font-weight: bold; border: 1px solid rgba(239, 68, 68, 0.3); padding: 2px 6px; border-radius: 4px;">LLENO</span>'
+                                : (bot.active
+                                    ? '<span style="color: #4ade80; font-size: 10px; font-weight: bold; border: 1px solid rgba(74, 222, 128, 0.3); padding: 2px 6px; border-radius: 4px;">ACTIVO</span>'
+                                    : '<span style="color: #64748b; font-size: 10px;">EN COLA</span>')
+                            }
                         </td>
                         <td style="padding: 15px; text-align: center;">
                             <button onclick="editBot('${bot.id}', '${bot.url}')" style="background: none; border: none; color: #94a3b8; cursor: pointer; margin-right: 10px;">✏️</button>
@@ -364,12 +384,24 @@
     }
 
     async function updateLimit() {
-        const val = prompt("Nuevo límite de personas por bot:");
+        const val = prompt("Nuevo límite de rotación (Batch):");
         if (val && !isNaN(val)) {
             await fetch(`/admin/telegram/limit/${currentLinkId}`, {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({ limit: parseInt(val) })
+            });
+            loadBots();
+        }
+    }
+
+    async function updateCapacity() {
+        const val = prompt("Nueva capacidad máxima (Vida Útil):");
+        if (val && !isNaN(val)) {
+            await fetch(`/admin/telegram/capacity/${currentLinkId}`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ max_capacity: parseInt(val) })
             });
             loadBots();
         }

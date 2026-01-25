@@ -12,7 +12,7 @@ export const telegramController = {
       // Obtener configuración del link
       const { data: link, error: lErr } = await supabase
         .from('smart_links')
-        .select('telegram_rotation_limit, current_bot_index')
+        .select('telegram_rotation_limit, telegram_max_capacity, current_bot_index')
         .eq('id', linkId)
         .single();
 
@@ -28,18 +28,20 @@ export const telegramController = {
       if (bErr) throw bErr;
 
       // Calcular estadísticas para el frontend
-      // En la lógica de Redis, 'active' era solo el bot del índice actual.
-      // Aquí haremos lo mismo.
+      const maxCapacity = link.telegram_max_capacity || 2000;
+
       const stats = bots.map((bot, index) => ({
         id: bot.id,
         url: bot.url,
         clicks: bot.clicks_current,
-        active: index === link.current_bot_index
+        active: index === link.current_bot_index,
+        is_full: bot.clicks_current >= maxCapacity // Flag para el frontend
       }));
 
       res.json({
         stats,
-        limit: link.telegram_rotation_limit || 200
+        limit: link.telegram_rotation_limit || 200,
+        max_capacity: maxCapacity
       });
 
     } catch (err) {
@@ -98,7 +100,7 @@ export const telegramController = {
     }
   },
 
-  // 5. Cambiar límite de rotación
+  // 5. Cambiar límite de rotación (Batch)
   async updateLimit(req, res) {
     try {
       const { linkId } = req.params;
@@ -107,6 +109,24 @@ export const telegramController = {
       const { error } = await supabase
         .from('smart_links')
         .update({ telegram_rotation_limit: limit })
+        .eq('id', linkId);
+
+      if (error) throw error;
+      res.json({ success: true });
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  },
+
+  // 5.5 Cambiar capacidad máxima (Vida Útil)
+  async updateMaxCapacity(req, res) {
+    try {
+      const { linkId } = req.params;
+      const { max_capacity } = req.body;
+
+      const { error } = await supabase
+        .from('smart_links')
+        .update({ telegram_max_capacity: max_capacity })
         .eq('id', linkId);
 
       if (error) throw error;
@@ -144,28 +164,19 @@ export const telegramController = {
   async handleRotation(req, res) {
     try {
       const { slug } = req.params;
-      const userIP = req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress;
 
       // 1. Obtener Link y Configuración
       const { data: link, error } = await supabase
         .from('smart_links')
-        .select('id, is_active, status, telegram_rotation_limit, current_bot_index')
+        .select('id, is_active, status, telegram_rotation_limit, telegram_max_capacity, current_bot_index')
         .eq('slug', slug)
         .single();
 
       if (error || !link) return res.status(404).send('Link not found');
 
       // 2. Verificación de Pago / Estado
-      // Si status es 'pending_payment' o is_active es false
       if (!link.is_active || link.status === 'pending_payment') {
-         return res.status(403).send(`
-            <body style="background:#0f172a; color:white; font-family:sans-serif; display:flex; justify-content:center; align-items:center; height:100vh; margin:0;">
-                <div style="text-align:center; border:1px solid #334155; padding:40px; border-radius:20px; background:#1e293b;">
-                    <h1 style="color:#f43f5e;">⚠️ SERVICIO SUSPENDIDO</h1>
-                    <p>Este enlace ha sido desactivado temporalmente.</p>
-                </div>
-            </body>
-         `);
+         return res.status(403).send('Servicio Suspendido');
       }
 
       // 3. Obtener Bots
@@ -176,59 +187,73 @@ export const telegramController = {
         .order('id', { ascending: true });
 
       if (!bots || bots.length === 0) {
-          // Fallback: Si no hay bots configurados, intentar usar el campo 'telegram' antiguo del smart_link si existe, o error.
-          // Para este ejemplo, asumimos que deben configurar bots.
           return res.redirect('https://t.me/SoporteAgencia');
       }
 
+      // Lógica de Selección Inteligente (Saltar bots llenos)
+      const maxCapacity = link.telegram_max_capacity || 2000;
       let currentIndex = link.current_bot_index || 0;
-      if (currentIndex >= bots.length) currentIndex = 0; // Seguridad
+
+      // Seguridad inicial
+      if (currentIndex >= bots.length) currentIndex = 0;
+
+      // Buscar el siguiente bot disponible si el actual está lleno
+      let attempts = 0;
+      while (bots[currentIndex].clicks_current >= maxCapacity && attempts < bots.length) {
+          currentIndex = (currentIndex + 1) % bots.length;
+          attempts++;
+      }
+
+      // Si todos están llenos, usamos el último (o podríamos redirigir a soporte)
+      // Por ahora, usaremos el que toque aunque esté lleno para no perder tráfico,
+      // pero el admin verá que está rojo en el panel.
 
       const currentBot = bots[currentIndex];
 
-      // 4. Lógica de Conteo (Simple, sin Redis IP Lock por ahora para no complicar, o usando cookies)
-      // Usaremos una cookie simple para evitar contar el mismo usuario dos veces en corto tiempo
+      // 4. Lógica de Conteo
       const cookieName = `tg_lock_${slug}`;
       if (!req.cookies[cookieName]) {
 
-          // Incrementamos contador
           const newClicks = (currentBot.clicks_current || 0) + 1;
 
-          // Actualizamos el bot actual
+          // Actualizar bot
           await supabase
             .from('telegram_bots')
             .update({ clicks_current: newClicks })
             .eq('id', currentBot.id);
 
-          // Verificamos límite
+          // Lógica de Rotación (Batch o Llenado)
           const limit = link.telegram_rotation_limit || 200;
+          let shouldRotate = false;
 
-          if (newClicks >= limit) {
-              // ROTACIÓN
-              const nextIndex = (currentIndex + 1) % bots.length;
+          // A. Si se llenó por completo -> ROTAR YA
+          if (newClicks >= maxCapacity) {
+              shouldRotate = true;
+          }
+          // B. Si se cumplió el ciclo de rotación (Batch) -> ROTAR
+          else if (newClicks > 0 && newClicks % limit === 0) {
+              shouldRotate = true;
+          }
 
-              // Actualizamos el índice en el link
+          if (shouldRotate) {
+              let nextIndex = (currentIndex + 1) % bots.length;
+
+              // Buscar siguiente que no esté lleno (si es posible)
+              let searchAttempts = 0;
+              while (bots[nextIndex].clicks_current >= maxCapacity && searchAttempts < bots.length) {
+                  nextIndex = (nextIndex + 1) % bots.length;
+                  searchAttempts++;
+              }
+
               await supabase
                 .from('smart_links')
                 .update({ current_bot_index: nextIndex })
                 .eq('id', link.id);
-
-              // Opcional: Resetear el siguiente bot si queremos ciclos limpios,
-              // pero tu lógica original reseteaba. Haremos lo mismo.
-              const nextBot = bots[nextIndex];
-              if (nextBot) {
-                  await supabase
-                    .from('telegram_bots')
-                    .update({ clicks_current: 0 })
-                    .eq('id', nextBot.id);
-              }
           }
 
-          // Marcar cookie por 1 hora
           res.cookie(cookieName, '1', { maxAge: 3600000, httpOnly: true });
       }
 
-      // 5. Redirección Final
       return res.redirect(currentBot.url);
 
     } catch (err) {
