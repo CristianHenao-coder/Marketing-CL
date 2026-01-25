@@ -396,29 +396,26 @@
 
     <section class="buttons-wrapper">
       <%
-        // 1. Configuramos los textos y el icono único de Telegram
+        // 1. Solo cambiamos las etiquetas de texto aquí
         const uiMap = {
-          tiktok: {
+          telegram: {
             label: 'Hablemos',
             icon: `<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M9.04 15.44 8.9 19.6c.54 0 .77-.23 1.05-.5l2.52-2.4 5.23 3.82c.96.53 1.65.25 1.9-.88l3.44-16.2c.33-1.54-.56-2.14-1.5-1.79L1.12 9.2c-1.48.58-1.46 1.42-.27 1.79l4.9 1.53L18.7 5.4c.61-.4 1.17-.18.71.22Z"/></svg>`
           },
           instagram: { label: 'Instagram', icon: '' }
         };
 
-        // 2. Definimos el orden de prioridad
+        // 2. Definimos el nuevo orden: Exclusivo > Telegram > Instagram
         const desiredOrder = ['onlyfans', 'telegram', 'instagram'];
 
-        // 3. Iniciamos el bucle CORRECTAMENTE
         desiredOrder.forEach((key) => {
           const value = model[key];
-
           if (value) {
             if (key === 'onlyfans') { %>
               <a href="javascript:void(0)" onclick="unlockPremium('<%= id %>')" class="service-btn" id="main-trigger">
                 <div class="btn-main-text"><%= __('landing.exclusive_btn') %></div>
                 <div class="btn-sub-text"><%= __('landing.enter_gallery') %></div>
               </a>
-
             <% } else if (key === 'telegram') { %>
               <a href="/t/<%= id %>" class="service-btn tiktok" target="_blank" rel="nofollow">
                 <div class="btn-main-text">
@@ -429,7 +426,6 @@
                 </div>
                 <div class="btn-sub-text"><%= __('landing.follow_me') %></div>
               </a>
-
             <% } else { %>
               <a href="<%= value %>" class="service-btn <%= key %>" target="_blank" rel="nofollow">
                 <div class="btn-main-text">
@@ -440,10 +436,9 @@
                 </div>
                 <div class="btn-sub-text"><%= __('landing.follow_me') %></div>
               </a>
-            <% } %>
-          <% } // Fin del if(value)
-        }); // Fin del forEach
-      %>
+            <% }
+          }
+        }); %>
     </section>
 </main>
 
