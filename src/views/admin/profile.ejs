@@ -1,10 +1,15 @@
 
-<div style="background: var(--card-bg); padding: 15px; border-radius: 12px; border: 1px solid var(--border); margin-bottom: 20px; display: flex; gap: 20px; font-size: 13px;">
-    <div><strong>ID:</strong> #<%= client.id %></div>
-    <div><strong>NOMBRE:</strong> <%= client.name %></div>
-    <div><strong>CONTACTO:</strong> <%= client.contact || client.telegram %></div>
-    <div style="margin-left: auto;"><strong>TOTAL:</strong> <span style="color: #00ff66;">$<%= client.total_money %> USD</span></div>
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+    <div style="background: var(--card-bg); padding: 15px; border-radius: 12px; border: 1px solid var(--border); display: flex; gap: 20px; font-size: 13px;">
+        <div><strong>ID:</strong> #<%= client.id %></div>
+        <div><strong>NOMBRE:</strong> <%= client.name %></div>
+        <div><strong>CONTACTO:</strong> <%= client.contact || client.telegram %></div>
+        <div style="margin-left: auto;"><strong>TOTAL:</strong> <span style="color: #00ff66;">$<%= client.total_money %> USD</span></div>
+    </div>
+    <!-- Botón para añadir nuevo link -->
+    <button onclick="openCreateLinkModal()" class="btn-glow" style="padding: 12px 20px; font-size: 14px;">+ Añadir Link a Cliente</button>
 </div>
+
 
 <div style="background: var(--card-bg); border: 1px solid var(--border); border-radius: 15px; overflow-x: auto;">
     <table style="width: 100%; border-collapse: collapse; white-space: nowrap;">
@@ -82,6 +87,73 @@
         </tbody>
     </table>
 </div>
+
+<!-- MODAL DE CREACIÓN DE LINK (NUEVO) -->
+<div id="createLinkModal" style="display: none; position: fixed; z-index: 1001; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.9); backdrop-filter: blur(8px); overflow-y: auto;">
+    <div style="background-color: #0a0a0a; margin: 5% auto; padding: 30px; border: 1px solid var(--primary); width: 90%; max-width: 700px; border-radius: 15px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h2 style="margin: 0; color: var(--primary);">🚀 Nuevo Link para <%= client.name %></h2>
+            <button onclick="closeCreateLinkModal()" style="background: none; border: none; color: #64748b; font-size: 24px; cursor: pointer;">&times;</button>
+        </div>
+
+        <form id="createLinkForm" enctype="multipart/form-data">
+            <!-- Cliente pre-seleccionado y oculto -->
+            <input type="hidden" name="client_id" value="<%= client.id %>">
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div>
+                    <label>Slug (Ruta)</label>
+                    <input type="text" name="slug" placeholder="ej: marta-vip-promo" required />
+                </div>
+                <div>
+                    <label>Dominio Propio (Opcional)</label>
+                    <input type="text" name="custom_domain" placeholder="ej: martavip.com" />
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div>
+                    <label>Nombre en Pantalla</label>
+                    <input type="text" name="display_name" required />
+                </div>
+                <div>
+                    <label>Subtítulo</label>
+                    <input type="text" name="subtitle" placeholder="Model / Artist" />
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div>
+                    <label>OnlyFans URL</label>
+                    <input type="url" name="onlyfans" />
+                </div>
+                <div>
+                    <label>Instagram URL</label>
+                    <input type="url" name="instagram" />
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div>
+                    <label>Telegram URL</label>
+                    <input type="url" name="telegram" />
+                </div>
+                <div>
+                    <label>TikTok URL</label>
+                    <input type="url" name="tiktok" />
+                </div>
+            </div>
+
+            <label>Foto de Perfil</label>
+            <input type="file" name="file" accept="image/*" />
+
+            <div style="margin-top: 20px;">
+                <button type="submit" class="btn-glow" style="width: 100%;">Crear Link</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 
 <!-- MODAL DE EDICIÓN BÁSICA -->
 <div id="editModal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.8); backdrop-filter: blur(5px);">
@@ -171,6 +243,14 @@
 <script>
     // --- VARIABLES GLOBALES PARA EL MODAL DE TELEGRAM ---
     let currentLinkId = null;
+
+    // --- FUNCIONES DE CREACIÓN DE LINK (NUEVO) ---
+    function openCreateLinkModal() {
+        document.getElementById('createLinkModal').style.display = 'block';
+    }
+    function closeCreateLinkModal() {
+        document.getElementById('createLinkModal').style.display = 'none';
+    }
 
     // --- FUNCIONES DE EDICIÓN BÁSICA ---
     function openEditModal(button) {
@@ -353,22 +433,18 @@
     window.onclick = function(event) {
         const modal = document.getElementById('editModal');
         const tgModal = document.getElementById('telegramModal');
+        const createModal = document.getElementById('createLinkModal');
         if (event.target == modal) closeModal();
         if (event.target == tgModal) closeTelegramModal();
+        if (event.target == createModal) closeCreateLinkModal();
     }
 
     // Capturar el envío del formulario de edición
     document.getElementById('editForm').addEventListener('submit', async (e) => {
         e.preventDefault();
-
-        // 1. Capturamos el ID
         const id = document.getElementById('edit_id').value;
-
-        // 2. Manejamos la fecha para que no envíe un texto vacío ""
         const rawExpiry = document.getElementById('edit_expiry').value;
         const finalExpiry = rawExpiry === "" ? null : rawExpiry;
-
-        // 3. Construimos el objeto con los nombres exactos de tu DB
         const formData = {
             display_name: document.getElementById('edit_name').value,
             price: parseFloat(document.getElementById('edit_price').value) || 0,
@@ -383,9 +459,7 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(formData)
             });
-
             const result = await response.json();
-
             if (result.success) {
                 alert('¡Link actualizado! ✅');
                 location.reload();
@@ -395,6 +469,24 @@
         } catch (error) {
             console.error('Error en fetch:', error);
             alert('Hubo un error de conexión ❌');
+        }
+    });
+
+    // Capturar el envío del formulario de CREACIÓN
+    document.getElementById('createLinkForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        try {
+            const res = await fetch('/admin/save', { method: 'POST', body: formData });
+            const result = await res.json();
+            if (result.success) {
+                alert('¡Nuevo link creado para este cliente! ✅');
+                location.reload();
+            } else {
+                alert('Error al crear el link: ' + result.error);
+            }
+        } catch (err) {
+            alert('Error de conexión al crear el link.');
         }
     });
 </script>
