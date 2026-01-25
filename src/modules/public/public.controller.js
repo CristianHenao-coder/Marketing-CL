@@ -13,18 +13,25 @@ export const publicController = {
       const { slug } = req.params;
       const host = normalizeHost(req.headers.host);
 
-      // Si no hay slug y estamos en la raíz del dominio principal (no un dominio custom), redirigir al admin
-      // Asumimos que si no hay slug y no se encuentra un link por dominio, es la home del sistema
+      console.log(`🔍 Request -> Host: "${host}", Slug: "${slug || '(root)'}"`);
+
+      let link = null;
+
+      // Si no hay slug, intentamos buscar por dominio personalizado
       if (!slug) {
-          const linkByDomain = await linksService.getByDomain(host);
-          if (!linkByDomain) {
+          link = await linksService.getByDomain(host);
+          console.log(`🌍 Búsqueda por dominio "${host}": ${link ? 'ENCONTRADO ✅' : 'NO ENCONTRADO ❌'}`);
+
+          if (!link) {
+              // Si no es un dominio de cliente, asumimos que es el dominio principal del sistema
+              // y redirigimos al login del admin.
+              console.log('➡️ Redirigiendo a /admin/login');
               return res.redirect('/admin/login');
           }
-          // Si hay link por dominio, seguimos con la lógica normal usando ese link
-          var link = linkByDomain;
       } else {
-          // 1. Buscamos el link (ya sea por slug o por dominio propio)
-          var link = await linksService.getBySlug(slug);
+          // Si hay slug, buscamos por slug
+          link = await linksService.getBySlug(slug);
+          console.log(`🔗 Búsqueda por slug "${slug}": ${link ? 'ENCONTRADO ✅' : 'NO ENCONTRADO ❌'}`);
       }
 
       if (!link) return res.status(404).send('Not Found');
