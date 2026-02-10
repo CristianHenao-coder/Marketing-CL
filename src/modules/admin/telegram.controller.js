@@ -192,8 +192,8 @@ export const telegramController = {
       }
 
       // 4. Configuración de Rotación
-      const maxCapacity = link.telegram_max_capacity || 2000;
-      const limit = link.telegram_rotation_limit || 200;
+      const maxCapacity = link.telegram_max_capacity || 200;
+      const limit = link.telegram_rotation_limit || 20;
       let currentIndex = link.current_bot_index || 0;
 
       // Seguridad: validar índice
