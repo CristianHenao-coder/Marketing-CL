@@ -167,7 +167,6 @@ export const telegramController = {
       const { slug } = req.params;
 
       // 1. Obtener Link y Configuración
-      // CAMBIO: Usamos select('*') aquí también por seguridad
       const { data: link, error } = await supabase
         .from('smart_links')
         .select('*')
@@ -178,7 +177,7 @@ export const telegramController = {
 
       // 2. Verificación de Pago / Estado
       if (!link.is_active || link.status === 'pending_payment') {
-         return res.status(403).send('Servicio Suspendido');
+        return res.status(403).send('Servicio Suspendido');
       }
 
       // 3. Obtener Bots
@@ -189,73 +188,92 @@ export const telegramController = {
         .order('id', { ascending: true });
 
       if (!bots || bots.length === 0) {
-          return res.redirect('https://t.me/SoporteAgencia');
+        return res.redirect('https://t.me/SoporteAgencia');
       }
 
-      // Lógica de Selección Inteligente (Saltar bots llenos)
+      // 4. Configuración de Rotación
       const maxCapacity = link.telegram_max_capacity || 2000;
+      const limit = link.telegram_rotation_limit || 200;
       let currentIndex = link.current_bot_index || 0;
 
-      // Seguridad inicial
+      // Seguridad: validar índice
       if (currentIndex >= bots.length) currentIndex = 0;
 
-      // Buscar el siguiente bot disponible si el actual está lleno
+      // 5. Buscar bot disponible (que no esté lleno)
       let attempts = 0;
       while (bots[currentIndex].clicks_current >= maxCapacity && attempts < bots.length) {
-          currentIndex = (currentIndex + 1) % bots.length;
-          attempts++;
+        currentIndex = (currentIndex + 1) % bots.length;
+        attempts++;
       }
 
+      // ✅ ESTE es el bot que recibirá al usuario AHORA
       const currentBot = bots[currentIndex];
 
-      // 4. Lógica de Conteo
+      // Si todos los bots están llenos, redirigir de todos modos al actual
+      if (currentBot.clicks_current >= maxCapacity) {
+        console.warn(`⚠️ Todos los bots de ${slug} están llenos (>= ${maxCapacity})`);
+        return res.redirect(currentBot.url);
+      }
+
+      // 6. Lógica de Conteo (solo si no tiene cookie anti-duplicado)
       const cookieName = `tg_lock_${slug}`;
       if (!req.cookies[cookieName]) {
 
-          const newClicks = (currentBot.clicks_current || 0) + 1;
+        const newClicks = (currentBot.clicks_current || 0) + 1;
 
-          // Actualizar bot
+        // Actualizar contador del bot ACTUAL
+        await supabase
+          .from('telegram_bots')
+          .update({ clicks_current: newClicks })
+          .eq('id', currentBot.id);
+
+        // 7. Evaluar si con ESTE click debemos rotar PARA EL PRÓXIMO usuario
+        let shouldRotate = false;
+
+        // A. Si con este click se llenó por completo → ROTAR PARA EL PRÓXIMO
+        if (newClicks >= maxCapacity) {
+          shouldRotate = true;
+          console.log(`🔄 Bot ${currentBot.id} alcanzó capacidad máxima (${newClicks}/${maxCapacity})`);
+        }
+        // B. Si se cumplió el ciclo de rotación (Batch) → ROTAR PARA EL PRÓXIMO
+        else if (newClicks > 0 && newClicks % limit === 0) {
+          shouldRotate = true;
+          console.log(`🔄 Bot ${currentBot.id} alcanzó límite de batch (${newClicks}/${limit})`);
+        }
+
+        // 8. Si debe rotar, actualizar índice PARA EL SIGUIENTE usuario
+        if (shouldRotate) {
+          let nextIndex = (currentIndex + 1) % bots.length;
+
+          // Buscar siguiente que no esté lleno (si es posible)
+          let searchAttempts = 0;
+          while (
+            bots[nextIndex] &&
+            bots[nextIndex].clicks_current >= maxCapacity &&
+            searchAttempts < bots.length
+          ) {
+            nextIndex = (nextIndex + 1) % bots.length;
+            searchAttempts++;
+          }
+
+          // Actualizar índice para el SIGUIENTE usuario
           await supabase
-            .from('telegram_bots')
-            .update({ clicks_current: newClicks })
-            .eq('id', currentBot.id);
+            .from('smart_links')
+            .update({ current_bot_index: nextIndex })
+            .eq('id', link.id);
 
-          // Lógica de Rotación (Batch o Llenado)
-          const limit = link.telegram_rotation_limit || 200;
-          let shouldRotate = false;
+          console.log(`✅ Rotado: próximo índice será ${nextIndex} (Bot ID: ${bots[nextIndex]?.id})`);
+        }
 
-          // A. Si se llenó por completo -> ROTAR YA
-          if (newClicks >= maxCapacity) {
-              shouldRotate = true;
-          }
-          // B. Si se cumplió el ciclo de rotación (Batch) -> ROTAR
-          else if (newClicks > 0 && newClicks % limit === 0) {
-              shouldRotate = true;
-          }
-
-          if (shouldRotate) {
-              let nextIndex = (currentIndex + 1) % bots.length;
-
-              // Buscar siguiente que no esté lleno (si es posible)
-              let searchAttempts = 0;
-              while (bots[nextIndex].clicks_current >= maxCapacity && searchAttempts < bots.length) {
-                  nextIndex = (nextIndex + 1) % bots.length;
-                  searchAttempts++;
-              }
-
-              await supabase
-                .from('smart_links')
-                .update({ current_bot_index: nextIndex })
-                .eq('id', link.id);
-          }
-
-          res.cookie(cookieName, '1', { maxAge: 3600000, httpOnly: true });
+        // Marcar cookie para evitar doble conteo (1 hora)
+        res.cookie(cookieName, '1', { maxAge: 3600000, httpOnly: true });
       }
 
+      // 9. ✅ Redirigir al bot que SÍ recibe este click
       return res.redirect(currentBot.url);
 
     } catch (err) {
-      console.error("Rotation Error:", err);
+      console.error("❌ Rotation Error:", err);
       res.status(500).send('Error interno');
     }
   }
