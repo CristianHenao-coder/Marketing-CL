@@ -1,6 +1,7 @@
 import { linksService } from '../../services/links.service.js';
 import { normalizeHost, delay } from '../../core/utils/http.js';
 import crypto from 'crypto';
+import { env } from '../../config/env.js';
 
 export const publicController = {
 
@@ -18,28 +19,28 @@ export const publicController = {
       let link = null;
 
       if (!slug) {
-          link = await linksService.getByDomain(host);
-          if (!link) return res.redirect('/admin/login');
+        link = await linksService.getByDomain(host);
+        if (!link) return res.redirect('/admin/login');
       } else {
-          link = await linksService.getBySlug(slug);
+        link = await linksService.getBySlug(slug);
       }
 
       if (!link) return res.status(404).send('Not Found');
 
       // 🛡️ MODO DEBUG VISUAL
       if (forceGate) {
-          return res.render('public/searchEngine', {
-            id: link.slug,
-            model: link,
-            isBotRequest: false,
-            isSocialApp: true,
-            layout: false
-          });
+        return res.render('public/searchEngine', {
+          id: link.slug,
+          model: link,
+          isBotRequest: false,
+          isSocialApp: true,
+          layout: false
+        });
       }
 
       // 🛡️ CAPA 1: CLOAKING (Bots y PC)
       if (!isPreview && (req.isBot || !req.isMobile)) {
-         return res.render('public/searchEngine', {
+        return res.render('public/searchEngine', {
           id: link.slug,
           model: link,
           isBotRequest: true,
@@ -63,18 +64,18 @@ export const publicController = {
       // 🛡️ CAPA 3: DESTINO REAL
       if (link.link_mode === 'instructions') {
         return res.render('public/instructions', {
-            id: link.slug,
-            model: link,
-            layout: false
+          id: link.slug,
+          model: link,
+          layout: false
         });
       }
 
       return res.render('public/searchEngine', {
-          id: link.slug,
-          model: link,
-          isBotRequest: false,
-          isSocialApp: false,
-          layout: false
+        id: link.slug,
+        model: link,
+        isBotRequest: false,
+        isSocialApp: false,
+        layout: false
       });
 
     } catch (e) {
@@ -101,14 +102,14 @@ export const publicController = {
       const isIos = /iphone|ipad|ipod/.test(ua);
 
       const deepLink = isIos
-          ? `onlyfans://user/${username}`
-          : `intent://onlyfans.com/${username}#Intent;package=com.onlyfans;scheme=https;end`;
+        ? `onlyfans://user/${username}`
+        : `intent://onlyfans.com/${username}#Intent;package=com.onlyfans;scheme=https;end`;
 
       const payload = {
-          u: targetUrl,
-          d: deepLink,
-          ts: Date.now(),
-          v: crypto.createHash('md5').update(id + (process.env.COOKIE_SECRET || 'gate')).digest('hex')
+        u: targetUrl,
+        d: deepLink,
+        ts: Date.now(),
+        v: crypto.createHash('md5').update(id + (process.env.COOKIE_SECRET || 'gate')).digest('hex')
       };
 
       const secureData = Buffer.from(JSON.stringify(payload)).toString('base64');
@@ -120,18 +121,19 @@ export const publicController = {
   },
 
   async renderLoading(req, res) {
-      try {
-          const { id } = req.params;
-          const link = await linksService.getBySlug(id);
-          if (!link) return res.status(404).send('Not Found');
-          res.render('public/loading', {
-              id: link.slug,
-              model: link,
-              layout: false
-          });
-      } catch (e) {
-          console.error("[PublicController Error]", e);
-          res.status(500).send('Maintenance');
-      }
+    try {
+      const { id } = req.params;
+      const link = await linksService.getBySlug(id);
+      if (!link) return res.status(404).send('Not Found');
+      res.render('public/loading', {
+        id: link.slug,
+        model: link,
+        supabaseStorageUrl: env.SUPABASE_STORAGE_URL,
+        layout: false
+      });
+    } catch (e) {
+      console.error("[PublicController Error]", e);
+      res.status(500).send('Maintenance');
+    }
   }
 };

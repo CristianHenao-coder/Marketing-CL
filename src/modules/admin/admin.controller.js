@@ -156,6 +156,7 @@ export const adminController = {
 
       const newLink = {
         slug: b.slug?.trim(),
+        custom_domain: b.custom_domain?.trim() || null,
         display_name: b.display_name,
         onlyfans: b.onlyfans,
         instagram: b.instagram,
@@ -206,47 +207,47 @@ export const adminController = {
   },
 
   async toggleService(req, res) {
-      try {
-          const { id } = req.params;
-          const { currentStatus } = req.body;
+    try {
+      const { id } = req.params;
+      const { currentStatus } = req.body;
 
-          // Logic: if currentStatus is 'active', switch to 'pending_payment' (or 'inactive' based on your logic)
-          // If it's anything else, switch to 'active'.
-          // Assuming 'status' field in 'smart_links' table based on your schema description.
+      // Logic: if currentStatus is 'active', switch to 'pending_payment' (or 'inactive' based on your logic)
+      // If it's anything else, switch to 'active'.
+      // Assuming 'status' field in 'smart_links' table based on your schema description.
 
-          const newStatus = currentStatus === 'active' ? 'pending_payment' : 'active';
+      const newStatus = currentStatus === 'active' ? 'pending_payment' : 'active';
 
-          const { data, error } = await supabase
-            .from("smart_links")
-            .update({ status: newStatus })
-            .eq("id", id)
-            .select()
-            .single();
+      const { data, error } = await supabase
+        .from("smart_links")
+        .update({ status: newStatus })
+        .eq("id", id)
+        .select()
+        .single();
 
-          if (error) throw error;
+      if (error) throw error;
 
-          res.json({ success: true, newStatus: data.status });
-      } catch (err) {
-          res.status(500).json({ success: false, error: err.message });
-      }
+      res.json({ success: true, newStatus: data.status });
+    } catch (err) {
+      res.status(500).json({ success: false, error: err.message });
+    }
   },
 
   async updateLink(req, res) {
-      try {
-          const { id } = req.params;
-          const updates = req.body;
-          // Filter allowed fields to update
-          const allowed = ['display_name', 'onlyfans', 'instagram', 'telegram', 'price', 'link_mode'];
-          const toUpdate = {};
-          for (const key of allowed) {
-              if (updates[key] !== undefined) toUpdate[key] = updates[key];
-          }
-
-          const { data, error } = await supabase.from("smart_links").update(toUpdate).eq("id", id).select().single();
-          if (error) throw error;
-          res.json({ success: true, link: data });
-      } catch (err) {
-          res.status(500).json({ success: false, error: err.message });
+    try {
+      const { id } = req.params;
+      const updates = req.body;
+      // Filter allowed fields to update
+      const allowed = ['display_name', 'onlyfans', 'instagram', 'telegram', 'price', 'link_mode'];
+      const toUpdate = {};
+      for (const key of allowed) {
+        if (updates[key] !== undefined) toUpdate[key] = updates[key];
       }
+
+      const { data, error } = await supabase.from("smart_links").update(toUpdate).eq("id", id).select().single();
+      if (error) throw error;
+      res.json({ success: true, link: data });
+    } catch (err) {
+      res.status(500).json({ success: false, error: err.message });
+    }
   }
 };

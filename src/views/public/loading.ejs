@@ -1,14 +1,20 @@
 <!DOCTYPE html>
 <html lang="<%= getLocale() %>">
+
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title><%= __('loading.title') %></title>
+    <title>
+        <%= __('loading.title') %>
+    </title>
 
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet" />
 
     <style>
-        * { box-sizing: border-box; }
+        * {
+            box-sizing: border-box;
+        }
+
         body {
             margin: 0;
             font-family: 'Poppins', sans-serif;
@@ -21,6 +27,7 @@
             padding: 40px;
             overflow: hidden;
         }
+
         .wrapper {
             width: 100%;
             max-width: 1200px;
@@ -29,12 +36,14 @@
             justify-content: space-between;
             gap: 40px;
         }
+
         .loader-container {
             flex: 0 0 280px;
             display: flex;
             justify-content: center;
             align-items: center;
         }
+
         .loader {
             width: 150px;
             height: 150px;
@@ -46,6 +55,7 @@
             box-shadow: 0 0 35px rgba(255, 42, 138, 0.8);
             background-color: #ffffff;
         }
+
         .loader::before {
             content: "";
             position: absolute;
@@ -56,22 +66,58 @@
             border-right-color: #ff2a8a;
             animation: spin 1.2s linear infinite;
         }
+
         .loader-logo {
             position: relative;
             width: 65%;
             height: 65%;
             object-fit: contain;
         }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        .text-container { flex: 1; text-align: right; }
-        h1 { font-size: 2.8rem; margin: 0 0 12px; letter-spacing: 1px; }
-        p { font-size: 1.15rem; opacity: 0.9; margin: 0; }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .text-container {
+            flex: 1;
+            text-align: right;
+        }
+
+        h1 {
+            font-size: 2.8rem;
+            margin: 0 0 12px;
+            letter-spacing: 1px;
+        }
+
+        p {
+            font-size: 1.15rem;
+            opacity: 0.9;
+            margin: 0;
+        }
+
         @media (max-width: 768px) {
-            body { padding: 24px; }
-            .wrapper { flex-direction: column; text-align: center; }
-            .text-container { text-align: center; }
-            h1 { font-size: 2.1rem; }
-            p { font-size: 1rem; }
+            body {
+                padding: 24px;
+            }
+
+            .wrapper {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .text-container {
+                text-align: center;
+            }
+
+            h1 {
+                font-size: 2.1rem;
+            }
+
+            p {
+                font-size: 1rem;
+            }
         }
     </style>
 </head>
@@ -80,12 +126,16 @@
     <div class="wrapper">
         <div class="loader-container">
             <div class="loader">
-                <img src="https://fptwztporosusnwcwvny.supabase.co/storage/v1/object/public/public-fotos/logoOnly.png" alt="Logo" class="loader-logo" />
+                <img src="<%= supabaseStorageUrl %>/public-fotos/logoOnly.png" alt="Logo" class="loader-logo" />
             </div>
         </div>
         <div class="text-container">
-            <h1><%= __('loading.title') %></h1>
-            <p><%= __('loading.subtitle') %></p>
+            <h1>
+                <%= __('loading.title') %>
+            </h1>
+            <p>
+                <%= __('loading.subtitle') %>
+            </p>
         </div>
     </div>
 
@@ -126,4 +176,5 @@
         setTimeout(initRedirect, 2000);
     </script>
 </body>
+
 </html>
