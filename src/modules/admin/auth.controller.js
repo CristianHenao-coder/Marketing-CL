@@ -1,58 +1,65 @@
-// src/modules/admin/auth.controller.js
-import bcrypt from 'bcrypt';
-import { supabase } from '../../config/supabase.js';
+import { supabaseAdmin, supabaseAuth } from '../../config/supabase.js';
+
+const COOKIE_OPTIONS = (isProd) => ({
+  httpOnly: true,
+  secure: isProd,
+  sameSite: 'lax',
+  path: '/',
+  signed: true,
+});
 
 export const authController = {
   // ======================
   //  LOGIN (VISTA)
   // ======================
   renderLogin(req, res) {
-    // Si ya está autenticado, lo mandamos directo al dashboard
     if (req.adminUser) {
       return res.redirect('/admin/dashboard');
     }
 
-    // 👇 DESACTIVAMOS EL LAYOUT GLOBAL
     return res.render('admin/login', {
-      layout: false,              // <--- clave para que NO use admin/layout.ejs
+      layout: false,
       title: 'Admin Access',
     });
   },
 
   // ======================
-  //  LOGIN (POST)
+  //  LOGIN (POST) - Email/Password (Supabase Auth)
   // ======================
   async login(req, res) {
-    const { user, pass } = req.body;
+    const { email, password } = req.body;
+    const isProd = process.env.NODE_ENV === 'production';
+
+    if (!email || !password) {
+      return res.status(400).json({ error: 'Email y contraseña son obligatorios' });
+    }
 
     try {
-      // 1. Buscar usuario en tabla admin_users
-      const { data: admin, error } = await supabase
+      // 1) Login con Supabase Auth
+      const { data, error } = await supabaseAuth.auth.signInWithPassword({ email, password });
+      if (error || !data?.session || !data?.user) {
+        return res.status(401).json({ error: 'Credenciales inválidas' });
+      }
+
+      const userId = data.user.id;
+
+      // 2) Verificar que sea admin (whitelist admin_users)
+      const { data: adminRow, error: adminErr } = await supabaseAdmin
         .from('admin_users')
-        .select('*')
-        .eq('username', user)
-        .single();
+        .select('id, user_id, username, created_at')
+        .eq('user_id', userId)
+        .maybeSingle();
 
-      if (error || !admin) {
-        return res.status(401).json({ error: 'Usuario no encontrado' });
+      if (adminErr || !adminRow) {
+        // No es admin: no permitimos acceso
+        return res.status(403).json({ error: 'No autorizado (no es admin)' });
       }
 
-      // 2. Comparar contraseña con el hash
-      const match = await bcrypt.compare(pass, admin.password_hash);
+      // 3) Guardar tokens en cookies firmadas
+      res.cookie('admin_at', data.session.access_token, { ...COOKIE_OPTIONS(isProd), maxAge: 60 * 60 * 1000 }); // 1h
+      res.cookie('admin_rt', data.session.refresh_token, { ...COOKIE_OPTIONS(isProd), maxAge: 30 * 24 * 60 * 60 * 1000 }); // 30d
 
-      if (!match) {
-        return res.status(401).json({ error: 'Contraseña incorrecta' });
-      }
-
-      // 3. Crear cookie de sesión simple (puedes pasar luego a JWT)
-      const token = Buffer.from(`${user}:${admin.password_hash}`).toString('base64');
-
-      res.cookie('admin_auth', token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        maxAge: 24 * 60 * 60 * 1000, // 1 día
-      });
-
+      // 4) OK
       return res.json({ success: true });
     } catch (err) {
       console.error('[authController.login] Error:', err);
@@ -64,8 +71,8 @@ export const authController = {
   //  LOGOUT
   // ======================
   logout(req, res) {
-    // 👇 Usa el MISMO nombre de cookie que pusimos en login
-    res.clearCookie('admin_auth');
+    res.clearCookie('admin_at');
+    res.clearCookie('admin_rt');
     return res.redirect('/admin/login');
   },
 };

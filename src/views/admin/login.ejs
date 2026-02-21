@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8">
   <title>Admin Login | Secure Access</title>
@@ -44,15 +45,16 @@
     }
 
     .error {
-    background: rgba(255, 77, 77, 0.1);
-    border-left: 3px solid #ff4d4d;
-    padding: 10px;
-    border-radius: 4px;
-    color: #ff4d4d;
-    font-size: 0.85em;
-    margin-bottom: 15px;
-    display: none; /* Se activa con JS */
-}
+      background: rgba(255, 77, 77, 0.1);
+      border-left: 3px solid #ff4d4d;
+      padding: 10px;
+      border-radius: 4px;
+      color: #ff4d4d;
+      font-size: 0.85em;
+      margin-bottom: 15px;
+      display: none;
+      text-align: left;
+    }
 
     input {
       width: 100%;
@@ -99,25 +101,18 @@
       transform: translateY(-1px);
       box-shadow: 0 0 26px rgba(0, 255, 102, 0.7);
     }
-
-    .error {
-      color: #ff4d4d;
-      font-size: 0.9em;
-      margin-bottom: 10px;
-      display: none;
-      text-align: left;
-    }
   </style>
 </head>
+
 <body>
   <div class="login-card">
     <h2>Admin Access</h2>
-    <div id="errorMsg" class="error">Credenciales incorrectas</div>
+    <div id="errorMsg" class="error">Credenciales incorrectas o no autorizado</div>
 
     <form id="loginForm">
-      <input type="text" name="user" placeholder="Usuario" required>
-      <input type="password" name="pass" placeholder="Contraseña" required>
-      <button type="submit">Ingresar al Sistema</button>
+      <input type="email" name="email" placeholder="Correo" required>
+      <input type="password" name="password" placeholder="Contraseña" required>
+      <button type="submit">Ingresar</button>
     </form>
   </div>
 
@@ -126,17 +121,17 @@
       e.preventDefault();
       const formData = new FormData(e.target);
       const data = Object.fromEntries(formData);
-      
+
       const res = await fetch('/admin/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
       });
 
-      // 🔹 LÓGICA ORIGINAL (no la toco)
-      if (res.ok) window.location.href = '/admin/list';
+      if (res.ok) window.location.href = '/admin/dashboard';
       else document.getElementById('errorMsg').style.display = 'block';
     };
   </script>
 </body>
+
 </html>
