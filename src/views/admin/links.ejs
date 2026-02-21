@@ -452,9 +452,21 @@
                 const result = await res.json();
                 if (result.success) {
                     let domain = document.querySelector('#customDomain').value.trim() || window.location.host;
-                    // Limpiar protocolos si el usuario los pegó
-                    domain = domain.replace(/^https?:\/\//i, '');
-                    const finalLink = `${window.location.protocol}//${domain}/${document.querySelector('#slug').value}`;
+
+                    // Depuración: Ver qué estamos procesando
+                    console.log('[LinkPro] Dominio original:', domain);
+
+                    // Limpieza profunda: quitar protocolos, www opcional, y barras al final
+                    domain = domain
+                        .replace(/^https?:\/\//i, '') // Quita http:// o https://
+                        .replace(/\/+$/, '')          // Quita barras al final
+                        .trim();
+
+                    console.log('[LinkPro] Dominio limpio:', domain);
+
+                    const slug = document.querySelector('#slug').value.trim().replace(/^\/+/, '');
+                    const finalLink = `${window.location.protocol}//${domain}/${slug}`;
+
                     document.querySelector('#modalLinkText').textContent = finalLink;
                     document.querySelector('#modalBackdrop').style.display = 'flex';
                 } else {
