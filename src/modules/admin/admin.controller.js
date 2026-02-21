@@ -156,7 +156,7 @@ export const adminController = {
 
       const newLink = {
         slug: b.slug?.trim(),
-        custom_domain: b.custom_domain?.trim() || null,
+        custom_domain: b.custom_domain?.trim().replace(/^https?:\/\//i, '') || null,
         display_name: b.display_name,
         onlyfans: b.onlyfans,
         instagram: b.instagram,
