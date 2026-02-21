@@ -1,4 +1,4 @@
-cat > src / config / env.js << 'EOF'
+
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -25,4 +25,3 @@ if (!env.SUPABASE_URL || !env.SUPABASE_ANON_KEY || !env.SUPABASE_SERVICE_ROLE_KE
 if (!env.COOKIE_SECRET) {
   throw new Error('❌ Error: COOKIE_SECRET es obligatorio para firmar cookies');
 }
-EOF
