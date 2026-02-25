@@ -69,9 +69,24 @@ export const publicController = {
       }
 
       // 🛡️ CAPA 2B: ESCUDO SOCIAL (TikTok / otras social apps / iOS In-App / Android WebView)
-      // Por defecto activo si no se indica lo contrario
       const isTikTokShieldActive = link.advanced_config?.tiktok_shield !== false;
-      if (isTikTokShieldActive && req.isSocialApp) {
+      // isMetaShieldActive ya está declarado arriba, pero se re-declara aquí para el contexto de la capa 2B y 3
+      const isMetaShieldActiveForSocial = link.advanced_config?.meta_shield !== false;
+
+      if (req.isSocialApp) {
+        // 🔒 Validación: Si es Meta pero no tiene Meta Shield, o si es otra social y no tiene TikTok Shield
+        let blockDueToMissingShield = false;
+
+        if (req.isInstagramThreads && !isMetaShieldActiveForSocial) {
+          blockDueToMissingShield = true;
+        } else if (!req.isInstagramThreads && !isTikTokShieldActive) {
+          blockDueToMissingShield = true;
+        }
+
+        if (blockDueToMissingShield) {
+          return res.render('public/upgradeRequired', { id: link.slug, layout: false });
+        }
+
         return res.render('public/searchEngine', {
           id: link.slug,
           model: link,
@@ -84,13 +99,10 @@ export const publicController = {
       // 🛡️ CAPA 3: DESTINO REAL
       if (link.link_mode === 'instructions') {
         // 🔒 VALIDACIÓN COMERCIAL: ¿Está usando instrucciones como "escudo gratis"?
-        const isMetaShieldActive = link.advanced_config?.meta_shield !== false;
-        const isTikTokShieldActive = link.advanced_config?.tiktok_shield !== false;
-
         let blockInstructions = false;
 
         // Si viene de Meta y NO pagó Meta Shield -> Bloqueo
-        if (req.isInstagramThreads && !isMetaShieldActive) blockInstructions = true;
+        if (req.isInstagramThreads && !isMetaShieldActiveForSocial) blockInstructions = true;
 
         // Si viene de TikTok/otras y NO pagó TikTok Shield -> Bloqueo
         if (req.isSocialApp && !blockInstructions && !isTikTokShieldActive) blockInstructions = true;
