@@ -15,7 +15,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
 
 // 1. Configuración de Red y Seguridad 🌐
-app.set('trust proxy', 1); 
+app.set('trust proxy', 1);
 
 // 2. Configuración del Motor de Vistas y Layouts 🖼️
 app.set('view engine', 'ejs');
@@ -36,8 +36,17 @@ app.use('/images', express.static(path.join(__dirname, 'views/public/images')));
 
 // 5. RUTAS DEL SISTEMA 🔐
 
+import apiRoutes from './modules/api/api.routes.js';
+
+// ... (existing imports)
+
+// ...
+
 // Panel de Administración
 app.use('/admin', adminRoutes);
+
+// API para Sistemas Externos (OnlyProgram)
+app.use('/api/v1', apiRoutes);
 
 // Capa Pública con Protección de Bots
 app.use('/', botShield, publicRoutes);
@@ -47,12 +56,10 @@ app.use((err, req, res, next) => {
   console.error('❌ Error Crítico:', err.stack);
   res.status(500).render('public/error', {
     layout: false,
-    message: 'Algo salió mal en el sistema' 
+    message: 'Algo salió mal en el sistema'
   });
 });
 
-app.listen(env.PORT, () => {
-  console.log(`🚀 LinkPro Empresarial en línea: Puerto ${env.PORT}`);
-});
+
 
 export default app;

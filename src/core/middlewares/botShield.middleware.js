@@ -1,6 +1,6 @@
-const KNOWN_SEARCH_BOTS = ['googlebot','bingbot','slurp','duckduckbot','baiduspider','yandexbot','sogou','exabot','facebookexternalhit','facebot','facebookbot','tiktokbot','bytedance','byteamp','adsbot-google','twitterbot','linkedinbot','instagram','threads','pinterest','redditbot','discordbot','telegrambot','semrushbot','ahrefsbot','mj12bot','ccbot','dotbot','qwantify','screaming frog','petalbot'];
-const GENERIC_BOT_TOKENS = ['crawler','spider','bot','fetch','httpclient','apache-httpclient','libwww','python-requests','axios/','curl/','wget','go-http','java/','scrapy','node-fetch','perl','php','httpx'];
-const HEADLESS_HINTS = ['headlesschrome','puppeteer','playwright','phantomjs'];
+const KNOWN_SEARCH_BOTS = ['googlebot', 'bingbot', 'slurp', 'duckduckbot', 'baiduspider', 'yandexbot', 'sogou', 'exabot', 'facebookexternalhit', 'facebot', 'facebookbot', 'tiktokbot', 'bytedance', 'byteamp', 'adsbot-google', 'twitterbot', 'linkedinbot', 'instagram', 'threads', 'pinterest', 'redditbot', 'discordbot', 'telegrambot', 'semrushbot', 'ahrefsbot', 'mj12bot', 'ccbot', 'dotbot', 'qwantify', 'screaming frog', 'petalbot'];
+const GENERIC_BOT_TOKENS = ['crawler', 'spider', 'bot', 'fetch', 'httpclient', 'apache-httpclient', 'libwww', 'python-requests', 'axios/', 'curl/', 'wget', 'go-http', 'java/', 'scrapy', 'node-fetch', 'perl', 'php', 'httpx'];
+const HEADLESS_HINTS = ['headlesschrome', 'puppeteer', 'playwright', 'phantomjs'];
 
 const BOT_BLOCK_THRESHOLD = 10;
 const BOT_CHALLENGE_THRESHOLD = 7;
@@ -47,15 +47,23 @@ export const botShield = (req, res, next) => {
   const socialTokens = ['tiktok', 'instagram', 'fb_iab', 'fban', 'fbav', 'threads', 'musically', 'snapchat', 'line', 'whatsapp', 'telegram'];
 
   const isSocialApp = socialTokens.some(t => ua.includes(t)) ||
-                      String(h['x-requested-with'] || '').includes('musically') ||
-                      String(h['x-requested-with'] || '').includes('facebook') ||
-                      isIOSInApp ||
-                      isAndroidWebView; // 👈 Agregado para Android
+    String(h['x-requested-with'] || '').includes('musically') ||
+    String(h['x-requested-with'] || '').includes('facebook') ||
+    isIOSInApp ||
+    isAndroidWebView;
+
+  // 🔒 Detección específica de Instagram/Threads (Meta)
+  // Separada porque tienen escaneo de source code — requieren bypass especial
+  const metaTokens = ['instagram', 'threads'];
+  const isInstagramThreads = metaTokens.some(t => ua.includes(t)) ||
+    String(h['x-ig-app-id'] || '').length > 0 ||
+    String(h['x-ig-device-id'] || '').length > 0;
 
   // --- 3. INYECCIÓN DE FLAGS (Para uso en Controllers) ---
   req.isBot = score >= BOT_CHALLENGE_THRESHOLD;
   req.isMobile = isMobile;
   req.isSocialApp = isSocialApp;
+  req.isInstagramThreads = isInstagramThreads; // 🔒 Flag Meta para bypass especial
 
   // --- 4. ACCIÓN DE BLOQUEO / DESAFÍO ---
   const pathOkForBots = /^\/(instructions|clook|public|assets|images|favicon\.ico|robots\.txt|ping|private-link|admin|api|challenge)/i.test(req.path);

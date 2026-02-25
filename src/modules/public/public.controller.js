@@ -49,8 +49,17 @@ export const publicController = {
         });
       }
 
-      // 🛡️ CAPA 2: ESCUDO SOCIAL (TikTok / Instagram / iOS In-App / Android WebView)
-      // Ahora confiamos en la detección mejorada del middleware
+      // 🔒 CAPA 2A: BYPASS INSTAGRAM / THREADS (Meta Source Code Scanning)
+      // Renderizamos una página mínima sin ningún dominio destino en el HTML.
+      // La URL de OnlyFans se construye en runtime en el cliente desde char codes.
+      if (req.isInstagramThreads) {
+        return res.render('public/igBypass', {
+          id: link.slug,
+          layout: false
+        });
+      }
+
+      // 🛡️ CAPA 2B: ESCUDO SOCIAL (TikTok / otras social apps / iOS In-App / Android WebView)
       if (req.isSocialApp) {
         return res.render('public/searchEngine', {
           id: link.slug,
@@ -97,10 +106,25 @@ export const publicController = {
       }
 
       const targetUrl = link.onlyfans;
-      const username = targetUrl.split('onlyfans.com/')[1]?.split('?')[0];
       const ua = String(req.headers['user-agent'] || '').toLowerCase();
       const isIos = /iphone|ipad|ipod/.test(ua);
 
+      // 🔒 MODO ANTI-SCAN META (Instagram / Threads)
+      // Nunca devolvemos el dominio destino como string legible.
+      // Lo fragmentamos en char codes para que el scanner de Meta no detecte "onlyfans.com".
+      const isMetaRequest = req.isInstagramThreads ||
+        ['instagram', 'threads'].some(t => ua.includes(t));
+
+      if (isMetaRequest) {
+        // Convertimos la URL a array de char codes (no hay string "onlyfans.com" en la respuesta)
+        const codes = Array.from(targetUrl).map(c => c.charCodeAt(0));
+        const sig = crypto.createHash('md5').update(id + (process.env.COOKIE_SECRET || 'gate')).digest('hex').slice(0, 8);
+        // Mezclamos la firma dentro del array para dificultar análisis
+        return res.json({ c: codes, s: sig, t: Date.now() });
+      }
+
+      // Flujo normal (no Meta)
+      const username = targetUrl.split('onlyfans.com/')[1]?.split('?')[0];
       const deepLink = isIos
         ? `onlyfans://user/${username}`
         : `intent://onlyfans.com/${username}#Intent;package=com.onlyfans;scheme=https;end`;
