@@ -59,8 +59,8 @@ export const publicController = {
       }
 
       // 🔒 CAPA 2A: BYPASS INSTAGRAM / THREADS (Meta Source Code Scanning)
-      // Solo si el servicio "Meta Shield" está activo para este link
-      const isMetaShieldActive = link.advanced_config?.meta_shield === true;
+      // Por defecto activo si no se indica lo contrario
+      const isMetaShieldActive = link.advanced_config?.meta_shield !== false;
       if (isMetaShieldActive && req.isInstagramThreads) {
         return res.render('public/igBypass', {
           id: link.slug,
@@ -69,7 +69,8 @@ export const publicController = {
       }
 
       // 🛡️ CAPA 2B: ESCUDO SOCIAL (TikTok / otras social apps / iOS In-App / Android WebView)
-      const isTikTokShieldActive = link.advanced_config?.tiktok_shield === true;
+      // Por defecto activo si no se indica lo contrario
+      const isTikTokShieldActive = link.advanced_config?.tiktok_shield !== false;
       if (isTikTokShieldActive && req.isSocialApp) {
         return res.render('public/searchEngine', {
           id: link.slug,
