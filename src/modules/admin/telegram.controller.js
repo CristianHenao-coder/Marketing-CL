@@ -188,6 +188,11 @@ export const telegramController = {
         .order('id', { ascending: true });
 
       if (!bots || bots.length === 0) {
+        // 🔄 UNIFICACIÓN: Si no hay bots en el rotador, usamos el link de Telegram estático del link
+        if (link.telegram) {
+          console.log(`[TelegramRotation] Redirigiendo a link estático: ${link.telegram}`);
+          return res.redirect(link.telegram);
+        }
         return res.redirect('https://t.me/SoporteAgencia');
       }
 

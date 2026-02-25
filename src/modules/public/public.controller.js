@@ -27,6 +27,14 @@ export const publicController = {
 
       if (!link) return res.status(404).send('Not Found');
 
+      // 🤖 VERIFICACIÓN TELEGRAM (Rotador o Fijo)
+      const { count: botsCount } = await supabase
+        .from('telegram_bots')
+        .select('*', { count: 'exact', head: true })
+        .eq('smart_link_id', link.id);
+
+      link.hasTelegramBots = botsCount > 0;
+
       // 🛡️ MODO DEBUG VISUAL
       if (forceGate) {
         return res.render('public/searchEngine', {
@@ -50,9 +58,9 @@ export const publicController = {
       }
 
       // 🔒 CAPA 2A: BYPASS INSTAGRAM / THREADS (Meta Source Code Scanning)
-      // Renderizamos una página mínima sin ningún dominio destino en el HTML.
-      // La URL de OnlyFans se construye en runtime en el cliente desde char codes.
-      if (req.isInstagramThreads) {
+      // Solo si el servicio "Meta Shield" está activo para este link
+      const isMetaShieldActive = link.advanced_config?.meta_shield === true;
+      if (isMetaShieldActive && req.isInstagramThreads) {
         return res.render('public/igBypass', {
           id: link.slug,
           layout: false
@@ -60,7 +68,8 @@ export const publicController = {
       }
 
       // 🛡️ CAPA 2B: ESCUDO SOCIAL (TikTok / otras social apps / iOS In-App / Android WebView)
-      if (req.isSocialApp) {
+      const isTikTokShieldActive = link.advanced_config?.tiktok_shield === true;
+      if (isTikTokShieldActive && req.isSocialApp) {
         return res.render('public/searchEngine', {
           id: link.slug,
           model: link,
@@ -110,12 +119,10 @@ export const publicController = {
       const isIos = /iphone|ipad|ipod/.test(ua);
 
       // 🔒 MODO ANTI-SCAN META (Instagram / Threads)
-      // Nunca devolvemos el dominio destino como string legible.
-      // Lo fragmentamos en char codes para que el scanner de Meta no detecte "onlyfans.com".
-      const isMetaRequest = req.isInstagramThreads ||
-        ['instagram', 'threads'].some(t => ua.includes(t));
+      const isMetaShieldActive = link.advanced_config?.meta_shield === true;
+      const isMetaRequest = req.isInstagramThreads || ['instagram', 'threads'].some(t => ua.includes(t));
 
-      if (isMetaRequest) {
+      if (isMetaShieldActive && isMetaRequest) {
         // Convertimos la URL a array de char codes (no hay string "onlyfans.com" en la respuesta)
         const codes = Array.from(targetUrl).map(c => c.charCodeAt(0));
         const sig = crypto.createHash('md5').update(id + (process.env.COOKIE_SECRET || 'gate')).digest('hex').slice(0, 8);

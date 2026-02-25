@@ -167,9 +167,12 @@ export const adminController = {
         photo: photoUrl,
         price: Number(b.price || 30),
         fecha_vencimiento: toISOorNull(b.fecha_vencimiento),
+        telegram_rotation_limit: Number(b.telegram_rotation_limit || 1), // 👈 Valor por defecto 1 (Round Robin)
         advanced_config: {
           os_force: b.os_force || "all",
-          blacklisted_countries: parseBlacklistedCountries(b.blacklisted_countries)
+          blacklisted_countries: parseBlacklistedCountries(b.blacklisted_countries),
+          meta_shield: b.meta_shield === 'true' || b.meta_shield === true, // 👈 Nuevo: Meta Shield
+          tiktok_shield: b.tiktok_shield === 'true' || b.tiktok_shield === true // 👈 Nuevo: TikTok Shield
         }
       };
 
@@ -237,11 +240,20 @@ export const adminController = {
       const { id } = req.params;
       const updates = req.body;
       // Filter allowed fields to update
-      const allowed = ['display_name', 'onlyfans', 'instagram', 'telegram', 'price', 'link_mode'];
+      const allowed = ['display_name', 'onlyfans', 'instagram', 'telegram', 'price', 'link_mode', 'telegram_rotation_limit'];
       const toUpdate = {};
       for (const key of allowed) {
         if (updates[key] !== undefined) toUpdate[key] = updates[key];
       }
+
+      // Manejar advanced_config de forma inteligente para no borrar lo anterior
+      const { data: current } = await supabase.from("smart_links").select("advanced_config").eq("id", id).single();
+      const newConfig = {
+        ...(current?.advanced_config || {}),
+        meta_shield: updates.meta_shield === true || updates.meta_shield === 'true',
+        tiktok_shield: updates.tiktok_shield === true || updates.tiktok_shield === 'true'
+      };
+      toUpdate.advanced_config = newConfig;
 
       const { data, error } = await supabase.from("smart_links").update(toUpdate).eq("id", id).select().single();
       if (error) throw error;

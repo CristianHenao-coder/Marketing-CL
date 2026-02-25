@@ -1,16 +1,21 @@
 <!DOCTYPE html>
 <html lang="<%= getLocale() %>">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title><%= model.display_name || model.name %> - Verified Profile</title>
+  <title>
+    <%= model.display_name || model.name %> - Verified Profile
+  </title>
 
   <meta name="robots" content="noindex, nofollow, noarchive">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet" />
 
   <style>
     /* RESET */
-    *, *::before, *::after {
+    *,
+    *::before,
+    *::after {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
@@ -22,7 +27,8 @@
       gap: 10px;
     }
 
-    html, body {
+    html,
+    body {
       width: 100%;
       height: 100%;
       font-family: 'Poppins', sans-serif;
@@ -75,12 +81,10 @@
       content: "";
       position: absolute;
       inset: 0;
-      background: linear-gradient(
-        to top,
-        rgba(0,0,0,1) 5%,
-        rgba(0,0,0,0.5) 40%,
-        rgba(0,0,0,0) 80%
-      );
+      background: linear-gradient(to top,
+          rgba(0, 0, 0, 1) 5%,
+          rgba(0, 0, 0, 0.5) 40%,
+          rgba(0, 0, 0, 0) 80%);
       z-index: 1;
     }
 
@@ -104,14 +108,14 @@
       font-size: clamp(2.2rem, 7vw, 3.5rem);
       font-weight: 700;
       letter-spacing: -1px;
-      text-shadow: 0 4px 20px rgba(0,0,0,0.8);
+      text-shadow: 0 4px 20px rgba(0, 0, 0, 0.8);
       margin-bottom: 5px;
     }
 
     .profile-subtitle {
       font-size: clamp(0.95rem, 2.5vw, 1.2rem);
       opacity: 0.9;
-      text-shadow: 0 1px 10px rgba(0,0,0,0.8);
+      text-shadow: 0 1px 10px rgba(0, 0, 0, 0.8);
       font-weight: 400;
       color: #00aff0;
     }
@@ -129,8 +133,8 @@
       width: 100%;
       padding: 18px 25px;
       border-radius: 60px;
-      border: 1px solid rgba(255,255,255,0.2);
-      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.1);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
       color: #fff;
@@ -163,15 +167,20 @@
     .service-btn.telegram {
       background: #ffffff;
       border-color: #ffffff;
-      color: #0088cc; /* Azul Telegram para el texto */
+      color: #0088cc;
+      /* Azul Telegram para el texto */
       box-shadow: 0 0 25px rgba(255, 255, 255, 0.3);
     }
+
     .service-btn.telegram .btn-label::before {
-      background-color: #0088cc; /* Icono azul */
+      background-color: #0088cc;
+      /* Icono azul */
       mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' d='M9.04 15.44 8.9 19.6c.54 0 .77-.23 1.05-.5l2.52-2.4 5.23 3.82c.96.53 1.65.25 1.9-.88l3.44-16.2c.33-1.54-.56-2.14-1.5-1.79L1.12 9.2c-1.48.58-1.46 1.42-.27 1.79l4.9 1.53L18.7 5.4c.61-.4 1.17-.18.71.22Z'/%3E%3C/svg%3E");
     }
+
     .service-btn.telegram .btn-sub-text {
-        color: #333; /* Subtítulo oscuro */
+      color: #333;
+      /* Subtítulo oscuro */
     }
 
     /* TIKTOK (Negro/Cian/Rosa) */
@@ -180,28 +189,28 @@
       border-color: rgba(255, 255, 255, 0.2);
       box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
     }
+
     .service-btn.tiktok .btn-label::before {
       mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' d='M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z'/%3E%3C/svg%3E");
     }
 
     /* INSTAGRAM (Gradiente) */
     .service-btn.instagram {
-      background: linear-gradient(
-        135deg,
-        rgba(193,53,132,0.4),
-        rgba(225,48,108,0.4),
-        rgba(252,175,69,0.4)
-      );
-      border-color: rgba(225,48,108,0.6);
-      box-shadow: 0 0 25px rgba(225,48,108,0.35);
+      background: linear-gradient(135deg,
+          rgba(193, 53, 132, 0.4),
+          rgba(225, 48, 108, 0.4),
+          rgba(252, 175, 69, 0.4));
+      border-color: rgba(225, 48, 108, 0.6);
+      box-shadow: 0 0 25px rgba(225, 48, 108, 0.35);
     }
+
     .service-btn.instagram .btn-label::before {
       mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' d='M7 2C4.24 2 2 4.24 2 7v10c0 2.76 2.24 5 5 5h10c2.76 0 5-2.24 5-5V7c0-2.76-2.24-5-5-5H7zm10 2c1.65 0 3 1.35 3 3v10c0 1.65-1.35 3-3 3H7c-1.65 0-3-1.35-3-3V7c0-1.65 1.35-3 3-3h10zm-5 3.5A4.5 4.5 0 1 0 16.5 12 4.5 4.5 0 0 0 12 7.5zm0 7.4A2.9 2.9 0 1 1 14.9 12 2.9 2.9 0 0 1 12 14.9zM17.8 6.2a1.1 1.1 0 1 0 1.1 1.1 1.1 1.1 0 0 0-1.1-1.1z'/%3E%3C/svg%3E");
     }
 
     .service-btn:active {
       transform: scale(0.96);
-      background: rgba(255,255,255,0.2);
+      background: rgba(255, 255, 255, 0.2);
     }
 
     .btn-main-text {
@@ -220,8 +229,8 @@
     /* MAIN CTA GLOW */
     #main-trigger {
       background: rgba(0, 175, 240, 0.15);
-      border-color: rgba(0,175,240,0.5);
-      box-shadow: 0 0 20px rgba(0,175,240,0.2);
+      border-color: rgba(0, 175, 240, 0.5);
+      box-shadow: 0 0 20px rgba(0, 175, 240, 0.2);
       animation: buttonGlow 3s infinite ease-in-out;
     }
 
@@ -232,12 +241,10 @@
       left: -100%;
       width: 50%;
       height: 200%;
-      background: linear-gradient(
-        to right,
-        rgba(255,255,255,0) 0%,
-        rgba(255,255,255,0.2) 50%,
-        rgba(255,255,255,0) 100%
-      );
+      background: linear-gradient(to right,
+          rgba(255, 255, 255, 0) 0%,
+          rgba(255, 255, 255, 0.2) 50%,
+          rgba(255, 255, 255, 0) 100%);
       transform: rotate(25deg);
       animation: buttonShine 4s infinite;
     }
@@ -333,7 +340,10 @@
       align-items: center;
       color: #fff;
     }
-    .step-item:last-child { margin-bottom: 0; }
+
+    .step-item:last-child {
+      margin-bottom: 0;
+    }
 
     .step-num {
       background: #ff3399;
@@ -352,7 +362,7 @@
     .guide-img {
       width: 100%;
       border-radius: 12px;
-      border: 1px solid rgba(255,255,255,0.1);
+      border: 1px solid rgba(255, 255, 255, 0.1);
       margin-top: 10px;
       opacity: 0.9;
       animation: pulseGuide 2s infinite ease-in-out;
@@ -367,27 +377,80 @@
       opacity: 0.8;
     }
 
-    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-    @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+
+      to {
+        opacity: 1;
+      }
+    }
+
+    @keyframes pulse {
+      0% {
+        transform: scale(1);
+      }
+
+      50% {
+        transform: scale(1.05);
+      }
+
+      100% {
+        transform: scale(1);
+      }
+    }
+
     @keyframes bounceArrow {
-      0%, 100% { transform: translate(0, 0) rotate(-30deg); }
-      50% { transform: translate(10px, -10px) rotate(-45deg); }
+
+      0%,
+      100% {
+        transform: translate(0, 0) rotate(-30deg);
+      }
+
+      50% {
+        transform: translate(10px, -10px) rotate(-45deg);
+      }
     }
 
     @keyframes fadeInUp {
-      from { opacity: 0; transform: translateY(30px); }
-      to { opacity: 1; transform: translateY(0); }
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     @keyframes buttonGlow {
-      0%,100% { box-shadow: 0 0 15px rgba(0,175,240,0.2); border-color: rgba(0,175,240,0.4); }
-      50% { box-shadow: 0 0 35px rgba(0,175,240,0.6); border-color: rgba(0,175,240,0.8); }
+
+      0%,
+      100% {
+        box-shadow: 0 0 15px rgba(0, 175, 240, 0.2);
+        border-color: rgba(0, 175, 240, 0.4);
+      }
+
+      50% {
+        box-shadow: 0 0 35px rgba(0, 175, 240, 0.6);
+        border-color: rgba(0, 175, 240, 0.8);
+      }
     }
 
     @keyframes buttonShine {
-      0% { left: -120%; }
-      30% { left: 150%; }
-      100% { left: 150%; }
+      0% {
+        left: -120%;
+      }
+
+      30% {
+        left: 150%;
+      }
+
+      100% {
+        left: 150%;
+      }
     }
 
     @media (max-width: 768px) {
@@ -400,135 +463,140 @@
 
 <body>
 
-<main class="fullscreen-app">
+  <main class="fullscreen-app">
     <div class="bg-media"></div>
 
     <section class="profile-info">
-      <h1 class="profile-name"><%= model.display_name || model.name %></h1>
-      <p class="profile-subtitle"><%= model.subtitle %></p>
+      <h1 class="profile-name">
+        <%= model.display_name || model.name %>
+      </h1>
+      <p class="profile-subtitle">
+        <%= model.subtitle %>
+      </p>
     </section>
 
     <section class="buttons-wrapper">
-      <%
-        // Definición de textos sugerentes (Copywriting)
-        const uiMap = {
-          telegram: {
-            label: __('landing.telegram_label'),
-            sub: __('landing.telegram_sub')
-          },
-          tiktok: {
-            label: __('landing.tiktok_label'),
-            sub: __('landing.tiktok_sub')
-          },
-          instagram: {
-            label: __('landing.instagram_label'),
-            sub: __('landing.instagram_sub')
-          }
-        };
-      %>
+      <% // Definición de textos sugerentes (Copywriting) const uiMap={ telegram: { label: __('landing.telegram_label'),
+        sub: __('landing.telegram_sub') }, tiktok: { label: __('landing.tiktok_label'), sub: __('landing.tiktok_sub') },
+        instagram: { label: __('landing.instagram_label'), sub: __('landing.instagram_sub') } }; %>
 
-      <!-- 1. ONLYFANS (Siempre primero si existe) -->
-      <% if (model.onlyfans) { %>
-        <a href="javascript:void(0)" onclick="unlockPremium('<%= id %>')" class="service-btn" id="main-trigger">
-          <div class="btn-main-text"><%= __('landing.exclusive_btn') %></div>
-          <div class="btn-sub-text"><%= __('landing.enter_gallery') %></div>
-        </a>
-      <% } %>
+        <!-- 1. ONLYFANS (Siempre primero si existe) -->
+        <% if (model.onlyfans) { %>
+          <a href="javascript:void(0)" onclick="unlockPremium('<%= id %>')" class="service-btn" id="main-trigger">
+            <div class="btn-main-text">
+              <%= __('landing.exclusive_btn') %>
+            </div>
+            <div class="btn-sub-text">
+              <%= __('landing.enter_gallery') %>
+            </div>
+          </a>
+          <% } %>
 
-      <!-- 2. TELEGRAM (Segundo si existe) -->
-      <% if (model.telegram) { %>
-         <a href="/t/<%= id %>" class="service-btn telegram" target="_blank" rel="nofollow">
-          <div class="btn-main-text">
-            <span class="btn-label">
-              <%= uiMap.telegram.label %>
-            </span>
-          </div>
-          <div class="btn-sub-text"><%= uiMap.telegram.sub %></div>
-        </a>
-      <% } %>
+            <!-- 2. TELEGRAM (Segundo si existe link o bots) -->
+            <% if (model.telegram || model.hasTelegramBots) { %>
+              <a href="/t/<%= id %>" class="service-btn telegram" target="_blank" rel="nofollow">
+                <div class="btn-main-text">
+                  <span class="btn-label">
+                    <%= uiMap.telegram.label %>
+                  </span>
+                </div>
+                <div class="btn-sub-text">
+                  <%= uiMap.telegram.sub %>
+                </div>
+              </a>
+              <% } %>
 
-      <!-- 3. INSTAGRAM (Tercero si existe) -->
-      <% if (model.instagram) { %>
-        <a href="<%= model.instagram %>" class="service-btn instagram" target="_blank" rel="nofollow">
-          <div class="btn-main-text">
-            <span class="btn-label">
-              <%= uiMap.instagram.label %>
-            </span>
-          </div>
-          <div class="btn-sub-text"><%= uiMap.instagram.sub %></div>
-        </a>
-      <% } %>
+                <!-- 3. INSTAGRAM (Tercero si existe) -->
+                <% if (model.instagram) { %>
+                  <a href="<%= model.instagram %>" class="service-btn instagram" target="_blank" rel="nofollow">
+                    <div class="btn-main-text">
+                      <span class="btn-label">
+                        <%= uiMap.instagram.label %>
+                      </span>
+                    </div>
+                    <div class="btn-sub-text">
+                      <%= uiMap.instagram.sub %>
+                    </div>
+                  </a>
+                  <% } %>
 
-      <!-- 4. TIKTOK (Cuarto si existe) -->
-      <% if (model.tiktok) { %>
-        <a href="<%= model.tiktok %>" class="service-btn tiktok" target="_blank" rel="nofollow">
-          <div class="btn-main-text">
-            <span class="btn-label">
-              <%= uiMap.tiktok.label %>
-            </span>
-          </div>
-          <div class="btn-sub-text"><%= uiMap.tiktok.sub %></div>
-        </a>
-      <% } %>
+                    <!-- 4. TIKTOK (Cuarto si existe) -->
+                    <% if (model.tiktok) { %>
+                      <a href="<%= model.tiktok %>" class="service-btn tiktok" target="_blank" rel="nofollow">
+                        <div class="btn-main-text">
+                          <span class="btn-label">
+                            <%= uiMap.tiktok.label %>
+                          </span>
+                        </div>
+                        <div class="btn-sub-text">
+                          <%= uiMap.tiktok.sub %>
+                        </div>
+                      </a>
+                      <% } %>
 
     </section>
   </main>
 
-  <% if (typeof isSocialApp !== 'undefined' && isSocialApp) { %>
-      <div id="safety-gate">
-        <div class="gate-card">
-          <div class="arrow-pointer">➚</div>
+  <% if (typeof isSocialApp !=='undefined' && isSocialApp) { %>
+    <div id="safety-gate">
+      <div class="gate-card">
+        <div class="arrow-pointer">➚</div>
 
-          <span class="gate-icon">💋</span>
-          <div class="gate-title"><%= __('gate.title') %></div>
-          <p class="gate-desc">
-            <%- __('gate.desc') %>
-          </p>
+        <span class="gate-icon">💋</span>
+        <div class="gate-title">
+          <%= __('gate.title') %>
+        </div>
+        <p class="gate-desc">
+          <%- __('gate.desc') %>
+        </p>
 
-          <div class="steps-container">
-            <div class="step-item">
-              <div class="step-num">1</div>
-              <div><%- __('gate.step1') %></div>
-            </div>
-            <div class="step-item">
-              <div class="step-num">2</div>
-              <div><%- __('gate.step2') %></div>
-            </div>
+        <div class="steps-container">
+          <div class="step-item">
+            <div class="step-num">1</div>
+            <div><%- __('gate.step1') %></div>
           </div>
+          <div class="step-item">
+            <div class="step-num">2</div>
+            <div><%- __('gate.step2') %></div>
+          </div>
+        </div>
 
-          <img src="/images/gitonly.png" class="guide-img" alt="Tutorial">
+        <img src="/images/gitonly.png" class="guide-img" alt="Tutorial">
 
-          <div class="footer-brand"><%= __('gate.footer') %></div>
+        <div class="footer-brand">
+          <%= __('gate.footer') %>
         </div>
       </div>
-  <% } %>
+    </div>
+    <% } %>
 
-  <script>
-    function unlockPremium(slug) {
-      if (navigator.webdriver) return;
+      <script>
+        function unlockPremium(slug) {
+          if (navigator.webdriver) return;
 
-      const btn = document.getElementById('main-trigger');
-      if (btn) {
-        btn.innerHTML = '<div class="btn-main-text"><%= __('landing.verifying') %></div><div class="btn-sub-text"><%= __('landing.please_wait') %></div>';
-        btn.style.animation = "none";
-        btn.style.background = "rgba(0,175,240,0.4)";
-        btn.style.pointerEvents = "none";
-      }
+          const btn = document.getElementById('main-trigger');
+          if (btn) {
+            btn.innerHTML = '<div class="btn-main-text"><%= __('landing.verifying') %></div><div class="btn-sub-text"><%= __('landing.please_wait') %></div>';
+            btn.style.animation = "none";
+            btn.style.background = "rgba(0,175,240,0.4)";
+            btn.style.pointerEvents = "none";
+          }
 
-      setTimeout(() => {
-        window.location.href = "/loading/" + slug;
-      }, 800);
-    }
+          setTimeout(() => {
+            window.location.href = "/loading/" + slug;
+          }, 800);
+        }
 
-    (function() {
-      const ua = navigator.userAgent.toLowerCase();
-      const isSocial = /tiktok|instagram|fb_iab|threads|fban|fbav|musically/.test(ua);
-      if (!isSocial && !window.location.search.includes('e=')) {
-          const newUrl = window.location.pathname + '?e=1' + window.location.hash;
-          window.history.replaceState({path: newUrl}, '', newUrl);
-      }
-    })();
-  </script>
+        (function () {
+          const ua = navigator.userAgent.toLowerCase();
+          const isSocial = /tiktok|instagram|fb_iab|threads|fban|fbav|musically/.test(ua);
+          if (!isSocial && !window.location.search.includes('e=')) {
+            const newUrl = window.location.pathname + '?e=1' + window.location.hash;
+            window.history.replaceState({ path: newUrl }, '', newUrl);
+          }
+        })();
+      </script>
 
 </body>
+
 </html>

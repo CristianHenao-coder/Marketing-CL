@@ -307,8 +307,10 @@
 
                 <div class="row">
                     <div>
-                        <label>Telegram URL (Principal)</label>
+                        <label>Telegram (Link Fijo / Respaldo)</label>
                         <input type="url" id="telegram" name="telegram" placeholder="https://t.me/..." />
+                        <p style="font-size:10px; color:#666; margin-top:-10px; margin-bottom:10px;">Se usará si el
+                            rotador no tiene bots activos.</p>
                     </div>
                     <div>
                         <label>TikTok URL</label>
@@ -354,11 +356,51 @@
                     </div>
                 </div>
 
-                <label>Modo de Visualización</label>
-                <select name="link_mode">
-                    <option value="landing">Landing Page (Directo)</option>
-                    <option value="instructions">Instrucciones (Paso a paso)</option>
-                </select>
+                <div class="row">
+                    <div>
+                        <label>Modo de Visualización</label>
+                        <select name="link_mode">
+                            <option value="landing">Landing Page (Directo)</option>
+                            <option value="instructions">Instrucciones (Paso a paso)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label>Batch Rotación Telegram</label>
+                        <input type="number" name="telegram_rotation_limit" value="1" min="1" />
+                        <p style="font-size:10px; color:#666; margin-top:-10px;">1 = Cambia de bot en cada click (Round
+                            Robin).</p>
+                    </div>
+                </div>
+
+                <div
+                    style="background: rgba(0,255,102,0.05); padding: 20px; border-radius: 10px; border: 1px solid rgba(0,255,102,0.1); margin-top: 10px;">
+                    <label style="color: var(--primary); margin-bottom: 15px;">🛡️ SERVICIOS DE PROTECCIÓN
+                        (ESCUDOS)</label>
+
+                    <div style="display: flex; gap: 20px;">
+                        <label
+                            style="display: flex; align-items: center; gap: 8px; cursor: pointer; text-transform: none;">
+                            <input type="checkbox" name="meta_shield" value="true" checked
+                                style="width: 18px; margin: 0;">
+                            <div>
+                                <span style="color: #fff; font-weight: 600;">Meta Shield (IG/Threads)</span>
+                                <span style="display: block; font-size: 10px; color: #888;">Bypass indetectable para
+                                    Instagram.</span>
+                            </div>
+                        </label>
+
+                        <label
+                            style="display: flex; align-items: center; gap: 8px; cursor: pointer; text-transform: none;">
+                            <input type="checkbox" name="tiktok_shield" value="true" checked
+                                style="width: 18px; margin: 0;">
+                            <div>
+                                <span style="color: #fff; font-weight: 600;">TikTok Shield</span>
+                                <span style="display: block; font-size: 10px; color: #888;">Pantalla de "Search Engine"
+                                    ante bots.</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
 
                 <div style="margin-top:20px;">
                     <button type="submit" class="btn primary">GENERAR SMART LINK</button>
