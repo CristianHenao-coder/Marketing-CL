@@ -119,10 +119,23 @@ export const linksService = {
     });
   },
 
-  // 🧹 Borrar caché de un slug específico
-  invalidateCache(slug) {
-    if (!slug) return;
-    linksCache.delete(slug);
-    console.log(`[Cache] Invalidado: ${slug}`);
+  // 🧹 Borrar caché de un link (Slug y Dominios)
+  invalidateCache(link) {
+    if (!link) return;
+
+    // 1. Por Slug
+    if (link.slug) {
+      linksCache.delete(link.slug);
+    }
+
+    // 2. Por Dominio Personalizado
+    if (link.custom_domain) {
+      const domain = link.custom_domain.toLowerCase();
+      linksCache.delete(domain);
+      linksCache.delete(domain.replace('www.', ''));
+      linksCache.delete('www.' + domain.replace('www.', ''));
+    }
+
+    console.log(`[Cache] Invalidado: ${link.slug || 'unknown'}`);
   }
 };

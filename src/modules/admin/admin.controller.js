@@ -189,12 +189,12 @@ export const adminController = {
 
   async deleteLink(req, res) {
     try {
-      const { data: linkToDelete } = await supabase.from("smart_links").select("slug").eq("id", req.params.id).single();
+      const { data: linkToDelete } = await supabase.from("smart_links").select("slug, custom_domain").eq("id", req.params.id).single();
       const { error } = await supabase.from("smart_links").delete().eq("id", req.params.id);
       if (error) throw error;
 
       // 🧹 Invalidad caché
-      if (linkToDelete) linksService.invalidateCache(linkToDelete.slug);
+      if (linkToDelete) linksService.invalidateCache(linkToDelete);
 
       res.json({ success: true });
     } catch (err) {
@@ -210,7 +210,7 @@ export const adminController = {
       if (error) throw error;
 
       // 🧹 Invalidad caché
-      linksService.invalidateCache(data.slug);
+      linksService.invalidateCache(data);
 
       res.json({ success: true, link: data });
     } catch (err) {
@@ -239,7 +239,7 @@ export const adminController = {
       if (error) throw error;
 
       // 🧹 Invalidad caché
-      linksService.invalidateCache(data.slug);
+      linksService.invalidateCache(data);
 
       res.json({ success: true, newStatus: data.status });
     } catch (err) {
@@ -271,7 +271,7 @@ export const adminController = {
       if (error) throw error;
 
       // 🧹 Invalidad caché
-      linksService.invalidateCache(data.slug);
+      linksService.invalidateCache(data);
 
       res.json({ success: true, link: data });
     } catch (err) {
@@ -308,7 +308,7 @@ export const adminController = {
       if (error) throw error;
 
       // 🧹 Invalidad caché
-      linksService.invalidateCache(data.slug);
+      linksService.invalidateCache(data);
 
       res.json({ success: true, shield: key, value: newValue });
     } catch (err) {
