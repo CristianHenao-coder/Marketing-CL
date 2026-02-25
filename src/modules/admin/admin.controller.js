@@ -189,8 +189,13 @@ export const adminController = {
 
   async deleteLink(req, res) {
     try {
+      const { data: linkToDelete } = await supabase.from("smart_links").select("slug").eq("id", req.params.id).single();
       const { error } = await supabase.from("smart_links").delete().eq("id", req.params.id);
       if (error) throw error;
+
+      // 🧹 Invalidad caché
+      if (linkToDelete) linksService.invalidateCache(linkToDelete.slug);
+
       res.json({ success: true });
     } catch (err) {
       res.status(500).json({ success: false, error: err.message });
@@ -232,6 +237,9 @@ export const adminController = {
         .single();
 
       if (error) throw error;
+
+      // 🧹 Invalidad caché
+      linksService.invalidateCache(data.slug);
 
       res.json({ success: true, newStatus: data.status });
     } catch (err) {
