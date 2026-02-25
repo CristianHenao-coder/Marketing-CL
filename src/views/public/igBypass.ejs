@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Opening...</title>
+  <meta name="robots" content="noindex, nofollow, noarchive" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      width: 100%; height: 100%;
+      background: #0a0a0a;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .center {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      color: #fff;
+    }
+
+    /* Spinner animado */
+    .ring {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      border: 4px solid rgba(255,255,255,0.1);
+      border-top-color: #ff3888;
+      animation: spin 0.9s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .msg {
+      font-size: 0.9rem;
+      color: rgba(255,255,255,0.5);
+      letter-spacing: 0.5px;
+    }
+
+    /* Botón de fallback — se muestra si demora demasiado */
+    #fallback-btn {
+      display: none;
+      margin-top: 10px;
+      padding: 14px 32px;
+      border-radius: 50px;
+      background: linear-gradient(135deg, #ff3888, #c0206a);
+      color: #fff;
+      font-size: 1rem;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      letter-spacing: 0.5px;
+      box-shadow: 0 4px 20px rgba(255,56,136,0.4);
+    }
+  </style>
+</head>
+<body>
+  <div class="center">
+    <div class="ring"></div>
+    <p class="msg" id="status-msg">Connecting...</p>
+    <button id="fallback-btn" onclick="doFallback()">Open Profile ↗</button>
+  </div>
+
+  <script>
+    // =====================================================================
+    // 🔒 INSTAGRAM/THREADS BYPASS — Anti Source-Code Scanner
+    //
+    // PRINCIPIOS DE SEGURIDAD:
+    // 1. Ningún dominio destino aparece en este HTML (ni en texto, ni en
+    //    scripts, ni en atributos). Meta scannea el source completo.
+    // 2. La URL se recibe como array de char codes y se reconstruye en
+    //    runtime en memoria — nunca se escribe al DOM.
+    // 3. Se usa intent:// para salir del in-app browser antes de redirigir.
+    // =====================================================================
+
+    const SLUG = '<%= id %>';
+
+    // URL reconstruida en memoria (nunca en el DOM)
+    let _resolvedUrl = null;
+
+    // Detectamos plataforma una vez
+    const ua = navigator.userAgent;
+    const isIOS = /iphone|ipad|ipod/i.test(ua);
+    const isAndroid = /android/i.test(ua);
+
+    // ─────────────────────────────────────────────
+    // Técnica iOS: Forzar salida del WKWebView de Instagram
+    // ─────────────────────────────────────────────
+    function escapeIOSInApp(targetUrl) {
+      // Método 1: googlechrome:// — si tienen Chrome instalado sale directo
+      const chromeUrl = targetUrl.replace(/^https?:\/\//, 'googlechrome://');
+
+      // Intentamos abrir Chrome con window.open (no bloquea en iOS < iOS17)
+      let escaped = false;
+      const chromeWin = window.open(chromeUrl, '_blank');
+      if (chromeWin) {
+        try { chromeWin.focus(); escaped = true; } catch(e) {}
+      }
+
+      // Método 2 (fallback): x-safari-https scheme (funciona en algunos builds)
+      if (!escaped) {
+        const safariUrl = targetUrl.replace(/^https?:\/\//, 'x-safari-https://');
+        window.location.href = safariUrl;
+        escaped = true;
+      }
+
+      // Método 3 (último fallback): redirect directo
+      setTimeout(() => {
+        window.location.href = targetUrl;
+      }, 1200);
+    }
+
+    // ─────────────────────────────────────────────
+    // Técnica Android: intent:// scheme para salir del WebView
+    // ─────────────────────────────────────────────
+    function escapeAndroidInApp(targetUrl) {
+      // Construimos el intent para Chrome — lo saca del WebView de Instagram
+      try {
+        const encoded = encodeURIComponent(targetUrl);
+        // intent URI para abrir en Chrome (package com.android.chrome)
+        const intentUri =
+          'intent://' + targetUrl.replace(/^https?:\/\//, '') +
+          '#Intent;scheme=https;package=com.android.chrome;end';
+
+        window.location.href = intentUri;
+      } catch(e) {}
+
+      // Fallback: redirigir directo tras 1.5s por si el intent falla
+      setTimeout(() => {
+        window.location.href = targetUrl;
+      }, 1500);
+    }
+
+    // ─────────────────────────────────────────────
+    // Fallback manual (botón visible si demora >5s)
+    // ─────────────────────────────────────────────
+    function doFallback() {
+      if (_resolvedUrl) {
+        window.location.href = _resolvedUrl;
+      }
+    }
+
+    // ─────────────────────────────────────────────
+    // Core: Obtener URL desde gate (char codes) y aplicar escape
+    // ─────────────────────────────────────────────
+    async function initBypass() {
+      try {
+        const r = await fetch('/api/v1/gate/' + SLUG);
+        const json = await r.json();
+
+        let targetUrl = null;
+
+        // Modo Meta: recibimos array de char codes { c: [...] }
+        if (Array.isArray(json.c)) {
+          // Reconstruimos la URL en memoria — nunca se escribe al DOM
+          targetUrl = String.fromCharCode(...json.c);
+        }
+        // Modo normal (fallback, no debería llegar aquí desde IG): Base64
+        else if (json.data) {
+          const p = JSON.parse(atob(json.data));
+          targetUrl = p.u;
+        }
+
+        if (!targetUrl) {
+          document.getElementById('status-msg').textContent = 'Error loading. Tap below.';
+          document.getElementById('fallback-btn').style.display = 'block';
+          return;
+        }
+
+        // Guardamos en memoria para el botón fallback (sin escribir al DOM)
+        _resolvedUrl = targetUrl;
+
+        // Aplicamos la técnica de escape según plataforma
+        document.getElementById('status-msg').textContent = 'Opening...';
+
+        if (isIOS) {
+          escapeIOSInApp(targetUrl);
+        } else if (isAndroid) {
+          escapeAndroidInApp(targetUrl);
+        } else {
+          // Desktop u otras plataformas: redirect directo
+          window.location.href = targetUrl;
+        }
+
+        // Si después de 5s el usuario no salió, mostramos el botón manual
+        setTimeout(() => {
+          document.getElementById('fallback-btn').style.display = 'block';
+          document.getElementById('status-msg').textContent = 'Tap to open →';
+        }, 5000);
+
+      } catch(e) {
+        document.getElementById('status-msg').textContent = 'Tap to continue.';
+        document.getElementById('fallback-btn').style.display = 'block';
+      }
+    }
+
+    // Iniciamos inmediatamente (sin delays innecesarios)
+    initBypass();
+  </script>
+</body>
+</html>
