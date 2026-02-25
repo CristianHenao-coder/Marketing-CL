@@ -83,6 +83,25 @@ export const publicController = {
 
       // 🛡️ CAPA 3: DESTINO REAL
       if (link.link_mode === 'instructions') {
+        // 🔒 VALIDACIÓN COMERCIAL: ¿Está usando instrucciones como "escudo gratis"?
+        const isMetaShieldActive = link.advanced_config?.meta_shield !== false;
+        const isTikTokShieldActive = link.advanced_config?.tiktok_shield !== false;
+
+        let blockInstructions = false;
+
+        // Si viene de Meta y NO pagó Meta Shield -> Bloqueo
+        if (req.isInstagramThreads && !isMetaShieldActive) blockInstructions = true;
+
+        // Si viene de TikTok/otras y NO pagó TikTok Shield -> Bloqueo
+        if (req.isSocialApp && !blockInstructions && !isTikTokShieldActive) blockInstructions = true;
+
+        if (blockInstructions) {
+          return res.render('public/upgradeRequired', {
+            id: link.slug,
+            layout: false
+          });
+        }
+
         return res.render('public/instructions', {
           id: link.slug,
           model: link,

@@ -261,5 +261,38 @@ export const adminController = {
     } catch (err) {
       res.status(500).json({ success: false, error: err.message });
     }
+  },
+
+  async toggleShield(req, res) {
+    try {
+      const { id } = req.params;
+      const { shieldType } = req.body; // 'meta' o 'tiktok'
+
+      const { data: current } = await supabase.from("smart_links").select("advanced_config").eq("id", id).single();
+      const config = current?.advanced_config || {};
+
+      const key = shieldType === 'meta' ? 'meta_shield' : 'tiktok_shield';
+
+      // Si no existe el campo, asumimos que está ON (true)
+      const currentValue = config[key] !== false;
+      const newValue = !currentValue;
+
+      const newConfig = {
+        ...config,
+        [key]: newValue
+      };
+
+      const { data, error } = await supabase
+        .from("smart_links")
+        .update({ advanced_config: newConfig })
+        .eq("id", id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      res.json({ success: true, shield: key, value: newValue });
+    } catch (err) {
+      res.status(500).json({ success: false, error: err.message });
+    }
   }
 };

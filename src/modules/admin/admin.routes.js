@@ -140,6 +140,12 @@ router.post('/links/:id/toggle-active', adminController.toggleLinkActive);
  */
 router.post('/links/edit/:id', adminController.updateLink);
 
+/**
+ * Toggle rápido de escudos (Meta/TikTok)
+ * PATCH /admin/links/:id/toggle-shield
+ */
+router.patch('/links/:id/toggle-shield', adminController.toggleShield);
+
 
 /* =========================================================================
  *  GESTIÓN DE TELEGRAM (ROTADOR)

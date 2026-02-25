@@ -54,19 +54,25 @@
                                 <%= link.instagram || '—' %>
                             </span></div>
                         <div style="margin-top: 8px; display: flex; gap: 5px; flex-wrap: wrap;">
-                            <% if (link.advanced_config?.meta_shield !==false) { %>
-                                <span title="Meta Shield Activo"
-                                    style="background: rgba(225,48,108,0.15); border: 1px solid #e1306c44; color: #ff6ba8; font-size: 9px; font-weight: 700; padding: 2px 6px; border-radius: 3px; letter-spacing: 0.5px; text-transform: uppercase;">🛡️
-                                    META</span>
-                                <% } %>
-                                    <% if (link.advanced_config?.tiktok_shield !==false) { %>
-                                        <span title="TikTok Shield Activo"
-                                            style="background: rgba(0,255,102,0.1); border: 1px solid #00ff6644; color: #00ff66; font-size: 9px; font-weight: 700; padding: 2px 6px; border-radius: 3px; letter-spacing: 0.5px; text-transform: uppercase;">🛡️
-                                            TIKTOK</span>
-                                        <% } %>
-                                            <span title="Rotación de Telegram"
-                                                style="background: rgba(0,136,204,0.1); border: 1px solid #0088cc44; color: #0088cc; font-size: 9px; font-weight: 700; padding: 2px 6px; border-radius: 3px; letter-spacing: 0.5px; text-transform: uppercase;">✈️
-                                                BATCH: <%= link.telegram_rotation_limit || 200 %></span>
+                            <span onclick="quickToggleShield('<%= link.id %>', 'meta')"
+                                title="Click para <%= link.advanced_config?.meta_shield !== false ? 'APAGAR' : 'ENCENDER' %> Meta Shield"
+                                style="cursor: pointer; background: <%= link.advanced_config?.meta_shield !== false ? 'rgba(225,48,108,0.15)' : 'rgba(255,255,255,0.05)' %>;
+                                       border: 1px solid <%= link.advanced_config?.meta_shield !== false ? '#e1306c44' : '#333' %>;
+                                       color: <%= link.advanced_config?.meta_shield !== false ? '#ff6ba8' : '#666' %>;
+                                       font-size: 9px; font-weight: 700; padding: 2px 6px; border-radius: 3px; letter-spacing: 0.5px; text-transform: uppercase; transition: 0.2s;">
+                                🛡️ META
+                            </span>
+                            <span onclick="quickToggleShield('<%= link.id %>', 'tiktok')"
+                                title="Click para <%= link.advanced_config?.tiktok_shield !== false ? 'APAGAR' : 'ENCENDER' %> TikTok Shield"
+                                style="cursor: pointer; background: <%= link.advanced_config?.tiktok_shield !== false ? 'rgba(0,255,102,0.1)' : 'rgba(255,255,255,0.05)' %>;
+                                       border: 1px solid <%= link.advanced_config?.tiktok_shield !== false ? '#00ff6644' : '#333' %>;
+                                       color: <%= link.advanced_config?.tiktok_shield !== false ? '#00ff66' : '#666' %>;
+                                       font-size: 9px; font-weight: 700; padding: 2px 6px; border-radius: 3px; letter-spacing: 0.5px; text-transform: uppercase; transition: 0.2s;">
+                                🛡️ TIKTOK
+                            </span>
+                            <span title="Rotación de Telegram"
+                                style="background: rgba(0,136,204,0.1); border: 1px solid #0088cc44; color: #0088cc; font-size: 9px; font-weight: 700; padding: 2px 6px; border-radius: 3px; letter-spacing: 0.5px; text-transform: uppercase;">✈️
+                                BATCH: <%= link.telegram_rotation_limit || 200 %></span>
                         </div>
                     </td>
 
@@ -627,6 +633,25 @@
             alert('Error de conexión al crear el link.');
         }
     });
+
+    async function quickToggleShield(id, type) {
+        try {
+            const response = await fetch(`/admin/links/${id}/toggle-shield`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ shieldType: type })
+            });
+            const result = await response.json();
+            if (result.success) {
+                location.reload();
+            } else {
+                alert("Error: " + result.error);
+            }
+        } catch (error) {
+            console.error("quickToggleShield error:", error);
+            alert("Error de conexión ❌");
+        }
+    }
 </script>
 
 <!-- ══════════════════════════════════════════
