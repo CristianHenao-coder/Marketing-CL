@@ -2,6 +2,7 @@ import { linksService } from '../../services/links.service.js';
 import { normalizeHost, delay } from '../../core/utils/http.js';
 import crypto from 'crypto';
 import { env } from '../../config/env.js';
+import { supabase } from '../../config/supabase.js';
 
 export const publicController = {
 
