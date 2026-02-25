@@ -203,6 +203,10 @@ export const adminController = {
       const { is_active } = req.body;
       const { data, error } = await supabase.from("smart_links").update({ is_active: !!is_active }).eq("id", id).select().single();
       if (error) throw error;
+
+      // 🧹 Invalidad caché
+      linksService.invalidateCache(data.slug);
+
       res.json({ success: true, link: data });
     } catch (err) {
       res.status(500).json({ success: false, error: err.message });
@@ -257,6 +261,10 @@ export const adminController = {
 
       const { data, error } = await supabase.from("smart_links").update(toUpdate).eq("id", id).select().single();
       if (error) throw error;
+
+      // 🧹 Invalidad caché
+      linksService.invalidateCache(data.slug);
+
       res.json({ success: true, link: data });
     } catch (err) {
       res.status(500).json({ success: false, error: err.message });
@@ -268,7 +276,7 @@ export const adminController = {
       const { id } = req.params;
       const { shieldType } = req.body; // 'meta' o 'tiktok'
 
-      const { data: current } = await supabase.from("smart_links").select("advanced_config").eq("id", id).single();
+      const { data: current } = await supabase.from("smart_links").select("slug, advanced_config").eq("id", id).single();
       const config = current?.advanced_config || {};
 
       const key = shieldType === 'meta' ? 'meta_shield' : 'tiktok_shield';
@@ -290,6 +298,10 @@ export const adminController = {
         .single();
 
       if (error) throw error;
+
+      // 🧹 Invalidad caché
+      linksService.invalidateCache(data.slug);
+
       res.json({ success: true, shield: key, value: newValue });
     } catch (err) {
       res.status(500).json({ success: false, error: err.message });
