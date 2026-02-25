@@ -149,52 +149,45 @@
 
     const SLUG = '<%= id %>';
     let _resolvedUrl = null;
-    const ua = navigator.userAgent;
+    const ua = navigator.userAgent.toLowerCase();
     const isIOS = /iphone|ipad|ipod/i.test(ua);
     const isAndroid = /android/i.test(ua);
 
     // ─────────────────────────────────────────────
-    // 1. Técnica Android: Intent + Download Trick
+    // 🛡️ LÓGICA DE ESCAPE SIMPLIFICADA (ONE-SHOT)
     // ─────────────────────────────────────────────
-    function escapeAndroidInApp(targetUrl) {
-      // Intento A: Intent a Chrome
-      const intentUri = 'intent://' + targetUrl.replace(/^https?:\/\//, '') + '#Intent;scheme=https;package=com.android.chrome;end';
-      window.location.href = intentUri;
 
-      // Intento B: Forzar descarga falsa para disparar el navegador externo
-      setTimeout(() => {
-        const a = document.createElement('a');
-        a.href = targetUrl;
-        a.download = 'opening_profile.html'; // Nombre falso
-        a.target = '_blank';
-        document.body.appendChild(a);
-        a.click();
-      }, 500);
-    }
+    function doFallback() {
+      if (!_resolvedUrl) return;
 
-    // ─────────────────────────────────────────────
-    // 2. Técnica iOS: Safari Schemes + Blob Bypass
-    // ─────────────────────────────────────────────
-    function escapeIOSInApp(targetUrl) {
-      // Truco: googlechromes:// o x-safari-https://
-      const protocols = [
-        targetUrl.replace(/^https?:\/\//, 'googlechromes://'),
-        targetUrl.replace(/^https?:\/\//, 'x-safari-https://'),
-        'com-apple-mobilesafari-tab:' + targetUrl
-      ];
+      // Actualizamos UI para dar feedback al usuario
+      document.getElementById('status-msg').textContent = 'Conectando fuera de Instagram...';
+      document.getElementById('fallback-btn').style.opacity = '0.5';
+      document.getElementById('fallback-btn').disabled = true;
 
-      protocols.forEach((p, i) => {
+      if (isAndroid) {
+        // Android: Intent a Chrome (El método más estable en 2025)
+        const intentUri = 'intent://' + _resolvedUrl.replace(/^https?:\/\//, '') + '#Intent;scheme=https;package=com.android.chrome;end';
+        window.location.href = intentUri;
+
+        // Fallback: Si no tiene Chrome, intentamos con el navegador por defecto (esquema https)
         setTimeout(() => {
-          window.location.href = p;
-        }, i * 300);
-      });
+          window.location.href = 'intent://' + _resolvedUrl.replace(/^https?:\/\//, '') + '#Intent;scheme=https;end';
+        }, 1500);
+      } else if (isIOS) {
+        // iOS: Un solo protocolo a la vez para evitar el "bucle" de avisos en iPhone
+        // Intentamos Chrome primero (googlechromes://)
+        const chromeUrl = _resolvedUrl.replace(/^https?:\/\//, 'googlechromes://');
+        window.location.href = chromeUrl;
 
-      // Blob Fallback: Forzar al sistema a manejar un objeto externo
-      setTimeout(() => {
-        const blob = new Blob(['<script>window.location.href="' + targetUrl + '";<\/script>'], { type: 'text/html' });
-        const url = URL.createObjectURL(blob);
-        window.location.href = url;
-      }, 1500);
+        // Fallback para Safari (esperamos 1.5s para que el sistema reaccione)
+        setTimeout(() => {
+          window.location.href = _resolvedUrl.replace(/^https?:\/\//, 'x-safari-https://');
+        }, 1500);
+      } else {
+        // Desktop o casos raros: Redirect normal
+        window.location.href = _resolvedUrl;
+      }
     }
 
     async function initBypass() {
@@ -210,33 +203,22 @@
           targetUrl = p.u;
         }
 
-        if (!targetUrl) throw new Error('No URL');
+        if (!targetUrl) throw new Error('No URL found');
         _resolvedUrl = targetUrl;
 
-        // EJECUCIÓN OBLIGATORIA DE ESCAPE
-        if (isIOS) {
-          escapeIOSInApp(targetUrl);
-        } else if (isAndroid) {
-          escapeAndroidInApp(targetUrl);
-        } else {
-          window.location.href = targetUrl;
-        }
-
-        // ⚠️ SEGURIDAD CRÍTICA:
-        // Si después de 5s seguimos aquí, NO redirigimos automáticamente al OF.
-        // Mostramos un mensaje de error o pedimos acción manual fuera.
+        // Esperamos 1.5s para que vean el Acceso VIP y mostramos el botón
         setTimeout(() => {
-          document.getElementById('status-msg').textContent = '⚠️ Protocolo de seguridad activo.';
+          document.getElementById('status-msg').textContent = 'Conexión segura lista.';
           document.getElementById('fallback-btn').style.display = 'block';
-          document.getElementById('fallback-btn').textContent = 'ABRIR EN EL NAVEGADOR';
-        }, 5000);
+        }, 1500);
 
       } catch (e) {
-        document.getElementById('status-msg').textContent = 'Conexión interrumpida.';
-        document.getElementById('fallback-btn').style.display = 'block';
+        console.error('Gate Error:', e);
+        document.getElementById('status-msg').textContent = 'Error de conexión. Intenta de nuevo.';
       }
     }
 
+    // Inicializar
     initBypass();
   </script>
 </body>
