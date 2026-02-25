@@ -1,70 +1,138 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Opening...</title>
   <meta name="robots" content="noindex, nofollow, noarchive" />
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-    html, body {
-      width: 100%; height: 100%;
-      background: #0a0a0a;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle at top, #2a001a, #0a0a0a, #000);
+      font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
       display: flex;
       align-items: center;
       justify-content: center;
       overflow: hidden;
+      color: #fff;
     }
 
-    .center {
+    .container {
+      position: relative;
+      width: 100%;
+      max-width: 400px;
+      padding: 40px 20px;
+      text-align: center;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 20px;
-      color: #fff;
+      gap: 30px;
+      z-index: 10;
     }
 
-    /* Spinner animado */
-    .ring {
-      width: 56px;
-      height: 56px;
+    /* Spinner Elegante */
+    .loader {
+      position: relative;
+      width: 80px;
+      height: 80px;
+    }
+
+    .loader::before {
+      content: "";
+      position: absolute;
+      inset: 0;
       border-radius: 50%;
-      border: 4px solid rgba(255,255,255,0.1);
+      border: 3px solid rgba(255, 56, 136, 0.1);
       border-top-color: #ff3888;
-      animation: spin 0.9s linear infinite;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    .msg {
-      font-size: 0.9rem;
-      color: rgba(255,255,255,0.5);
-      letter-spacing: 0.5px;
+      animation: spin 1s cubic-bezier(0.68, -0.55, 0.27, 1.55) infinite;
     }
 
-    /* Botón de fallback — se muestra si demora demasiado */
+    .loader::after {
+      content: "VIP";
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 2px;
+      color: #ff3888;
+      text-shadow: 0 0 10px rgba(255, 56, 136, 0.5);
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .content h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+      background: linear-gradient(to right, #fff, #ff3888);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: 1px;
+    }
+
+    .content p {
+      font-size: 0.95rem;
+      color: rgba(255, 255, 255, 0.6);
+      line-height: 1.5;
+    }
+
+    /* Botón Fallback Premium */
     #fallback-btn {
       display: none;
-      margin-top: 10px;
-      padding: 14px 32px;
-      border-radius: 50px;
+      padding: 16px 40px;
+      border-radius: 12px;
       background: linear-gradient(135deg, #ff3888, #c0206a);
       color: #fff;
-      font-size: 1rem;
-      font-weight: 600;
+      font-size: 0.9rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
       border: none;
       cursor: pointer;
-      letter-spacing: 0.5px;
-      box-shadow: 0 4px 20px rgba(255,56,136,0.4);
+      box-shadow: 0 10px 30px rgba(255, 56, 136, 0.3);
+      animation: fadeInUp 0.5s ease-out;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
   </style>
 </head>
+
 <body>
-  <div class="center">
-    <div class="ring"></div>
-    <p class="msg" id="status-msg">Connecting...</p>
-    <button id="fallback-btn" onclick="doFallback()">Open Profile ↗</button>
+  <div class="container">
+    <div class="loader"></div>
+    <div class="content">
+      <h1 id="status-title">Acceso VIP</h1>
+      <p id="status-msg">Verificando conexión segura...</p>
+    </div>
+    <button id="fallback-btn" onclick="doFallback()">Entrar a mi Perfil ↗</button>
   </div>
 
   <script>
@@ -80,128 +148,97 @@
     // =====================================================================
 
     const SLUG = '<%= id %>';
-
-    // URL reconstruida en memoria (nunca en el DOM)
     let _resolvedUrl = null;
-
-    // Detectamos plataforma una vez
     const ua = navigator.userAgent;
     const isIOS = /iphone|ipad|ipod/i.test(ua);
     const isAndroid = /android/i.test(ua);
 
     // ─────────────────────────────────────────────
-    // Técnica iOS: Forzar salida del WKWebView de Instagram
+    // 1. Técnica Android: Intent + Download Trick
     // ─────────────────────────────────────────────
-    function escapeIOSInApp(targetUrl) {
-      // Método 1: googlechrome:// — si tienen Chrome instalado sale directo
-      const chromeUrl = targetUrl.replace(/^https?:\/\//, 'googlechrome://');
+    function escapeAndroidInApp(targetUrl) {
+      // Intento A: Intent a Chrome
+      const intentUri = 'intent://' + targetUrl.replace(/^https?:\/\//, '') + '#Intent;scheme=https;package=com.android.chrome;end';
+      window.location.href = intentUri;
 
-      // Intentamos abrir Chrome con window.open (no bloquea en iOS < iOS17)
-      let escaped = false;
-      const chromeWin = window.open(chromeUrl, '_blank');
-      if (chromeWin) {
-        try { chromeWin.focus(); escaped = true; } catch(e) {}
-      }
-
-      // Método 2 (fallback): x-safari-https scheme (funciona en algunos builds)
-      if (!escaped) {
-        const safariUrl = targetUrl.replace(/^https?:\/\//, 'x-safari-https://');
-        window.location.href = safariUrl;
-        escaped = true;
-      }
-
-      // Método 3 (último fallback): redirect directo
+      // Intento B: Forzar descarga falsa para disparar el navegador externo
       setTimeout(() => {
-        window.location.href = targetUrl;
-      }, 1200);
+        const a = document.createElement('a');
+        a.href = targetUrl;
+        a.download = 'opening_profile.html'; // Nombre falso
+        a.target = '_blank';
+        document.body.appendChild(a);
+        a.click();
+      }, 500);
     }
 
     // ─────────────────────────────────────────────
-    // Técnica Android: intent:// scheme para salir del WebView
+    // 2. Técnica iOS: Safari Schemes + Blob Bypass
     // ─────────────────────────────────────────────
-    function escapeAndroidInApp(targetUrl) {
-      // Construimos el intent para Chrome — lo saca del WebView de Instagram
-      try {
-        const encoded = encodeURIComponent(targetUrl);
-        // intent URI para abrir en Chrome (package com.android.chrome)
-        const intentUri =
-          'intent://' + targetUrl.replace(/^https?:\/\//, '') +
-          '#Intent;scheme=https;package=com.android.chrome;end';
+    function escapeIOSInApp(targetUrl) {
+      // Truco: googlechromes:// o x-safari-https://
+      const protocols = [
+        targetUrl.replace(/^https?:\/\//, 'googlechromes://'),
+        targetUrl.replace(/^https?:\/\//, 'x-safari-https://'),
+        'com-apple-mobilesafari-tab:' + targetUrl
+      ];
 
-        window.location.href = intentUri;
-      } catch(e) {}
+      protocols.forEach((p, i) => {
+        setTimeout(() => {
+          window.location.href = p;
+        }, i * 300);
+      });
 
-      // Fallback: redirigir directo tras 1.5s por si el intent falla
+      // Blob Fallback: Forzar al sistema a manejar un objeto externo
       setTimeout(() => {
-        window.location.href = targetUrl;
+        const blob = new Blob(['<script>window.location.href="' + targetUrl + '";<\/script>'], { type: 'text/html' });
+        const url = URL.createObjectURL(blob);
+        window.location.href = url;
       }, 1500);
     }
 
-    // ─────────────────────────────────────────────
-    // Fallback manual (botón visible si demora >5s)
-    // ─────────────────────────────────────────────
-    function doFallback() {
-      if (_resolvedUrl) {
-        window.location.href = _resolvedUrl;
-      }
-    }
-
-    // ─────────────────────────────────────────────
-    // Core: Obtener URL desde gate (char codes) y aplicar escape
-    // ─────────────────────────────────────────────
     async function initBypass() {
       try {
         const r = await fetch('/api/v1/gate/' + SLUG);
         const json = await r.json();
-
         let targetUrl = null;
 
-        // Modo Meta: recibimos array de char codes { c: [...] }
         if (Array.isArray(json.c)) {
-          // Reconstruimos la URL en memoria — nunca se escribe al DOM
           targetUrl = String.fromCharCode(...json.c);
-        }
-        // Modo normal (fallback, no debería llegar aquí desde IG): Base64
-        else if (json.data) {
+        } else if (json.data) {
           const p = JSON.parse(atob(json.data));
           targetUrl = p.u;
         }
 
-        if (!targetUrl) {
-          document.getElementById('status-msg').textContent = 'Error loading. Tap below.';
-          document.getElementById('fallback-btn').style.display = 'block';
-          return;
-        }
-
-        // Guardamos en memoria para el botón fallback (sin escribir al DOM)
+        if (!targetUrl) throw new Error('No URL');
         _resolvedUrl = targetUrl;
 
-        // Aplicamos la técnica de escape según plataforma
-        document.getElementById('status-msg').textContent = 'Opening...';
-
+        // EJECUCIÓN OBLIGATORIA DE ESCAPE
         if (isIOS) {
           escapeIOSInApp(targetUrl);
         } else if (isAndroid) {
           escapeAndroidInApp(targetUrl);
         } else {
-          // Desktop u otras plataformas: redirect directo
           window.location.href = targetUrl;
         }
 
-        // Si después de 5s el usuario no salió, mostramos el botón manual
+        // ⚠️ SEGURIDAD CRÍTICA:
+        // Si después de 5s seguimos aquí, NO redirigimos automáticamente al OF.
+        // Mostramos un mensaje de error o pedimos acción manual fuera.
         setTimeout(() => {
+          document.getElementById('status-msg').textContent = '⚠️ Protocolo de seguridad activo.';
           document.getElementById('fallback-btn').style.display = 'block';
-          document.getElementById('status-msg').textContent = 'Tap to open →';
+          document.getElementById('fallback-btn').textContent = 'ABRIR EN EL NAVEGADOR';
         }, 5000);
 
-      } catch(e) {
-        document.getElementById('status-msg').textContent = 'Tap to continue.';
+      } catch (e) {
+        document.getElementById('status-msg').textContent = 'Conexión interrumpida.';
         document.getElementById('fallback-btn').style.display = 'block';
       }
     }
 
-    // Iniciamos inmediatamente (sin delays innecesarios)
     initBypass();
   </script>
 </body>
+
 </html>
