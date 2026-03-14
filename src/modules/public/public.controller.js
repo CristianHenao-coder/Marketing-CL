@@ -12,7 +12,7 @@ export const publicController = {
     await delay(Math.floor(Math.random() * 500) + 300);
 
     try {
-      const { slug } = req.params;
+      const { slug } = req.params || {};
       const host = normalizeHost(req.headers.host);
       const isPreview = req.query.preview === 'true';
       const forceGate = req.query.gate === 'true';
@@ -131,7 +131,9 @@ export const publicController = {
 
     } catch (e) {
       console.error("[PublicController Error]", e);
-      res.status(500).send('Maintenance');
+      if (!res.headersSent) {
+        res.status(500).send('Maintenance');
+      }
     }
   },
 
