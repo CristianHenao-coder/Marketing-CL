@@ -44,7 +44,7 @@ export const botShield = (req, res, next) => {
   const isAndroidWebView = isAndroid && /wv/.test(ua);
 
   // Lista explícita de apps sociales
-  const socialTokens = ['tiktok', 'instagram', 'fb_iab', 'fban', 'fbav', 'threads', 'musically', 'snapchat', 'line', 'whatsapp', 'telegram'];
+  const socialTokens = ['tiktok', 'instagram', 'fb_iab', 'fban', 'fbav', 'threads', 'musical.ly', 'musically', 'snapchat', 'line', 'whatsapp', 'telegram', 'linkedin', 'pinterest'];
 
   const isSocialApp = socialTokens.some(t => ua.includes(t)) ||
     String(h['x-requested-with'] || '').includes('musically') ||

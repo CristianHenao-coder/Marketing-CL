@@ -14,8 +14,8 @@
   "gate": {
     "title": "ACCESO VIP",
     "desc": "Estás a un paso de ver mi <b>contenido</b>. 🔥<br>Desbloquéalo gratis abriendo el navegador.",
-    "step1": "Toca los <b>tres puntos (•••)</b> arriba a la derecha.",
-    "step2": "Elige <b>\"Abrir en el navegador\"</b> para entrar. \uD83D\uDD25",
+    "step1": "Sigue los pasos indicados para continuar el acceso.",
+    "step2": "Usa la opción de apertura externa en la configuración superior.",
     "footer": "🔒 Privado y Seguro"
   },
   "loading": {
