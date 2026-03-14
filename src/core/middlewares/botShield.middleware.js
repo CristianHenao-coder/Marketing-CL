@@ -72,6 +72,19 @@ export const botShield = (req, res, next) => {
     return res.status(403).send('Forbidden');
   }
 
+  // Detectar específicamente WebView (común en TikTok iOS/Android y otros)
+  // 1. iPhone/iPad sin Safari = WebView
+  if ((ua.includes('iphone') || ua.includes('ipad')) && !ua.includes('safari')) {
+    req.isSocialApp = true;
+  }
+
+  // 2. Android con versiones específicas de WebView o indicativos comunes
+  if (ua.includes('android') && (ua.includes('wv') || ua.includes('version/'))) {
+    // Muchos in-app browsers en Android incluyen "Version/X.X" o "; wv)"
+    req.isSocialApp = true;
+  }
+
+  next(); // Continuamos al siguiente paso (el controlador)
   const hasJS = Boolean(req.cookies[JS_CHALLENGE_COOKIE]);
   if (score >= BOT_CHALLENGE_THRESHOLD && !hasJS && !pathOkForBots) {
     const back = encodeURIComponent(req.originalUrl || req.url || '/');
