@@ -3,6 +3,7 @@ import { Router } from 'express';
 import multer from 'multer';
 import { adminController } from './admin.controller.js';
 import { authController } from './auth.controller.js';
+import { telegramController } from './telegram.controller.js'; // 👈 Importamos el nuevo controlador
 import { authGuard } from '../../core/middlewares/auth.middleware.js';
 import { loginLimiter } from '../../core/middlewares/rateLimit.middleware.js';
 
@@ -66,6 +67,8 @@ router.get('/logout', authController.logout);
  * ========================================================================= */
 
 router.use(authGuard);
+router.post('/clients/update/:id', adminController.updateClient);
+router.post('/clients/delete/:id', adminController.deleteClient);
 
 /**
  * Dashboard principal – KPIs globales
@@ -136,5 +139,24 @@ router.post('/links/:id/toggle-active', adminController.toggleLinkActive);
  * POST /admin/links/edit/:id
  */
 router.post('/links/edit/:id', adminController.updateLink);
+
+/**
+ * Toggle rápido de escudos (Meta/TikTok)
+ * PATCH /admin/links/:id/toggle-shield
+ */
+router.patch('/links/:id/toggle-shield', adminController.toggleShield);
+
+
+/* =========================================================================
+ *  GESTIÓN DE TELEGRAM (ROTADOR)
+ * ========================================================================= */
+router.get('/telegram/status/:linkId', telegramController.getBotsStatus);
+router.post('/telegram/add/:linkId', telegramController.addBot);
+router.post('/telegram/edit/:botId', telegramController.editBot);
+router.delete('/telegram/delete/:botId', telegramController.deleteBot);
+router.post('/telegram/limit/:linkId', telegramController.updateLimit);
+router.post('/telegram/capacity/:linkId', telegramController.updateMaxCapacity); // 👈 Nueva ruta
+router.post('/telegram/reset/:linkId', telegramController.resetStats);
+
 
 export default router;

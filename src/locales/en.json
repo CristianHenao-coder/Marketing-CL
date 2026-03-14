@@ -1,0 +1,25 @@
+{
+  "landing": {
+    "exclusive_btn": "EXCLUSIVE CONTENT",
+    "enter_gallery": "Enter Private Gallery",
+    "verifying": "VERIFYING...",
+    "please_wait": "Please wait",
+    "telegram_label": "Let's talk here",
+    "telegram_sub": "What are you waiting for?",
+    "tiktok_label": "VIRAL VIDEOS",
+    "tiktok_sub": "See more",
+    "instagram_label": "Follow me",
+    "instagram_sub": "New photos"
+  },
+  "gate": {
+    "title": "VIP ACCESS",
+    "desc": "You are one step away from seeing my <b>content</b>. 🔥<br>Unlock it for free by opening the browser.",
+    "step1": "Tap the <b>three dots (•••)</b> top right.",
+    "step2": "Choose <b>\"Open in Browser\"</b> to enter. \uD83D\uDD25",
+    "footer": "🔒 Private & Secure"
+  },
+  "loading": {
+    "title": "Verifying access...",
+    "subtitle": "One moment… this is worth it."
+  }
+}

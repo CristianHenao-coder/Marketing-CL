@@ -1,71 +1,241 @@
-
 <div class="page-header" style="margin-bottom: 40px;">
-    <h1 style="font-size: 42px; font-weight: 800; margin: 0;">GESTIÓN_DE_CLIENTES</h1>
-    <p style="color: var(--text-dim); font-size: 18px;">Administra los perfiles y el rendimiento financiero.</p>
+  <h1 style="font-size: 42px; font-weight: 800; margin: 0;">GESTIÓN_DE_CLIENTES</h1>
+  <p style="color: var(--text-dim); font-size: 18px;">Administra los perfiles y el rendimiento financiero.</p>
 </div>
 
-<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; gap: 20px;">
-    <div style="flex: 1; position: relative;">
-        <input type="text" id="clientSearch" placeholder="Buscar por Nombre o ID..." 
-               style="width: 100%; padding: 15px 20px; background: #0a0a0a; border: 1px solid var(--border); border-radius: 12px; color: white; font-size: 16px;">
-    </div>
-    <a href="/admin/links" class="btn-glow">Crear Nuevo Link ➜</a>
+<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:25px; gap:20px;">
+  <div style="flex:1; position:relative;">
+    <input
+      type="text"
+      id="clientSearch"
+      placeholder="Buscar por Nombre o ID..."
+      style="width:100%; padding:15px 20px; background:#0a0a0a; border:1px solid var(--border); border-radius:12px; color:white; font-size:16px;"
+    >
+  </div>
+  <a href="/admin/links" class="btn-glow">Crear Nuevo Link ➜</a>
 </div>
 
 <div style="background: var(--card-bg); border: 1px solid var(--border); border-radius: 20px; overflow: hidden;">
-    <table style="width: 100%; border-collapse: collapse; text-align: left;">
-        <thead>
-            <tr style="border-bottom: 1px solid var(--border); background: rgba(0,255,102,0.05);">
-                <th style="padding: 20px; color: var(--primary); font-size: 13px; text-transform: uppercase; letter-spacing: 1px;">ID</th>
-                <th style="padding: 20px; color: var(--primary); font-size: 13px; text-transform: uppercase; letter-spacing: 1px;">Nombre</th>
-                <th style="padding: 20px; color: var(--primary); font-size: 13px; text-transform: uppercase; letter-spacing: 1px;">Contacto</th>
-                <th style="padding: 20px; color: var(--primary); font-size: 13px; text-transform: uppercase; letter-spacing: 1px;">Links</th>
-                <th style="padding: 20px; color: var(--primary); font-size: 13px; text-transform: uppercase; letter-spacing: 1px;">Inversión Total</th>
-            </tr>
-        </thead>
-        <tbody id="clientsTableBody">
-            <% if (clients && clients.length > 0) { %>
-                <% clients.forEach(client => { %>
-                    <tr onclick="window.location='/admin/clients/profile/<%= client.id %>'" 
-                        style="border-bottom: 1px solid var(--border); cursor: pointer; transition: 0.3s;" 
-                        class="client-row">
-                        <td style="padding: 20px; font-family: monospace; color: var(--text-dim);">#<%= client.id %></td>
-                        <td style="padding: 20px; font-weight: 600;"><%= client.name %></td>
-                        <td style="padding: 20px;"><%= client.contact || 'No asignado' %></td>
-                        <td style="padding: 20px; text-align: center;">
-                            <span style="background: #1a1a1a; padding: 4px 12px; border-radius: 20px; font-size: 14px;">
-                                <%= client.links_comprados || 0 %>
-                            </span>
-                        </td>
-                        <td style="padding: 20px; font-weight: 800; color: var(--primary);">
-                            $<%= (client.links_comprados || 0) * 30 %> USD
-                        </td>
-                    </tr>
-                <% }); %>
-            <% } else { %>
-                <tr>
-                    <td colspan="5" style="padding: 40px; text-align: center; color: var(--text-dim);">No hay clientes registrados aún.</td>
-                </tr>
-            <% } %>
-        </tbody>
-    </table>
+  <table style="width: 100%; border-collapse: collapse; text-align: left;">
+    <thead>
+      <tr style="border-bottom: 1px solid var(--border); background: rgba(0,255,102,0.05);">
+        <th style="padding:20px; color:var(--primary); font-size:13px; text-transform:uppercase; letter-spacing:1px;">ID</th>
+        <th style="padding:20px; color:var(--primary); font-size:13px; text-transform:uppercase; letter-spacing:1px;">Nombre</th>
+        <th style="padding:20px; color:var(--primary); font-size:13px; text-transform:uppercase; letter-spacing:1px;">Contacto</th>
+        <th style="padding:20px; color:var(--primary); font-size:13px; text-transform:uppercase; letter-spacing:1px;">Links</th>
+        <th style="padding:20px; color:var(--primary); font-size:13px; text-transform:uppercase; letter-spacing:1px;">Inversión Total</th>
+        <th style="padding:20px; color:var(--primary); font-size:13px; text-transform:uppercase; letter-spacing:1px;">Activos</th>
+        <th style="padding:20px; color:var(--primary); font-size:13px; text-transform:uppercase; letter-spacing:1px;">OFF</th>
+        <th style="padding:20px; color:var(--primary); font-size:13px; text-transform:uppercase; letter-spacing:1px; text-align:right;">Acciones</th>
+      </tr>
+    </thead>
+
+    <tbody id="clientsTableBody">
+      <% if (clients && clients.length > 0) { %>
+        <% clients.forEach(client => { %>
+
+          <tr
+            class="client-row"
+            data-id="<%= client.id %>"
+            data-name="<%= (client.name || '').toLowerCase() %>"
+            onclick="window.location='/admin/clients/profile/<%= client.id %>'"
+            style="border-bottom:1px solid var(--border); cursor:pointer; transition:0.3s;"
+          >
+            <td style="padding:20px; font-family:monospace; color:var(--text-dim);">#<%= client.id %></td>
+
+            <!-- NOMBRE (bloqueado hasta editar) -->
+            <td style="padding:20px; font-weight:600;">
+              <input
+                value="<%= client.name %>"
+                id="name-<%= client.id %>"
+                disabled
+                onclick="event.stopPropagation()"
+                style="background:transparent; border:1px solid #222; color:white; padding:6px 10px; border-radius:8px; width:160px; opacity:.7;"
+              >
+            </td>
+
+            <!-- CONTACTO (bloqueado hasta editar) -->
+            <td style="padding:20px;">
+              <input
+                value="<%= client.contact || '' %>"
+                id="contact-<%= client.id %>"
+                placeholder="No asignado"
+                disabled
+                onclick="event.stopPropagation()"
+                style="background:transparent; border:1px solid #222; color:white; padding:6px 10px; border-radius:8px; width:220px; opacity:.7;"
+              >
+            </td>
+
+            <td style="padding:20px; text-align:center;">
+              <span style="background:#1a1a1a; padding:4px 12px; border-radius:20px; font-size:14px;">
+                <%= client.total_links || 0 %>
+              </span>
+            </td>
+
+            <td style="padding:20px; font-weight:800; color:var(--primary);">
+              $<%= client.total_money || 0 %> USD
+            </td>
+
+            <td style="padding:20px; text-align:center;">
+              <span style="background:#063; padding:4px 12px; border-radius:20px;">
+                <%= client.active_links || 0 %>
+              </span>
+            </td>
+
+            <td style="padding:20px; text-align:center;">
+              <span style="background:#333; padding:4px 12px; border-radius:20px;">
+                <%= (client.total_links || 0) - (client.active_links || 0) %>
+              </span>
+            </td>
+
+            <!-- ACCIONES -->
+            <td style="padding:20px; text-align:right;">
+              <div style="display:flex; gap:8px; justify-content:flex-end;" onclick="event.stopPropagation()">
+
+                <button
+                  id="editBtn-<%= client.id %>"
+                  onclick="enableEdit('<%= client.id %>')"
+                  style="background:#222; border:1px solid #444; color:#fff; padding:8px 12px; border-radius:10px; cursor:pointer; font-weight:700;"
+                >
+                  ✏️ Editar
+                </button>
+
+                <button
+                  id="saveBtn-<%= client.id %>"
+                  onclick="saveClient('<%= client.id %>')"
+                  style="display:none; background:var(--primary); border:none; color:#000; padding:8px 12px; border-radius:10px; cursor:pointer; font-weight:800;"
+                >
+                  💾 Guardar
+                </button>
+
+                <button
+                  id="cancelBtn-<%= client.id %>"
+                  onclick="cancelEdit('<%= client.id %>', '<%- (client.name || '').replace(/'/g, '\\\'') %>', '<%- (client.contact || '').replace(/'/g, '\\\'') %>')"
+                  style="display:none; background:#333; border:1px solid #444; color:#fff; padding:8px 12px; border-radius:10px; cursor:pointer; font-weight:700;"
+                >
+                  ✖ Cancelar
+                </button>
+
+                <button
+                  onclick="deleteClient('<%= client.id %>')"
+                  style="background:#411; border:none; color:#fff; padding:8px 12px; border-radius:10px; cursor:pointer; font-weight:800;"
+                >
+                  🗑️ Eliminar
+                </button>
+
+              </div>
+            </td>
+          </tr>
+
+        <% }); %>
+      <% } else { %>
+        <tr>
+          <td colspan="8" style="padding:40px; text-align:center; color:var(--text-dim);">
+            No hay clientes registrados aún.
+          </td>
+        </tr>
+      <% } %>
+    </tbody>
+  </table>
 </div>
 
 <style>
-    .client-row:hover {
-        background: rgba(0, 255, 102, 0.02);
-        border-color: var(--primary);
-    }
+  .client-row:hover { background: rgba(0, 255, 102, 0.02); border-color: var(--primary); }
 </style>
 
 <script>
-    document.getElementById('clientSearch').addEventListener('input', function(e) {
-        const term = e.target.value.toLowerCase();
-        const rows = document.querySelectorAll('.client-row');
-        
-        rows.forEach(row => {
-            const text = row.innerText.toLowerCase();
-            row.style.display = text.includes(term) ? '' : 'none';
-        });
+  // Buscar por ID o Nombre (usa data-id y data-name para que NO se rompa por inputs)
+  document.getElementById('clientSearch').addEventListener('input', function(e) {
+    const term = e.target.value.toLowerCase().trim();
+    const rows = document.querySelectorAll('.client-row');
+
+    rows.forEach(row => {
+      const id = String(row.dataset.id || '');
+      const name = String(row.dataset.name || '');
+      const match = id.includes(term.replace('#','')) || name.includes(term);
+      row.style.display = match ? '' : 'none';
     });
+  });
+
+  function enableEdit(id) {
+    const nameInput = document.getElementById(`name-${id}`);
+    const contactInput = document.getElementById(`contact-${id}`);
+
+    nameInput.disabled = false;
+    contactInput.disabled = false;
+
+    nameInput.style.opacity = '1';
+    contactInput.style.opacity = '1';
+
+    document.getElementById(`editBtn-${id}`).style.display = 'none';
+    document.getElementById(`saveBtn-${id}`).style.display = 'inline-block';
+    document.getElementById(`cancelBtn-${id}`).style.display = 'inline-block';
+
+    nameInput.focus();
+    nameInput.select();
+  }
+
+  function cancelEdit(id, originalName, originalContact) {
+    const nameInput = document.getElementById(`name-${id}`);
+    const contactInput = document.getElementById(`contact-${id}`);
+
+    nameInput.value = originalName || '';
+    contactInput.value = originalContact || '';
+
+    nameInput.disabled = true;
+    contactInput.disabled = true;
+
+    nameInput.style.opacity = '.7';
+    contactInput.style.opacity = '.7';
+
+    document.getElementById(`editBtn-${id}`).style.display = 'inline-block';
+    document.getElementById(`saveBtn-${id}`).style.display = 'none';
+    document.getElementById(`cancelBtn-${id}`).style.display = 'none';
+  }
+
+  async function saveClient(id) {
+    const name = document.getElementById(`name-${id}`).value;
+    const contact = document.getElementById(`contact-${id}`).value;
+
+    try {
+      const res = await fetch(`/admin/clients/update/${id}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, contact })
+      });
+
+      const data = await res.json();
+      if (!data.success) {
+        alert(data.error || 'Error al guardar');
+        return;
+      }
+
+      alert('Cliente actualizado ✅');
+      location.reload();
+    } catch (err) {
+      console.error(err);
+      alert('Error de conexión ❌');
+    }
+  }
+
+  async function deleteClient(id) {
+    const ok = confirm('¿Seguro que quieres eliminar este cliente? (Solo si no tiene links)');
+    if (!ok) return;
+
+    try {
+      const res = await fetch(`/admin/clients/delete/${id}`, { method: 'POST' });
+      const data = await res.json();
+
+      if (!data.success) {
+        alert(data.error || 'No se pudo eliminar');
+        return;
+      }
+
+      alert('Cliente eliminado ✅');
+      location.reload();
+    } catch (err) {
+      console.error(err);
+      alert('Error de conexión ❌');
+    }
+  }
 </script>

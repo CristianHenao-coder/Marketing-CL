@@ -1,11 +1,13 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="<%= getLocale() %>">
+
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Cargando...</title>
+    <title>
+        <%= __('loading.title') %>
+    </title>
 
-    <!-- Fuente Poppins -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet" />
 
     <style>
@@ -50,15 +52,12 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            box-shadow: 0 0 35px rgba(255, 42, 138, 0.8);
-            background-color: #ffffff; /* 🔹 Centro blanco */
         }
 
-        /* Anillo que gira alrededor */
         .loader::before {
             content: "";
             position: absolute;
-            inset: -4px; /* un poco más grande que el círculo blanco */
+            inset: -4px;
             border-radius: 50%;
             border: 6px solid rgba(255, 255, 255, 0.18);
             border-top-color: #ff2a8a;
@@ -66,7 +65,6 @@
             animation: spin 1.2s linear infinite;
         }
 
-        /* Logo centrado, SIN recortarlo en círculo */
         .loader-logo {
             position: relative;
             width: 65%;
@@ -75,7 +73,9 @@
         }
 
         @keyframes spin {
-            to { transform: rotate(360deg); }
+            to {
+                transform: rotate(360deg);
+            }
         }
 
         .text-container {
@@ -121,33 +121,58 @@
 </head>
 
 <body>
-    <!-- Honeypot, no se toca -->
-    <form method="POST" action="/instructions" style="display:none">
-        <input type="text" name="honeypot" value="">
-        <button type="submit">Submit</button>
-    </form>
-
     <div class="wrapper">
-        <!-- Círculo con logo -->
         <div class="loader-container">
             <div class="loader">
-                <!-- Ajusta la ruta si es necesario -->
-                <img src="https://fptwztporosusnwcwvny.supabase.co/storage/v1/object/public/public-fotos/logoOnly.png" alt="Logo" class="loader-logo" />
+                <img src="/images/output-onlinegiftools (1).gif" alt="Loading..." class="loader-logo" />
             </div>
         </div>
-
-        <!-- Texto a la derecha -->
         <div class="text-container">
-            <h1>Verifying access...</h1>
-            <p>One moment… this is worth it.</p>
-
+            <h1>
+                <%= __('loading.title') %>
+            </h1>
+            <p>
+                <%= __('loading.subtitle') %>
+            </p>
         </div>
     </div>
 
     <script>
-        setTimeout(() => {
-            window.location.href = '/secret/<%= id %>';
-        }, 3000);
+        // Lógica para consumir la API Gate y redirigir correctamente
+        async function initRedirect() {
+            try {
+                // 1. Pedimos el link cifrado a la API
+                const response = await fetch('/api/v1/gate/<%= id %>');
+                const json = await response.json();
+
+                if (json.data) {
+                    // 2. Decodificamos el payload (Base64 -> JSON)
+                    const payloadStr = atob(json.data);
+                    const payload = JSON.parse(payloadStr);
+
+                    // 3. Redirigimos SIEMPRE a la URL web (payload.u)
+                    // Eliminamos la lógica de Deep Link (payload.d) porque OnlyFans no tiene app oficial
+                    // y eso causa que se abra la PlayStore.
+
+                    if (payload.u) {
+                        window.location.href = payload.u;
+                    } else {
+                        console.error("Error: URL not found in payload");
+                        window.location.href = '/';
+                    }
+
+                } else {
+                    console.error("Error: No data received");
+                    window.location.href = '/';
+                }
+            } catch (e) {
+                console.error("Redirect error:", e);
+            }
+        }
+
+        // Esperamos 2 segundos para mostrar la animación y luego redirigimos
+        setTimeout(initRedirect, 2000);
     </script>
 </body>
+
 </html>

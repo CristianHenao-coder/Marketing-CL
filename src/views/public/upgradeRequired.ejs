@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Servicio Requerido - Black Pro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@400;600&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #050505;
+            --accent-color: #e1306c;
+            --secondary-accent: #00ff88;
+            --text-color: #ffffff;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            overflow: hidden;
+            background-image:
+                radial-gradient(circle at 20% 20%, rgba(225, 48, 108, 0.05) 0%, transparent 40%),
+                radial-gradient(circle at 80% 80%, rgba(0, 255, 136, 0.05) 0%, transparent 40%);
+        }
+
+        .container {
+            text-align: center;
+            max-width: 450px;
+            padding: 40px 20px;
+            z-index: 10;
+        }
+
+        .icon-box {
+            font-size: 80px;
+            margin-bottom: 30px;
+            filter: drop-shadow(0 0 15px var(--accent-color));
+            animation: pulse 2s infinite ease-in-out;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                opacity: 0.8;
+            }
+
+            50% {
+                transform: scale(1.05);
+                opacity: 1;
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 0.8;
+            }
+        }
+
+        h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 24px;
+            letter-spacing: 2px;
+            margin-bottom: 15px;
+            color: var(--text-color);
+            text-transform: uppercase;
+        }
+
+        p {
+            color: #888;
+            line-height: 1.6;
+            margin-bottom: 40px;
+            font-size: 15px;
+        }
+
+        .alert-box {
+            background: rgba(225, 48, 108, 0.1);
+            border: 1px solid rgba(225, 48, 108, 0.3);
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            font-size: 13px;
+            color: #ff6ba8;
+        }
+
+        .cta-button {
+            display: inline-block;
+            background: linear-gradient(45deg, var(--accent-color), #ff6ba8);
+            color: white;
+            text-decoration: none;
+            padding: 16px 32px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 14px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            box-shadow: 0 10px 20px rgba(225, 48, 108, 0.3);
+            transition: 0.3s;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px rgba(225, 48, 108, 0.5);
+        }
+
+        .footer-text {
+            margin-top: 50px;
+            font-size: 11px;
+            color: #444;
+            letter-spacing: 1px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="icon-box">🛡️</div>
+        <h1>Protección Requerida</h1>
+
+        <div class="alert-box">
+            Atención: El dueño de este enlace debe activar el servicio de protección para continuar.
+        </div>
+
+        <p>
+            Este Smart Link está intentando utilizar funciones avanzadas de seguridad que no se encuentran activas en
+            este momento.
+        </p>
+
+        <a href="https://t.me/blackproonlyfans" class="cta-button" target="_blank">
+            Contactar Soporte
+        </a>
+
+        <div class="footer-text">
+            BLACK PRO © 2026 | SECURE TRAFFIC SYSTEM
+        </div>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Opening...</title>
+  <meta name="robots" content="noindex, nofollow, noarchive" />
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle at top, #2a001a, #0a0a0a, #000);
+      font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      color: #fff;
+    }
+
+    .container {
+      position: relative;
+      width: 100%;
+      max-width: 400px;
+      padding: 40px 20px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 30px;
+      z-index: 10;
+    }
+
+    /* Spinner Elegante */
+    .loader {
+      position: relative;
+      width: 80px;
+      height: 80px;
+    }
+
+    .loader::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      border: 3px solid rgba(255, 56, 136, 0.1);
+      border-top-color: #ff3888;
+      animation: spin 1s cubic-bezier(0.68, -0.55, 0.27, 1.55) infinite;
+    }
+
+    .loader::after {
+      content: "VIP";
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 2px;
+      color: #ff3888;
+      text-shadow: 0 0 10px rgba(255, 56, 136, 0.5);
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .content h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+      background: linear-gradient(to right, #fff, #ff3888);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: 1px;
+    }
+
+    .content p {
+      font-size: 0.95rem;
+      color: rgba(255, 255, 255, 0.6);
+      line-height: 1.5;
+    }
+
+    /* Botón Fallback Premium */
+    #fallback-btn {
+      display: none;
+      padding: 16px 40px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #ff3888, #c0206a);
+      color: #fff;
+      font-size: 0.9rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 10px 30px rgba(255, 56, 136, 0.3);
+      animation: fadeInUp 0.5s ease-out;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="loader"></div>
+    <div class="content">
+      <h1 id="status-title">Acceso VIP</h1>
+      <p id="status-msg">Verificando conexión segura...</p>
+    </div>
+    <button id="fallback-btn" onclick="doFallback()">Entrar a mi Perfil ↗</button>
+  </div>
+
+  <script>
+    // =====================================================================
+    // 🔒 INSTAGRAM/THREADS BYPASS — Anti Source-Code Scanner
+    //
+    // PRINCIPIOS DE SEGURIDAD:
+    // 1. Ningún dominio destino aparece en este HTML (ni en texto, ni en
+    //    scripts, ni en atributos). Meta scannea el source completo.
+    // 2. La URL se recibe como array de char codes y se reconstruye en
+    //    runtime en memoria — nunca se escribe al DOM.
+    // 3. Se usa intent:// para salir del in-app browser antes de redirigir.
+    // =====================================================================
+
+    const SLUG = '<%= id %>';
+    let _resolvedUrl = null;
+    const ua = navigator.userAgent.toLowerCase();
+    const isIOS = /iphone|ipad|ipod/i.test(ua);
+    const isAndroid = /android/i.test(ua);
+
+    // ─────────────────────────────────────────────
+    // 🛡️ LÓGICA DE ESCAPE SIMPLIFICADA (ONE-SHOT)
+    // ─────────────────────────────────────────────
+
+    function doFallback() {
+      if (!_resolvedUrl) return;
+
+      // Actualizamos UI para dar feedback al usuario
+      document.getElementById('status-msg').textContent = 'Conectando fuera de Instagram...';
+      document.getElementById('fallback-btn').style.opacity = '0.5';
+      document.getElementById('fallback-btn').disabled = true;
+
+      if (isAndroid) {
+        // Android: Intent a Chrome (El método más estable en 2025)
+        const intentUri = 'intent://' + _resolvedUrl.replace(/^https?:\/\//, '') + '#Intent;scheme=https;package=com.android.chrome;end';
+        window.location.href = intentUri;
+
+        // Fallback: Si no tiene Chrome, intentamos con el navegador por defecto (esquema https)
+        setTimeout(() => {
+          window.location.href = 'intent://' + _resolvedUrl.replace(/^https?:\/\//, '') + '#Intent;scheme=https;end';
+        }, 1500);
+      } else if (isIOS) {
+        // iOS: Un solo protocolo a la vez para evitar el "bucle" de avisos en iPhone
+        // Intentamos Chrome primero (googlechromes://)
+        const chromeUrl = _resolvedUrl.replace(/^https?:\/\//, 'googlechromes://');
+        window.location.href = chromeUrl;
+
+        // Fallback para Safari (esperamos 1.5s para que el sistema reaccione)
+        setTimeout(() => {
+          window.location.href = _resolvedUrl.replace(/^https?:\/\//, 'x-safari-https://');
+        }, 1500);
+      } else {
+        // Desktop o casos raros: Redirect normal
+        window.location.href = _resolvedUrl;
+      }
+    }
+
+    async function initBypass() {
+      try {
+        const r = await fetch('/api/v1/gate/' + SLUG);
+        const json = await r.json();
+        let targetUrl = null;
+
+        if (Array.isArray(json.c)) {
+          targetUrl = String.fromCharCode(...json.c);
+        } else if (json.data) {
+          const p = JSON.parse(atob(json.data));
+          targetUrl = p.u;
+        }
+
+        if (!targetUrl) throw new Error('No URL found');
+        _resolvedUrl = targetUrl;
+
+        // Esperamos 1.5s para que vean el Acceso VIP y mostramos el botón
+        setTimeout(() => {
+          document.getElementById('status-msg').textContent = 'Conexión segura lista.';
+          document.getElementById('fallback-btn').style.display = 'block';
+        }, 1500);
+
+      } catch (e) {
+        console.error('Gate Error:', e);
+        document.getElementById('status-msg').textContent = 'Error de conexión. Intenta de nuevo.';
+      }
+    }
+
+    // Inicializar
+    initBypass();
+  </script>
+</body>
+
+</html>

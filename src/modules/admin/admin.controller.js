@@ -1,436 +1,318 @@
 import { linksService } from "../../services/links.service.js";
-import { storageService } from "../../services/storage.service.js";
+import { StorageService as storageService } from "../../services/storage.service.js";
 import { supabase } from "../../config/supabase.js";
 
-// ========== HELPERS ==========
-function parseBlacklistedCountries(raw) {
-  if (!raw) return [];
-  return raw
-    .split(",")
-    .map((c) => c.trim().toUpperCase())
-    .filter(Boolean);
-}
+// ========== HELPERS INTERNOS ==========
+const parseBlacklistedCountries = (raw) =>
+  raw ? raw.split(",").map(c => c.trim().toUpperCase()).filter(Boolean) : [];
 
-function safeAnalyticsClicks(analytics) {
-  if (!analytics || typeof analytics !== "object") return 0;
-  return analytics.total_clicks || analytics.clicks || 0;
-}
+const safeAnalyticsClicks = (analytics) =>
+  analytics?.total_clicks || analytics?.clicks || 0;
 
-function toISOorNull(dateStr) {
-  if (!dateStr) return null;
+const toISOorNull = (dateStr) => {
+  if (!dateStr || !String(dateStr).trim()) return null;
+  const d = new Date(`${dateStr.trim()}T00:00:00Z`);
+  return Number.isNaN(d.getTime()) ? null : d.toISOString();
+};
 
-  const trimmed = String(dateStr).trim();
-  if (!trimmed) return null;
-
-  const d = new Date(`${trimmed}T00:00:00Z`);
-  if (Number.isNaN(d.getTime())) return null;
-
-  return d.toISOString();
-}
-
-// ========== CONTROLADOR PRINCIPAL ==========
 export const adminController = {
+
   // =========================
   //  DASHBOARD
   // =========================
   async renderDashboard(req, res) {
     try {
-      const { data: links, error } = await supabase
-        .from("smart_links")
-        .select("id, is_active, analytics");
-
+      const { data: links, error } = await supabase.from("smart_links").select("id, is_active, analytics");
       if (error) throw error;
 
-      const totalLinks = links?.length || 0;
-      const activeLinks = links?.filter((l) => l.is_active).length || 0;
-      const inactiveLinks = totalLinks - activeLinks;
+      const stats = {
+        totalLinks: links?.length || 0,
+        activeLinks: links?.filter(l => l.is_active).length || 0,
+        totalClicks: links?.reduce((acc, l) => acc + safeAnalyticsClicks(l.analytics), 0) || 0
+      };
+      stats.inactiveLinks = stats.totalLinks - stats.activeLinks;
 
-      const totalClicks =
-        links?.reduce((acc, l) => acc + safeAnalyticsClicks(l.analytics), 0) ||
-        0;
-
-      return res.render("admin/dashboard", {
-        layout: "admin/layout",
-        currentSection: "dashboard",
-        stats: {
-          totalLinks,
-          activeLinks,
-          inactiveLinks,
-          totalClicks,
-        },
-        error: null,
-      });
+      res.render("admin/dashboard", { layout: "admin/layout", currentSection: "dashboard", stats, error: null });
     } catch (err) {
-      console.error("[renderDashboard] Error:", err);
-      return res.render("admin/dashboard", {
-        layout: "admin/layout",
-        currentSection: "dashboard",
-        stats: null,
-        error: "Error cargando estadísticas del dashboard",
-      });
+      res.render("admin/dashboard", { layout: "admin/layout", currentSection: "dashboard", stats: null, error: "Error en dashboard" });
     }
   },
 
   // =========================
-  //  CLIENTES (LISTADO)
+  //  CLIENTES
   // =========================
   async renderClients(req, res) {
     try {
       const { data, error } = await supabase
         .from("clients")
-        .select(
-          `
-          *,
-          smart_links (id)
-        `
-        )
+        .select(`id, name, contact, notas, created_at, smart_links (id, is_active, price)`)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
 
-      const clients = (data || []).map((c) => {
-        const linkCount = c.smart_links ? c.smart_links.length : 0;
+      const clients = (data || []).map(c => {
+        const links = c.smart_links || [];
         return {
-          id: c.id,
-          name: c.name,
-          contact: c.contact || c.telegram || "No asignado",
-          notas: c.notas || "",
-          created_at: c.created_at,
-          links_count: linkCount,
-          total_money: linkCount * 30,
+          ...c,
+          total_links: links.length,
+          active_links: links.filter(l => l.is_active).length,
+          total_money: links.reduce((acc, l) => acc + Number(l.price || 0), 0)
         };
       });
 
-      return res.render("admin/clients", {
-        layout: "admin/layout",
-        currentSection: "clients",
-        clients,
-        error: null,
-      });
+      res.render("admin/clients", { layout: "admin/layout", currentSection: "clients", clients, error: null });
     } catch (err) {
-      console.error("[renderClients] Error:", err);
-      return res.render("admin/clients", {
-        layout: "admin/layout",
-        currentSection: "clients",
-        clients: [],
-        error: "Error cargando clientes",
-      });
+      res.render("admin/clients", { layout: "admin/layout", currentSection: "clients", clients: [], error: "Error en clientes" });
     }
   },
 
-  // =========================
-  //  PERFIL DEL CLIENTE
-  // =========================
+  async updateClient(req, res) {
+    try {
+      const { id } = req.params;
+      const { name, contact } = req.body;
+      const { data, error } = await supabase
+        .from("clients")
+        .update({ name: name?.trim(), contact: contact?.trim() || null })
+        .eq("id", id).select().single();
+
+      if (error) throw error;
+      res.json({ success: true, client: data });
+    } catch (err) {
+      res.status(500).json({ success: false, error: err.message });
+    }
+  },
+
+  async deleteClient(req, res) {
+    try {
+      const { id } = req.params;
+      const { error } = await supabase.from("clients").delete().eq("id", id);
+      if (error) throw error;
+      res.json({ success: true });
+    } catch (err) {
+      res.status(500).json({ success: false, error: err.message });
+    }
+  },
+
   async renderClientProfile(req, res) {
     try {
       const { id } = req.params;
-
-      const { data: client, error: clientError } = await supabase
+      const { data: client, error } = await supabase
         .from("clients")
-        .select("*")
+        .select(`*, smart_links (*)`)
         .eq("id", id)
         .single();
 
-      if (clientError) throw clientError;
+      if (error) throw error;
 
-      const { data: links, error: linksError } = await supabase
-        .from("smart_links")
-        .select("*")
-        .eq("client_id", id)
-        .order("created_at", { ascending: false });
+      // Calculate total money for the client profile view
+      const links = client.smart_links || [];
+      client.total_money = links.reduce((acc, l) => acc + Number(l.price || 0), 0);
 
-      if (linksError) throw linksError;
-
-      return res.render("admin/profile", {
-        layout: "admin/layout",
-        currentSection: "clients",
-        client,
-        links: links || [],
-        error: null,
-      });
+      // Corrected view name from "admin/client_profile" to "admin/profile"
+      res.render("admin/profile", { layout: "admin/layout", currentSection: "clients", client, error: null });
     } catch (err) {
-      console.error("[renderClientProfile] Error:", err);
-      return res.redirect("/admin/clients?error=notfound");
+      res.redirect("/admin/clients");
     }
   },
 
   // =========================
-  //  LINKS (LISTADO Y FORM)
+  //  LINKS
   // =========================
   async renderLinks(req, res) {
     try {
-      const { data: clientsData, error: clientsError } = await supabase
-        .from("clients")
-        .select("id, name, telegram, contact")
-        .order("created_at", { ascending: false });
+      const { data: clients } = await supabase.from("clients").select("id, name, contact").order("name");
+      const { data: linksData } = await supabase.from("smart_links").select("*").order("created_at", { ascending: false });
 
-      if (clientsError) throw clientsError;
+      const clientsMap = new Map(clients.map(c => [String(c.id), c]));
+      const links = linksData.map(l => ({
+        ...l,
+        client_name: clientsMap.get(String(l.client_id))?.name || "—",
+        total_clicks: safeAnalyticsClicks(l.analytics)
+      }));
 
-      const { data: linksData, error: linksError } = await supabase
-        .from("smart_links")
-        .select("*")
-        .order("created_at", { ascending: false });
-
-      if (linksError) throw linksError;
-
-      const clientsMap = new Map(
-        (clientsData || []).map((c) => [String(c.id), c])
-      );
-
-      const links = (linksData || []).map((l) => {
-        const client = clientsMap.get(String(l.client_id)) || null;
-
-        return {
-          ...l,
-          client_name: client ? client.name : "—",
-          client_contact: client ? client.contact || client.telegram : null,
-          os_force: l.advanced_config?.os_force || "all",
-          blacklisted_countries:
-            l.advanced_config?.blacklisted_countries || [],
-          total_clicks: safeAnalyticsClicks(l.analytics),
-        };
-      });
-
-      return res.render("admin/links", {
-        layout: "admin/layout",
-        currentSection: "links",
-        links,
-        clients: clientsData || [],
-        error: null,
-      });
+      res.render("admin/links", { layout: "admin/layout", currentSection: "links", links, clients });
     } catch (err) {
-      console.error("[renderLinks] Error:", err);
-      return res.render("admin/links", {
-        layout: "admin/layout",
-        currentSection: "links",
-        links: [],
-        clients: [],
-        error: "Error cargando Smart Links",
-      });
+      res.render("admin/links", { layout: "admin/layout", currentSection: "links", links: [], clients: [], error: "Error" });
     }
   },
 
-  // =========================
-  //  CREAR LINK (CON AJAX)
-  // =========================
   async createLink(req, res) {
     try {
-      const {
-        slug,
-        display_name,
-        subtitle,
-        instagram,
-        onlyfans,
-        telegram, // ✅ ESTE TE FALTABA
-        tiktok,
-        link_mode,
-        custom_domain,
-        status,
-        client_id: clientIdRaw,
-        new_client_name,
-        new_client_contact,
-        price,
-        fecha_vencimiento,
-        os_force = "all",
-        blacklisted_countries,
-      } = req.body;
+      const b = req.body;
+      let photoUrl = b.photo || null;
 
-      const file = req.file;
-      let photoUrl = req.body.photo || null;
-
-      if (file) {
-        const upload = await storageService.uploadPhoto(
-          file.buffer,
-          file.originalname,
-          file.mimetype,
-          slug
-        );
-        photoUrl = upload.publicUrl;
+      if (req.file) {
+        // Note: StorageService.uploadPhoto signature is (slug, file)
+        const up = await storageService.uploadPhoto(b.slug, req.file);
+        photoUrl = up.publicUrl;
       }
 
-      let clientId = clientIdRaw ? Number(clientIdRaw) : null;
-
-      if (!clientId && new_client_name) {
-        const { data: newClient, error: clientError } = await supabase
-          .from("clients")
-          .insert({
-            name: new_client_name,
-            contact: new_client_contact || null,
-          })
-          .select("id")
-          .single();
-
-        if (clientError) throw clientError;
-        clientId = newClient.id;
+      // Lógica de cliente nuevo o existente
+      let clientId = b.client_id ? Number(b.client_id) : null;
+      if (!clientId && b.new_client_name) {
+        const { data: nc } = await supabase.from("clients").insert({ name: b.new_client_name, contact: b.new_client_contact }).select("id").single();
+        clientId = nc.id;
       }
-
-      const priceNumber =
-        price && String(price).trim() !== "" ? Number(price) : 30;
-
-      const fechaVencimientoISO = toISOorNull(fecha_vencimiento);
-
-      const advanced_config = {
-        os_force,
-        blacklisted_countries: parseBlacklistedCountries(blacklisted_countries),
-        geofilter_enabled: false,
-        data_analysis_enabled: false,
-      };
 
       const newLink = {
-        slug: slug?.trim(),
-        display_name,
-        subtitle,
-        onlyfans,
-        instagram,
-        telegram,
-        tiktok,
-        link_mode: link_mode || "landing",
-        custom_domain: custom_domain || null,
+        slug: b.slug?.trim(),
+        custom_domain: b.custom_domain?.trim().replace(/^https?:\/\//i, '').replace(/\/+$/, '') || null,
+        display_name: b.display_name,
+        onlyfans: b.onlyfans,
+        instagram: b.instagram,
+        telegram: b.telegram,
+        link_mode: b.link_mode || "landing",
         client_id: clientId,
         is_active: true,
-        status: status || "active",
         photo: photoUrl,
-        price: priceNumber,
-        fecha_vencimiento: fechaVencimientoISO,
-        analytics: { total_clicks: 0 },
-        advanced_config,
+        price: Number(b.price || 30),
+        fecha_vencimiento: toISOorNull(b.fecha_vencimiento),
+        telegram_rotation_limit: Number(b.telegram_rotation_limit || 1), // 👈 Valor por defecto 1 (Round Robin)
+        advanced_config: {
+          os_force: b.os_force || "all",
+          blacklisted_countries: parseBlacklistedCountries(b.blacklisted_countries),
+          meta_shield: b.meta_shield === 'true' || b.meta_shield === true, // 👈 Nuevo: Meta Shield
+          tiktok_shield: b.tiktok_shield === 'true' || b.tiktok_shield === true // 👈 Nuevo: TikTok Shield
+        }
       };
 
       const saved = await linksService.saveLink(newLink);
 
-      const isAjax =
-        req.xhr || req.headers["x-requested-with"] === "XMLHttpRequest";
-
-      if (isAjax) {
-        return res.json({
-          success: true,
-          message: "Link creado",
-          link: saved,
-          photoUrl,
-        });
+      if (req.xhr || req.headers["x-requested-with"] === "XMLHttpRequest") {
+        return res.json({ success: true, link: saved });
       }
-
-      return res.redirect("/admin/links");
-    } catch (error) {
-      console.error("[createLink] Error:", error);
-
-      const isAjax =
-        req.xhr || req.headers["x-requested-with"] === "XMLHttpRequest";
-
-      if (isAjax) {
-        return res.status(500).json({
-          success: false,
-          error: error.message,
-        });
-      }
-
-      return res.status(500).render("admin/links", {
-        layout: "admin/layout",
-        currentSection: "links",
-        links: [],
-        clients: [],
-        error: "Error creando el Smart Link",
-      });
+      res.redirect("/admin/links");
+    } catch (err) {
+      res.status(500).json({ success: false, error: err.message });
     }
   },
 
-  // =========================
-  //  ACTUALIZAR LINK (UPDATE)
-  // =========================
-  async updateLink(req, res) {
+  async deleteLink(req, res) {
     try {
-      const { id } = req.params;
-      const updateData = req.body;
-
-      const { data, error } = await supabase
-        .from("smart_links")
-        .update({
-          display_name: updateData.display_name,
-          price: updateData.price,
-          fecha_vencimiento: updateData.fecha_vencimiento,
-          instagram: updateData.instagram,
-          onlyfans: updateData.onlyfans,
-          subtitle: updateData.subtitle,
-          tiktok: updateData.tiktok,
-        })
-        .eq("id", id)
-        .select();
-
+      const { data: linkToDelete } = await supabase.from("smart_links").select("slug, custom_domain").eq("id", req.params.id).single();
+      const { error } = await supabase.from("smart_links").delete().eq("id", req.params.id);
       if (error) throw error;
 
-      return res.json({ success: true, data });
+      // 🧹 Invalidad caché
+      if (linkToDelete) linksService.invalidateCache(linkToDelete);
+
+      res.json({ success: true });
     } catch (err) {
-      console.error("Error en updateLink:", err.message);
-      return res.status(500).json({ success: false, error: err.message });
+      res.status(500).json({ success: false, error: err.message });
     }
   },
 
-  // =========================
-  //  TOGGLE SERVICE (ON/OFF)
-  // =========================
+  async toggleLinkActive(req, res) {
+    try {
+      const { id } = req.params;
+      const { is_active } = req.body;
+      const { data, error } = await supabase.from("smart_links").update({ is_active: !!is_active }).eq("id", id).select().single();
+      if (error) throw error;
+
+      // 🧹 Invalidad caché
+      linksService.invalidateCache(data);
+
+      res.json({ success: true, link: data });
+    } catch (err) {
+      res.status(500).json({ success: false, error: err.message });
+    }
+  },
+
   async toggleService(req, res) {
     try {
       const { id } = req.params;
       const { currentStatus } = req.body;
 
-      const newStatus =
-        currentStatus === "active" ? "pending_payment" : "active";
+      // Logic: if currentStatus is 'active', switch to 'pending_payment' (or 'inactive' based on your logic)
+      // If it's anything else, switch to 'active'.
+      // Assuming 'status' field in 'smart_links' table based on your schema description.
 
-      const is_active = newStatus === "active";
+      const newStatus = currentStatus === 'active' ? 'pending_payment' : 'active';
 
       const { data, error } = await supabase
         .from("smart_links")
-        .update({ status: newStatus, is_active })
+        .update({ status: newStatus })
         .eq("id", id)
         .select()
         .single();
 
       if (error) throw error;
 
-      return res.json({ success: true, newStatus: data.status });
+      // 🧹 Invalidad caché
+      linksService.invalidateCache(data);
+
+      res.json({ success: true, newStatus: data.status });
     } catch (err) {
-      return res.status(500).json({ success: false, error: err.message });
+      res.status(500).json({ success: false, error: err.message });
     }
   },
 
-  // =========================
-  //  ELIMINAR LINK
-  // =========================
-  async deleteLink(req, res) {
+  async updateLink(req, res) {
     try {
       const { id } = req.params;
+      const updates = req.body;
+      // Filter allowed fields to update
+      const allowed = ['display_name', 'onlyfans', 'instagram', 'telegram', 'price', 'link_mode', 'telegram_rotation_limit'];
+      const toUpdate = {};
+      for (const key of allowed) {
+        if (updates[key] !== undefined) toUpdate[key] = updates[key];
+      }
 
-      const { error } = await supabase.from("smart_links").delete().eq("id", id);
+      // Manejar advanced_config de forma inteligente para no borrar lo anterior
+      const { data: current } = await supabase.from("smart_links").select("advanced_config").eq("id", id).single();
+      const newConfig = {
+        ...(current?.advanced_config || {}),
+        meta_shield: updates.meta_shield === true || updates.meta_shield === 'true',
+        tiktok_shield: updates.tiktok_shield === true || updates.tiktok_shield === 'true'
+      };
+      toUpdate.advanced_config = newConfig;
 
+      const { data, error } = await supabase.from("smart_links").update(toUpdate).eq("id", id).select().single();
       if (error) throw error;
 
-      return res.json({ success: true });
+      // 🧹 Invalidad caché
+      linksService.invalidateCache(data);
+
+      res.json({ success: true, link: data });
     } catch (err) {
-      return res.status(500).json({ success: false, error: err.message });
+      res.status(500).json({ success: false, error: err.message });
     }
   },
 
-  // =========================
-  //  TOGGLE IS_ACTIVE (GENERICO)
-  // =========================
-  async toggleLinkActive(req, res) {
+  async toggleShield(req, res) {
     try {
       const { id } = req.params;
-      const { is_active } = req.body;
+      const { shieldType } = req.body; // 'meta' o 'tiktok'
+
+      const { data: current } = await supabase.from("smart_links").select("slug, advanced_config").eq("id", id).single();
+      const config = current?.advanced_config || {};
+
+      const key = shieldType === 'meta' ? 'meta_shield' : 'tiktok_shield';
+
+      // Si no existe el campo, asumimos que está ON (true)
+      const currentValue = config[key] !== false;
+      const newValue = !currentValue;
+
+      const newConfig = {
+        ...config,
+        [key]: newValue
+      };
 
       const { data, error } = await supabase
         .from("smart_links")
-        .update({ is_active: !!is_active })
+        .update({ advanced_config: newConfig })
         .eq("id", id)
-        .select("id, is_active")
+        .select()
         .single();
 
       if (error) throw error;
 
-      return res.json({ success: true, link: data });
+      // 🧹 Invalidad caché
+      linksService.invalidateCache(data);
+
+      res.json({ success: true, shield: key, value: newValue });
     } catch (err) {
-      console.error("[toggleLinkActive] Error:", err);
-      return res.status(500).json({ success: false, message: "Error interno" });
+      res.status(500).json({ success: false, error: err.message });
     }
-  },
+  }
 };

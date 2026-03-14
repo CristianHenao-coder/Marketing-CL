@@ -5,7 +5,7 @@ import { env } from '../config/env.js';
 const linksCache = new Map();
 
 export const linksService = {
-  
+
   // 1. Obtiene todos los links para el listado del Admin
   async getAll() {
     return await supabase
@@ -40,9 +40,9 @@ export const linksService = {
       // Intentamos insertar o actualizar basándonos en el slug
       const { data, error } = await supabase
         .from('smart_links')
-        .upsert(linkData, { 
+        .upsert(linkData, {
           onConflict: 'slug',
-          ignoreDuplicates: false 
+          ignoreDuplicates: false
         })
         .select()
         .single();
@@ -53,6 +53,9 @@ export const linksService = {
       linksCache.delete(linkData.slug);
       if (linkData.custom_domain) {
         linksCache.delete(linkData.custom_domain);
+        // También borramos la versión con/sin www por si acaso
+        linksCache.delete(linkData.custom_domain.replace('www.', ''));
+        linksCache.delete('www.' + linkData.custom_domain.replace('www.', ''));
       }
 
       return { success: true, data };
@@ -64,14 +67,34 @@ export const linksService = {
 
   // 4. Busca por dominio personalizado (ej: mis-links.com)
   async getByDomain(host) {
-    const cached = this._cacheGet(host);
+    // 1. Intento directo
+    let cached = this._cacheGet(host);
     if (cached) return cached;
 
-    const { data, error } = await supabase
+    let { data, error } = await supabase
       .from('smart_links')
       .select('*')
       .eq('custom_domain', host)
       .maybeSingle();
+
+    // 2. Si no encuentra, intentamos la variante con/sin www
+    if (!data) {
+      const altHost = host.startsWith('www.') ? host.slice(4) : `www.${host}`;
+      cached = this._cacheGet(altHost);
+      if (cached) return cached;
+
+      const { data: dataAlt } = await supabase
+        .from('smart_links')
+        .select('*')
+        .eq('custom_domain', altHost)
+        .maybeSingle();
+
+      if (dataAlt) {
+        data = dataAlt;
+        // Guardamos en caché ambas versiones para futuras peticiones rápidas
+        this._cacheSet(host, data);
+      }
+    }
 
     if (error) {
       console.error('❌ Error en getByDomain:', error.message);
@@ -90,9 +113,29 @@ export const linksService = {
   },
 
   _cacheSet(key, val) {
-    linksCache.set(key, { 
-      val, 
+    linksCache.set(key, {
+      val,
       exp: Date.now() + (env.CACHE_TTL_MS || 300000) // 5 minutos por defecto
     });
+  },
+
+  // 🧹 Borrar caché de un link (Slug y Dominios)
+  invalidateCache(link) {
+    if (!link) return;
+
+    // 1. Por Slug
+    if (link.slug) {
+      linksCache.delete(link.slug);
+    }
+
+    // 2. Por Dominio Personalizado
+    if (link.custom_domain) {
+      const domain = link.custom_domain.toLowerCase();
+      linksCache.delete(domain);
+      linksCache.delete(domain.replace('www.', ''));
+      linksCache.delete('www.' + domain.replace('www.', ''));
+    }
+
+    console.log(`[Cache] Invalidado: ${link.slug || 'unknown'}`);
   }
 };
