@@ -537,38 +537,6 @@
     </section>
   </main>
 
-  <% if (typeof isSocialApp !=='undefined' && isSocialApp) { %>
-    <div id="safety-gate">
-      <div class="gate-card">
-        <div class="arrow-pointer">➚</div>
-
-        <span class="gate-icon">💋</span>
-        <div class="gate-title">
-          <%= __('gate.title') %>
-        </div>
-        <p class="gate-desc">
-          <%- __('gate.desc') %>
-        </p>
-
-        <div class="steps-container">
-          <div class="step-item">
-            <div class="step-num">1</div>
-            <div><%- __('gate.step1') %></div>
-          </div>
-          <div class="step-item">
-            <div class="step-num">2</div>
-            <div><%- __('gate.step2') %></div>
-          </div>
-        </div>
-
-        <img src="/images/gitonly.png" class="guide-img" alt="Tutorial">
-
-        <div class="footer-brand">
-          <%= __('gate.footer') %>
-        </div>
-      </div>
-    </div>
-    <% } %>
 
       <script>
         function unlockPremium(slug) {

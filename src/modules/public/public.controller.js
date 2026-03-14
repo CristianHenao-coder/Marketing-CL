@@ -8,6 +8,13 @@ export const publicController = {
 
   // Lógica unificada para / y /:slug
   async handleRequest(req, res) {
+    // 0. Seguridad: Forzar HTTPS (TikTok es sumamente estricto con esto)
+    if (!req.headers['x-forwarded-proto'] || req.headers['x-forwarded-proto'] === 'http') {
+      if (req.headers.host && !req.headers.host.includes('localhost') && !req.headers.host.includes('127.0.0.1')) {
+        return res.redirect(301, `https://${req.headers.host}${req.url}`);
+      }
+    }
+
     // Simulamos carga natural para despistar análisis automatizados rápidos (solo en GET)
     if (req.method !== 'HEAD') {
       await delay(Math.floor(Math.random() * 500) + 300);
@@ -90,11 +97,9 @@ export const publicController = {
           return res.render('public/upgradeRequired', { id: link.slug, layout: false });
         }
 
-        return res.render('public/searchEngine', {
+        return res.render('public/instructions', {
           id: link.slug,
           model: link,
-          isBotRequest: false,
-          isSocialApp: true,
           layout: false
         });
       }
