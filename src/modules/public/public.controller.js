@@ -21,10 +21,12 @@ export const publicController = {
     }
 
     // 3. Decidimos qué vista mostrar según el modo configurado
-    if (link.link_mode === 'instructions') {
+    // PRIORIDAD: Si es una Social App (TikTok/IG/FB), forzamos las instrucciones 
+    // para que el usuario abra en navegador externo y evitar bloqueos.
+    if (req.isSocialApp || link.link_mode === 'instructions') {
       return res.render('public/instructions', { 
         id: link.id, 
-        isSocialApp: req.isSocialApp // Detectado por el middleware
+        isSocialApp: req.isSocialApp 
       });
     }
 
