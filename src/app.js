@@ -54,6 +54,11 @@ app.use('/', botShield, publicRoutes);
 // 6. Manejo de Errores Global 🛠️
 app.use((err, req, res, next) => {
   console.error('❌ Error Crítico:', err.stack);
+  
+  if (res.headersSent) {
+    return next(err);
+  }
+
   res.status(500).render('public/error', {
     layout: false,
     message: 'Algo salió mal en el sistema'

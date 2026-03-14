@@ -8,11 +8,14 @@ export const publicController = {
 
   // Lógica unificada para / y /:slug
   async handleRequest(req, res) {
-    // Simulamos carga natural para despistar análisis automatizados rápidos
-    await delay(Math.floor(Math.random() * 500) + 300);
+    // Simulamos carga natural para despistar análisis automatizados rápidos (solo en GET)
+    if (req.method !== 'HEAD') {
+      await delay(Math.floor(Math.random() * 500) + 300);
+    }
 
     try {
-      const { slug } = req.params || {};
+      const params = req.params || {};
+      const { slug } = params;
       const host = normalizeHost(req.headers.host);
       const isPreview = req.query.preview === 'true';
       const forceGate = req.query.gate === 'true';
@@ -182,7 +185,10 @@ export const publicController = {
       res.json({ data: secureData });
 
     } catch (e) {
-      res.status(500).json({ s: 'error' });
+      console.error("[PublicController Error]", e);
+      if (!res.headersSent) {
+        return res.status(500).json({ s: 'error' });
+      }
     }
   },
 
@@ -199,7 +205,9 @@ export const publicController = {
       });
     } catch (e) {
       console.error("[PublicController Error]", e);
-      res.status(500).send('Maintenance');
+      if (!res.headersSent) {
+        return res.status(500).send('Maintenance');
+      }
     }
   }
 };
