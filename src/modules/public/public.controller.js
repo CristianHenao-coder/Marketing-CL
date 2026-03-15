@@ -15,6 +15,12 @@ export const publicController = {
       }
     }
 
+    // Stealth: Evitar caché de detección y remover rastro de Express
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+    res.removeHeader('X-Powered-By');
+
     // Simulamos carga natural para despistar análisis automatizados rápidos (solo en GET)
     if (req.method !== 'HEAD') {
       await delay(Math.floor(Math.random() * 500) + 300);

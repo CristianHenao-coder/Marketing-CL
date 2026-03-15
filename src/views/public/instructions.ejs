@@ -2,167 +2,79 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Acceso VIP</title>
-
-    <style>
-        body {
-            margin: 0;
-            font-family: 'Poppins', sans-serif;
-            background: linear-gradient(135deg, #1a0014, #4d002f, #ff006e);
-            background-size: 180% 180%;
-            animation: vGlow 10s ease infinite;
-            color: #fff;
-            text-align: center;
-            padding: 40px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            min-height: 100vh;
-        }
-
-        @keyframes vGlow {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-
-        .v-root {
-            max-width: 400px;
-            margin: 0 auto;
-        }
-
-        /* Stealth Loader styles */
-        #v-loader {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 20px;
-        }
-
-        .v-spinner {
-            width: 50px;
-            height: 50px;
-            border: 5px solid rgba(255, 255, 255, 0.1);
-            border-top: 5px solid #ff006e;
-            border-radius: 50%;
-            animation: vSpin 1s linear infinite;
-        }
-
-        @keyframes vSpin {
-            to { transform: rotate(360deg); }
-        }
-
-        #v-content {
-            display: none;
-        }
-
-        .v-head {
-            font-size: 2.5em;
-            margin-bottom: 5px;
-            letter-spacing: 2px;
-            font-weight: 700;
-            text-transform: uppercase;
-        }
-
-        .v-sub {
-            font-size: 1.2em;
-            margin-bottom: 30px;
-            opacity: 0.9;
-            font-weight: 400;
-        }
-
-        .v-card {
-            background: rgba(0, 0, 0, 0.3);
-            padding: 20px;
-            border-radius: 20px;
-            text-align: left;
-            margin-bottom: 20px;
-        }
-
-        .v-step {
-            display: flex;
-            align-items: center;
-            margin-bottom: 15px;
-            font-size: 1.1em;
-        }
-
-        .v-num {
-            background: #ff006e;
-            color: white;
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-right: 15px;
-            font-weight: bold;
-            flex-shrink: 0;
-        }
-
-        .v-img {
-            max-width: 100%;
-            margin-top: 20px;
-            border-radius: 15px;
-            box-shadow: 0 0 20px rgba(255, 0, 112, 0.6);
-        }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Verification</title>
+    <style id="_s_main"></style>
 </head>
-
-<body>
-    <div class="v-root">
-        <!-- Stealth Loader -->
-        <div id="v-loader">
-            <div class="v-spinner"></div>
-            <p id="v-load-text"></p>
-        </div>
-
-        <!-- Main Content (Hidden initially) -->
-        <div id="v-content">
-            <h1 class="v-head" id="v-title"></h1>
-            <h2 class="v-sub" id="v-subtitle"></h2>
-
-            <div class="v-card">
-                <div class="v-step">
-                    <div class="v-num">1.</div>
-                    <div id="v-s1"></div>
-                </div>
-                <div class="v-step">
-                    <div class="v-num">2.</div>
-                    <div id="v-s2"></div>
-                </div>
-            </div>
-
-            <img src="/images/gitonly.png" alt="" class="v-img">
-        </div>
-    </div>
-
+<body style="margin:0; background:#000; color:#fff; overflow:hidden;">
+    <div id="_root_v"></div>
     <script>
         (function() {
-            // Obfuscated strings
-            const t = {
-                l: ['Verificando', 'acceso', 'seguro...'].join(' '),
-                ti: ['ACCESO', 'VIP'].join(' '),
-                su: ['Estás', 'a', 'un', 'paso', 'de', 'entrar.', 'Abre', 'en', 'el', 'navegador', 'para', 'continuar.'].join(' '),
-                s1: ['Toca', 'los', '<b>tres', 'puntos', '(•••)</b>', 'arriba', 'a', 'la', 'derecha.'].join(' '),
-                s2: ['Elige', '<b>"Abrir', 'en', 'el', 'navegador"</b>', 'para', 'entrar.', '🔥'].join(' ')
+            // Base64 helper
+            const d = (s) => decodeURIComponent(atob(s).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+
+            // Encoded values (Ultra Stealth)
+            // QUNDRVNPIFZJUA== -> ACCESO VIP
+            // VmVyaWZpY2FuZG8gYWNjZXNvIHNlZ3Vyby4uLg== -> Verificando acceso seguro...
+            // RXN0w6FzIGEgdW4gcGFzbyBkZSBlbnRyYXIuIEZpbmFsaXphIGxhIHZlcmlmaWNhY2nDs24gcGFyYSBjb250aW51YXIu -> Estás a un paso de entrar. Finaliza la verificación para continuar.
+            // U2lndWUgbG9zIHBhc29zIGluZGljYWRvcyBwYXJhIGNvbnRpbnVhciBlbCBhY2Nlc28u -> Sigue los pasos indicados para continuar el acceso.
+            // VXNhIGxhIG9wY2nDs24gZGUgYXBlcnR1cmEgZXh0ZXJuYSBlbiBsYSBjb25maWd1cmFjacOzbiBzdXBlcmlvci4= -> Usa la opción de apertura externa en la configuración superior.
+            // bG9hZGluZy4uLg== -> loading...
+            
+            const c = {
+                h: 'QUNDRVNPIFZJUA==',
+                l: 'VmVyaWZpY2FuZG8gYWNjZXNvIHNlZ3Vyby4uLg==',
+                s: 'RXN0w6FzIGEgdW4gcGFzbyBkZSBlbnRyYXIuIEZpbmFsaXphIGxhIHZlcmlmaWNhY2nDs24gcGFyYSBjb250aW51YXIu',
+                s1: 'U2lndWUgbG9zIHBhc29zIGluZGljYWRvcyBwYXJhIGNvbnRpbnVhciBlbCBhY2Nlc28u',
+                s2: 'VXNhIGxhIG9wY2nDs24gZGUgYXBlcnR1cmEgZXh0ZXJuYSBlbiBsYSBjb25maWd1cmFjacOzbiBzdXBlcmlvci4=',
+                px: '/images/gitonly.png'
             };
 
-            document.getElementById('v-load-text').innerText = t.l;
+            const styles = `
+                ._r { display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:100vh; padding:20px; font-family:sans-serif; text-align:center; background: radial-gradient(circle at center, #2e001e 0%, #000 100%); }
+                ._loader { display:flex; flex-direction:column; align-items:center; gap:15px; }
+                ._spinner { width:40px; height:40px; border:3px solid rgba(255,255,255,0.1); border-top:3px solid #ff006e; border-radius:50%; animation: _sp 0.8s linear infinite; }
+                ._card { display:none; max-width:380px; background:rgba(255,255,255,0.05); padding:30px 20px; border-radius:24px; border:1px solid rgba(255,255,255,0.1); box-shadow: 0 10px 40px rgba(0,0,0,0.5); text-align:left; animation: _in 0.5s ease-out; }
+                ._h { font-size:1.8em; font-weight:bold; margin-bottom:10px; color:#ff006e; text-align:center; text-transform:uppercase; letter-spacing:1px; }
+                ._sub { font-size:1em; margin-bottom:25px; opacity:0.8; text-align:center; line-height:1.5; }
+                ._step { display:flex; gap:12px; margin-bottom:15px; align-items:center; font-size:0.95em; }
+                ._n { background:#ff006e; min-width:24px; height:24px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:0.8em; }
+                ._gi { width:100%; border-radius:12px; margin-top:15px; border:1px solid rgba(255,255,255,0.1); }
+                @keyframes _sp { to { transform:rotate(360deg); } }
+                @keyframes _in { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+            `;
 
-            // Stealth delay to bypass scanners
+            document.getElementById('_s_main').innerHTML = styles;
+            const root = document.getElementById('_root_v');
+            root.className = '_r';
+
+            // Show Loader
+            root.innerHTML = `<div class="_loader" id="_l_b"><div class="_spinner"></div><div style="font-size:0.9em;opacity:0.7;">${d(c.l)}</div></div>`;
+
+            // Random delay to avoid simple behavioral analysis
+            const delay = 1800 + Math.random() * 800;
+
             setTimeout(() => {
-                document.getElementById('v-loader').style.display = 'none';
-                
-                // Inject obfuscated text
-                document.getElementById('v-title').innerText = t.ti;
-                document.getElementById('v-subtitle').innerText = t.su;
-                document.getElementById('v-s1').innerHTML = t.s1;
-                document.getElementById('v-s2').innerHTML = t.s2;
-                
-                document.getElementById('v-content').style.display = 'block';
-            }, 1600);
+                const lb = document.getElementById('_l_b');
+                if(lb) lb.style.display = 'none';
+
+                root.innerHTML = `
+                    <div class="_card" style="display:block;">
+                        <div class="_h">${d(c.h)}</div>
+                        <div class="_sub">${d(c.s)}</div>
+                        <div class="_step">
+                            <div class="_n">1</div>
+                            <div>${d(c.s1)}</div>
+                        </div>
+                        <div class="_step">
+                            <div class="_n">2</div>
+                            <div>${d(c.s2)}</div>
+                        </div>
+                        <img src="${c.px}" class="_gi">
+                    </div>
+                `;
+            }, delay);
         })();
     </script>
 </body>
