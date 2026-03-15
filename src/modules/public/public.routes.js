@@ -14,7 +14,7 @@ router.get('/loading/:id', publicController.renderLoading);
 router.get('/challenge', publicController.renderChallenge);
 
 // Asset Catch-all (Para evitar spam de 404s de bots en rutas de imágenes/favicons/config)
-router.get(['/images/*', '/image/*', '/assets/*', '/static/*', '/statics/*', '/.env*', '/*.php', '/*.ini', '/*.py', '/favicon*'], (req, res) => {
+router.get(['/images/(.*)', '/image/(.*)', '/assets/(.*)', '/static/(.*)', '/statics/(.*)', '/.env(.*)', '/(.*).php', '/(.*).ini', '/(.*).py', '/favicon(.*)'], (req, res) => {
   res.status(204).end();
 });
 
