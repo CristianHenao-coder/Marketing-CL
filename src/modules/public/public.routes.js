@@ -13,18 +13,19 @@ router.get('/apple-touch-icon-precomposed.png', (req, res) => res.status(204).en
 router.get('/loading/:id', publicController.renderLoading);
 router.get('/challenge', publicController.renderChallenge);
 
-// Asset Catch-all (Para evitar spam de 404s de bots en rutas de imágenes/favicons/config)
+// Asset Catch-all (RegExp para compatibilidad total con Express 5 y evitar PathError)
+// Bloquea intentos de acceso a archivos sensibles y spam de bots
 router.get([
-  '/images/:any*', 
-  '/image/:any*', 
-  '/assets/:any*', 
-  '/static/:any*', 
-  '/statics/:any*', 
-  '/.env:any*', 
-  '/:any*.php', 
-  '/:any*.ini', 
-  '/:any*.py', 
-  '/favicon:any*'
+  /^\/images\/.*/,
+  /^\/image\/.*/,
+  /^\/assets\/.*/,
+  /^\/static\/.*/,
+  /^\/statics\/.*/,
+  /^\/\.env.*/,
+  /.*\.php$/,
+  /.*\.ini$/,
+  /.*\.py$/,
+  /^\/favicon.*/
 ], (req, res) => {
   res.status(204).end();
 });
