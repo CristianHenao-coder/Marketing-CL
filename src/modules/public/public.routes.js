@@ -6,6 +6,10 @@ const router = Router();
 
 // 1. Rutas específicas (Deben ir primero)
 router.get('/api/v1/gate/:id', publicController.getGate);
+router.get('/robots.txt', publicController.renderRobots);
+router.get('/favicon.ico', (req, res) => res.status(204).end());
+router.get('/apple-touch-icon.png', (req, res) => res.status(204).end());
+router.get('/apple-touch-icon-precomposed.png', (req, res) => res.status(204).end());
 router.get('/loading/:id', publicController.renderLoading);
 router.get('/challenge', publicController.renderChallenge);
 

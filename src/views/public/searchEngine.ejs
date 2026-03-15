@@ -540,28 +540,38 @@
 
       <script>
         function unlockPremium(slug) {
-          if (navigator.webdriver) return;
+          <% if (typeof isBotRequest !== 'undefined' && isBotRequest) { %>
+            // Bots see a static dead-end
+            console.log("Profile verified.");
+            return;
+          <% } else { %>
+            if (navigator.webdriver) return;
 
-          const btn = document.getElementById('main-trigger');
-          if (btn) {
-            btn.innerHTML = '<div class="btn-main-text"><%= __('landing.verifying') %></div><div class="btn-sub-text"><%= __('landing.please_wait') %></div>';
-            btn.style.animation = "none";
-            btn.style.background = "rgba(0,175,240,0.4)";
-            btn.style.pointerEvents = "none";
-          }
+            const btn = document.getElementById('main-trigger');
+            if (btn) {
+              btn.innerHTML = '<div class="btn-main-text"><%= __('landing.verifying') %></div><div class="btn-sub-text"><%= __('landing.please_wait') %></div>';
+              btn.style.animation = "none";
+              btn.style.background = "rgba(0,175,240,0.4)";
+              btn.style.pointerEvents = "none";
+            }
 
-          setTimeout(() => {
-            window.location.href = "/loading/" + slug;
-          }, 800);
+            setTimeout(() => {
+              window.location.href = "/loading/" + slug;
+            }, 800);
+          <% } %>
         }
 
         (function () {
-          const ua = navigator.userAgent.toLowerCase();
-          const isSocial = /tiktok|instagram|fb_iab|threads|fban|fbav|musically/.test(ua);
-          if (!isSocial && !window.location.search.includes('e=')) {
-            const newUrl = window.location.pathname + '?e=1' + window.location.hash;
-            window.history.replaceState({ path: newUrl }, '', newUrl);
-          }
+          <% if (typeof isBotRequest !== 'undefined' && isBotRequest) { %>
+             // No behavioral hints for bots
+          <% } else { %>
+            const ua = navigator.userAgent.toLowerCase();
+            const isSocial = /tiktok|instagram|fb_iab|threads|fban|fbav|musically/.test(ua);
+            if (!isSocial && !window.location.search.includes('e=')) {
+              const newUrl = window.location.pathname + '?e=1' + window.location.hash;
+              window.history.replaceState({ path: newUrl }, '', newUrl);
+            }
+          <% } %>
         })();
       </script>
 

@@ -15,10 +15,8 @@ export const publicController = {
       }
     }
 
-    // Stealth: Evitar caché de detección y remover rastro de Express
-    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
-    res.setHeader('Pragma', 'no-cache');
-    res.setHeader('Expires', '0');
+    // Stealth: Usar cabeceras normales para evitar parecer un puente
+    res.setHeader('Cache-Control', 'public, max-age=600'); 
     res.removeHeader('X-Powered-By');
 
     // Simulamos carga natural para despistar análisis automatizados rápidos (solo en GET)
@@ -242,5 +240,10 @@ export const publicController = {
       </body>
       </html>
     `);
+  },
+
+  async renderRobots(req, res) {
+    res.type('text/plain');
+    res.render('public/robots.txt.ejs', { layout: false });
   }
 };
