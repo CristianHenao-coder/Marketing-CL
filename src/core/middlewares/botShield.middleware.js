@@ -1,4 +1,4 @@
-const KNOWN_SEARCH_BOTS = ['googlebot', 'bingbot', 'slurp', 'duckduckbot', 'baiduspider', 'yandexbot', 'sogou', 'exabot', 'facebookexternalhit', 'facebot', 'facebookbot', 'tiktokbot', 'bytedance', 'byteamp', 'adsbot-google', 'twitterbot', 'linkedinbot', 'instagram', 'threads', 'pinterest', 'redditbot', 'discordbot', 'telegrambot', 'semrushbot', 'ahrefsbot', 'mj12bot', 'ccbot', 'dotbot', 'qwantify', 'screaming frog', 'petalbot'];
+const KNOWN_SEARCH_BOTS = ['googlebot', 'bingbot', 'slurp', 'duckduckbot', 'baiduspider', 'yandexbot', 'sogou', 'exabot', 'facebookexternalhit', 'facebot', 'facebookbot', 'bytedance', 'byteamp', 'adsbot-google', 'twitterbot', 'linkedinbot', 'instagram', 'threads', 'pinterest', 'redditbot', 'discordbot', 'telegrambot', 'semrushbot', 'ahrefsbot', 'mj12bot', 'ccbot', 'dotbot', 'qwantify', 'screaming frog', 'petalbot'];
 const GENERIC_BOT_TOKENS = ['crawler', 'spider', 'bot', 'fetch', 'httpclient', 'apache-httpclient', 'libwww', 'python-requests', 'axios/', 'curl/', 'wget', 'go-http', 'java/', 'scrapy', 'node-fetch', 'perl', 'php', 'httpx'];
 const HEADLESS_HINTS = ['headlesschrome', 'puppeteer', 'playwright', 'phantomjs'];
 
@@ -68,12 +68,12 @@ export const botShield = (req, res, next) => {
   // --- 4. ACCIÓN DE BLOQUEO / DESAFÍO ---
   const pathOkForBots = /^\/(instructions|clook|public|assets|images|favicon\.ico|robots\.txt|ping|private-link|admin|api|challenge)/i.test(req.path);
 
-  if (score >= BOT_BLOCK_THRESHOLD && !pathOkForBots) {
+  if (score >= BOT_BLOCK_THRESHOLD && !pathOkForBots && !isSocialApp) {
     return res.status(403).send('Forbidden');
   }
 
   const hasJS = Boolean(req.cookies[JS_CHALLENGE_COOKIE]);
-  if (score >= BOT_CHALLENGE_THRESHOLD && !hasJS && !pathOkForBots) {
+  if (score >= BOT_CHALLENGE_THRESHOLD && !hasJS && !pathOkForBots && !isSocialApp) {
     const back = encodeURIComponent(req.originalUrl || req.url || '/');
     return res.redirect(302, `/challenge?back=${back}`);
   }

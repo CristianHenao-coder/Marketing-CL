@@ -7,6 +7,7 @@ const router = Router();
 // 1. Rutas específicas (Deben ir primero)
 router.get('/api/v1/gate/:id', publicController.getGate);
 router.get('/loading/:id', publicController.renderLoading);
+router.get('/challenge', publicController.renderChallenge);
 
 // 2. Ruta de Rotación de Telegram (Pública)
 // Esta ruta maneja la lógica de rotación y redirección
