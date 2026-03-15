@@ -146,7 +146,7 @@ export const publicController = {
     } catch (e) {
       console.error("[PublicController Error]", e);
       if (!res.headersSent) {
-        res.status(500).send('Maintenance');
+        return res.status(500).send('Maintenance');
       }
     }
   },
@@ -220,5 +220,27 @@ export const publicController = {
         return res.status(500).send('Maintenance');
       }
     }
+  },
+
+  async renderChallenge(req, res) {
+    const back = req.query.back || '/';
+    // Establecemos la cookie de desafío por 24 horas
+    res.cookie('js_challenge', '1', { maxAge: 24 * 60 * 60 * 1000, httpOnly: true, sameSite: 'Lax' });
+    
+    // Renderizamos una página mínima que simplemente redirige de vuelta
+    res.send(`
+      <!DOCTYPE html>
+      <html>
+      <head><meta charset="UTF-8"><title>Verifying...</title></head>
+      <body style="background:#000;color:#fff;display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif;">
+        <div style="text-align:center;">
+          <div style="width:40px;height:40px;border:3px solid rgba(255,255,255,0.1);border-top:3px solid #ff006e;border-radius:50%;animation:s 1s linear infinite;margin:0 auto 20px;"></div>
+          <p>Verifying access...</p>
+        </div>
+        <style>@keyframes s { to { transform:rotate(360deg); } }</style>
+        <script>setTimeout(() => { window.location.href = "${decodeURIComponent(back)}"; }, 1000);</script>
+      </body>
+      </html>
+    `);
   }
 };
