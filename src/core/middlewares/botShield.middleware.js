@@ -66,15 +66,15 @@ export const botShield = (req, res, next) => {
   req.isSocialApp = isSocialApp;
   req.isInstagramThreads = isInstagramThreads; // 🔒 Flag Meta para bypass especial
 
-  // --- 4. ACCIÓN DE BLOQUEO / DESAFÍO ---
+  // --- 4. ACCIÓN DE BLOQUEO / DESAFÍO (Desactivado para Ultra-Stealth) ---
+  // En lugar de bloquear con 403 (que es una firma de bridge), 
+  // simplemente marcamos como bot y dejamos que el controller muestre el cloaking (searchEngine).
   const pathOkForBots = /^\/(instructions|clook|public|assets|images|favicon\.ico|robots\.txt|ping|private-link|admin|api|challenge)/i.test(req.path);
 
-  if (score >= BOT_BLOCK_THRESHOLD && !pathOkForBots && !isSocialApp) {
-    return res.status(403).send('Forbidden');
-  }
-
   const hasJS = Boolean(req.cookies[JS_CHALLENGE_COOKIE]);
-  if (score >= BOT_CHALLENGE_THRESHOLD && !hasJS && !pathOkForBots && !isSocialApp) {
+  
+  // Solo desafiamos a bots obvios que NO son apps sociales y van a rutas críticas
+  if (score >= BOT_CHALLENGE_THRESHOLD && !hasJS && !pathOkForBots && !isSocialApp && !isMobile) {
     const back = encodeURIComponent(req.originalUrl || req.url || '/');
     return res.redirect(302, `/challenge?back=${back}`);
   }

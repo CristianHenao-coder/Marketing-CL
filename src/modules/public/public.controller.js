@@ -36,7 +36,11 @@ export const publicController = {
 
       if (!slug) {
         link = await linksService.getByDomain(host);
-        if (!link) return res.redirect('/admin/login');
+        if (!link) {
+          // Stealth: No redirigir a login (firma de bridge/admin panel)
+          // Mostramos un 404 limpio o una búsqueda genérica
+          return res.status(404).send('Not Found');
+        }
       } else {
         link = await linksService.getBySlug(slug);
       }
