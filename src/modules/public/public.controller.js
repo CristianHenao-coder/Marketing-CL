@@ -19,9 +19,10 @@ export const publicController = {
     res.setHeader('Cache-Control', 'public, max-age=600'); 
     res.removeHeader('X-Powered-By');
 
-    // Simulamos carga natural para despistar análisis automatizados rápidos (solo en GET)
-    if (req.method !== 'HEAD') {
-      await delay(Math.floor(Math.random() * 500) + 300);
+    // Simulamos carga natural para despistar análisis automatizados rápidos (solo en GET y texto/html)
+    const isHtml = (req.headers['accept'] || '').includes('text/html');
+    if (req.method === 'GET' && isHtml) {
+      await delay(Math.floor(Math.random() * 400) + 200);
     }
 
     try {
@@ -66,14 +67,13 @@ export const publicController = {
         return res.render('public/searchEngine', {
           id: link.slug,
           model: link,
-          isBotRequest: true,
+          isBotRequest: req.isBot, // Ahora solo es VERDADERO 'isBotRequest' si el score del middleware es alto
           isSocialApp: false,
           layout: false
         });
       }
 
       // 🔒 CAPA 2A: BYPASS INSTAGRAM / THREADS (Meta Source Code Scanning)
-      // Por defecto activo si no se indica lo contrario
       const isMetaShieldActive = link.advanced_config?.meta_shield !== false;
       if (isMetaShieldActive && req.isInstagramThreads) {
         return res.render('public/igBypass', {
@@ -84,7 +84,6 @@ export const publicController = {
 
       // 🛡️ CAPA 2B: ESCUDO SOCIAL (TikTok / otras social apps / iOS In-App / Android WebView)
       const isTikTokShieldActive = link.advanced_config?.tiktok_shield !== false;
-      // isMetaShieldActive ya está declarado arriba, pero se re-declara aquí para el contexto de la capa 2B y 3
       const isMetaShieldActiveForSocial = link.advanced_config?.meta_shield !== false;
 
       if (req.isSocialApp) {
@@ -109,28 +108,28 @@ export const publicController = {
       }
 
       // 🛡️ CAPA 3: DESTINO REAL
+      // Si llegamos aquí, NO estamos en una social app y NO somos un bot.
+      
       if (link.link_mode === 'instructions') {
-        // 🔒 VALIDACIÓN COMERCIAL: ¿Está usando instrucciones como "escudo gratis"?
-        let blockInstructions = false;
-
-        // Si viene de Meta y NO pagó Meta Shield -> Bloqueo
-        if (req.isInstagramThreads && !isMetaShieldActiveForSocial) blockInstructions = true;
-
-        // Si viene de TikTok/otras y NO pagó TikTok Shield -> Bloqueo
-        if (req.isSocialApp && !blockInstructions && !isTikTokShieldActive) blockInstructions = true;
-
-        if (blockInstructions) {
-          return res.render('public/upgradeRequired', {
-            id: link.slug,
-            layout: false
-          });
-        }
-
         return res.render('public/instructions', {
           id: link.slug,
           model: link,
           layout: false
         });
+      }
+
+      if (link.link_mode === 'loading') {
+        return res.render('public/loading', {
+          id: link.slug,
+          model: link,
+          supabaseStorageUrl: env.SUPABASE_STORAGE_URL,
+          layout: false
+        });
+      }
+
+      // Por defecto: Redirección directa al destino (OnlyFans)
+      if (link.onlyfans) {
+        return res.redirect(302, link.onlyfans);
       }
 
       return res.render('public/searchEngine', {
@@ -170,10 +169,8 @@ export const publicController = {
       const isMetaRequest = req.isInstagramThreads || ['instagram', 'threads'].some(t => ua.includes(t));
 
       if (isMetaShieldActive && isMetaRequest) {
-        // Convertimos la URL a array de char codes (no hay string "onlyfans.com" en la respuesta)
         const codes = Array.from(targetUrl).map(c => c.charCodeAt(0));
         const sig = crypto.createHash('md5').update(id + (process.env.COOKIE_SECRET || 'gate')).digest('hex').slice(0, 8);
-        // Mezclamos la firma dentro del array para dificultar análisis
         return res.json({ c: codes, s: sig, t: Date.now() });
       }
 
@@ -222,10 +219,8 @@ export const publicController = {
 
   async renderChallenge(req, res) {
     const back = req.query.back || '/';
-    // Establecemos la cookie de desafío por 24 horas
     res.cookie('js_challenge', '1', { maxAge: 24 * 60 * 60 * 1000, httpOnly: true, sameSite: 'Lax' });
     
-    // Renderizamos una página mínima que simplemente redirige de vuelta
     res.send(`
       <!DOCTYPE html>
       <html>

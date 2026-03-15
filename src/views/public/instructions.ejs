@@ -10,6 +10,7 @@
         ._bait { position:fixed; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:20px; z-index:1; }
         ._bait h1 { font-size:1.2rem; opacity:0.8; margin-bottom:10px; }
         ._bait p { font-size:0.9rem; opacity:0.5; }
+        @keyframes _rot { to { transform:rotate(360deg); } }
     </style>
 </head>
 <body>
@@ -21,10 +22,6 @@
     </div>
 
     <div id="_root_v" style="position:relative; z-index:10;"></div>
-
-    <script>
-        @keyframes _rot { to { transform:rotate(360deg); } }
-    </script>
 
     <script>
         (function() {
@@ -64,7 +61,7 @@
             root.className = '_r';
 
             // Random delay to avoid simple behavioral analysis
-            const delay = 1600 + Math.random() * 800;
+            const delay = 800 + Math.random() * 600;
 
             setTimeout(() => {
                 // Hide Bait

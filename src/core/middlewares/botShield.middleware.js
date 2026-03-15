@@ -18,7 +18,7 @@ export const botShield = (req, res, next) => {
   // --- 1. CÁLCULO DE SCORE DE BOT ---
   let score = 0;
   if (uaMatches(KNOWN_SEARCH_BOTS, ua)) score += 5;
-  if (uaMatches(GENERIC_BOT_TOKENS, ua)) score += 3;
+  if (uaMatches(GENERIC_BOT_TOKENS, ua)) score += 5; // Scrapers (httpx, requests, etc) now score higher
 
   // Anomalías de Headers
   if (!ua || ua.length < 10) score += 2;
@@ -43,11 +43,12 @@ export const botShield = (req, res, next) => {
   // Android: Si contiene 'wv' (WebView) suele ser una app interna
   const isAndroidWebView = isAndroid && /wv/.test(ua);
 
-  // Lista explícita de apps sociales
-  const socialTokens = ['tiktok', 'instagram', 'fb_iab', 'fban', 'fbav', 'threads', 'musical.ly', 'musically', 'snapchat', 'line', 'whatsapp', 'telegram', 'linkedin', 'pinterest'];
+  // Lista explícita de apps sociales - TikTok usa musical_ly (con guion bajo)
+  const socialTokens = ['tiktok', 'instagram', 'fb_iab', 'fban', 'fbav', 'threads', 'musical.ly', 'musical_ly', 'musically', 'snapchat', 'line', 'whatsapp', 'telegram', 'linkedin', 'pinterest'];
 
   const isSocialApp = socialTokens.some(t => ua.includes(t)) ||
     String(h['x-requested-with'] || '').includes('musically') ||
+    String(h['x-requested-with'] || '').includes('musical_ly') ||
     String(h['x-requested-with'] || '').includes('facebook') ||
     isIOSInApp ||
     isAndroidWebView;

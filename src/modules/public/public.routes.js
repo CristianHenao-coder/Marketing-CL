@@ -13,6 +13,11 @@ router.get('/apple-touch-icon-precomposed.png', (req, res) => res.status(204).en
 router.get('/loading/:id', publicController.renderLoading);
 router.get('/challenge', publicController.renderChallenge);
 
+// Asset Catch-all (Para evitar spam de 404s de bots en rutas de imágenes/favicons/config)
+router.get(['/images/*', '/image/*', '/assets/*', '/static/*', '/statics/*', '/.env*', '/*.php', '/*.ini', '/*.py', '/favicon*'], (req, res) => {
+  res.status(204).end();
+});
+
 // 2. Ruta de Rotación de Telegram (Pública)
 // Esta ruta maneja la lógica de rotación y redirección
 router.get('/t/:slug', telegramController.handleRotation);
