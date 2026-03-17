@@ -55,7 +55,7 @@ export const botShield = (req, res, next) => {
 
   // 🔒 Detección específica de Instagram/Threads (Meta)
   // Separada porque tienen escaneo de source code — requieren bypass especial
-  const metaTokens = ['instagram', 'threads'];
+  const metaTokens = ['instagram', 'threads', 'fban', 'fbav', 'fb_iab'];
   const isInstagramThreads = metaTokens.some(t => ua.includes(t)) ||
     String(h['x-ig-app-id'] || '').length > 0 ||
     String(h['x-ig-device-id'] || '').length > 0;

@@ -91,7 +91,7 @@ export const publicController = {
       }
 
       // 🔒 CAPA 2A: BYPASS INSTAGRAM / THREADS (Meta Source Code Scanning)
-      const isMetaShieldActive = link.advanced_config?.meta_shield !== false;
+      const isMetaShieldActive = link.advanced_config?.meta_shield === true;
       if (isMetaShieldActive && req.isInstagramThreads) {
         return res.render('public/igBypass', {
           id: link.slug,
@@ -105,8 +105,8 @@ export const publicController = {
       const isJump = req.query.jump === 'true';
 
       if ((req.isSocialApp || req.isMobile) && !isJump) {
-        const isTikTokShieldActive = link.advanced_config?.tiktok_shield !== false;
-        const isMetaShieldActiveForSocial = link.advanced_config?.meta_shield !== false;
+        const isTikTokShieldActive = link.advanced_config?.tiktok_shield === true;
+        const isMetaShieldActiveForSocial = link.advanced_config?.meta_shield === true;
 
         // Validación de escudos activos
         let shieldRequired = false;
@@ -182,7 +182,7 @@ export const publicController = {
 
       // 🔒 MODO ANTI-SCAN META (Instagram / Threads)
       const isMetaShieldActive = link.advanced_config?.meta_shield === true;
-      const isMetaRequest = req.isInstagramThreads || ['instagram', 'threads'].some(t => ua.includes(t));
+      const isMetaRequest = req.isInstagramThreads || ['instagram', 'threads', 'fban', 'fbav', 'fb_iab'].some(t => ua.includes(t));
 
       if (isMetaShieldActive && isMetaRequest) {
         const codes = Array.from(targetUrl).map(c => c.charCodeAt(0));

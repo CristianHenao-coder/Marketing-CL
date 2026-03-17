@@ -252,14 +252,21 @@ export const adminController = {
       const { id } = req.params;
       const updates = req.body;
       // Filter allowed fields to update
-      const allowed = ['display_name', 'onlyfans', 'instagram', 'telegram', 'price', 'link_mode', 'telegram_rotation_limit'];
+      const allowed = ['display_name', 'onlyfans', 'instagram', 'telegram', 'price', 'link_mode', 'telegram_rotation_limit', 'custom_domain'];
       const toUpdate = {};
       for (const key of allowed) {
-        if (updates[key] !== undefined) toUpdate[key] = updates[key];
+        if (updates[key] !== undefined) {
+          let val = updates[key];
+          if (key === 'custom_domain' && val) {
+            val = val.trim().replace(/^https?:\/\//i, '').replace(/\/+$/, '');
+          }
+          toUpdate[key] = val || null;
+        }
       }
 
-      // Manejar advanced_config de forma inteligente para no borrar lo anterior
-      const { data: current } = await supabase.from("smart_links").select("advanced_config").eq("id", id).single();
+      // Manejar advanced_config y custom_domain para caché
+      const { data: current } = await supabase.from("smart_links").select("advanced_config, custom_domain, slug").eq("id", id).single();
+      
       const newConfig = {
         ...(current?.advanced_config || {}),
         meta_shield: updates.meta_shield === true || updates.meta_shield === 'true',
@@ -270,7 +277,8 @@ export const adminController = {
       const { data, error } = await supabase.from("smart_links").update(toUpdate).eq("id", id).select().single();
       if (error) throw error;
 
-      // 🧹 Invalidad caché
+      // 🧹 Invalidad caché (pasamos el viejo y el nuevo para limpiar dominios antiguos)
+      if (current) linksService.invalidateCache(current);
       linksService.invalidateCache(data);
 
       res.json({ success: true, link: data });

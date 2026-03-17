@@ -112,6 +112,7 @@
                                 data-tg-limit="<%= link.telegram_rotation_limit %>"
                                 data-meta-shield="<%= link.advanced_config?.meta_shield || false %>"
                                 data-tiktok-shield="<%= link.advanced_config?.tiktok_shield || false %>"
+                                data-domain="<%= link.custom_domain || '' %>"
                                 style="background: #222; border: 1px solid #444; padding: 5px 10px; border-radius: 4px; cursor: pointer;">
                                 ✏️
                             </button>
@@ -232,6 +233,13 @@
                 <label
                     style="display: block; font-size: 12px; color: var(--text-dim); margin-bottom: 5px;">NOMBRE_DISPLAY</label>
                 <input type="text" id="edit_name"
+                    style="width: 100%; background: #1a1a1a; border: 1px solid #333; color: white; padding: 8px; border-radius: 5px;">
+            </div>
+            <div>
+                <label
+                    style="display: block; font-size: 12px; color: var(--text-dim); margin-bottom: 5px;">DOMINIO_PROPIO
+                    (Opcional)</label>
+                <input type="text" id="edit_domain" placeholder="ej: mi-dominio.com"
                     style="width: 100%; background: #1a1a1a; border: 1px solid #333; color: white; padding: 8px; border-radius: 5px;">
             </div>
             <div style="display: flex; gap: 10px;">
@@ -378,6 +386,7 @@
         document.getElementById('edit_expiry').value = data.expiry;
         document.getElementById('edit_ig').value = data.ig;
         document.getElementById('edit_of').value = data.of;
+        document.getElementById('edit_domain').value = data.domain || '';
         document.getElementById('edit_tg_limit').value = data.tgLimit || 200;
         document.getElementById('edit_meta_shield').checked = data.metaShield === 'true';
         document.getElementById('edit_tiktok_shield').checked = data.tiktokShield === 'true';
@@ -592,6 +601,7 @@
             price: parseFloat(document.getElementById('edit_price').value) || 0,
             instagram: document.getElementById('edit_ig').value,
             onlyfans: document.getElementById('edit_of').value,
+            custom_domain: document.getElementById('edit_domain').value,
             telegram_rotation_limit: parseInt(document.getElementById('edit_tg_limit').value) || 200,
             meta_shield: document.getElementById('edit_meta_shield').checked,
             tiktok_shield: document.getElementById('edit_tiktok_shield').checked
