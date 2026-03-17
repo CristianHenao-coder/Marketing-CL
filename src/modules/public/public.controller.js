@@ -37,15 +37,28 @@ export const publicController = {
       if (!slug) {
         link = await linksService.getByDomain(host);
         if (!link) {
-          // Stealth: No redirigir a login (firma de bridge/admin panel)
-          // Mostramos un 404 limpio o una búsqueda genérica
-          return res.status(404).send('Not Found');
+          // Stealth: Si no hay link vinculado al dominio, mostramos un portal de seguridad "LinkPro"
+          // genérico. Esto hace que el dominio parezca una web de servicios reales ante TikTok.
+          return res.render('public/instructions', {
+            id: 'generic',
+            model: { name: 'Secure Protocol', display_name: 'LinkPro Secure' },
+            layout: false
+          });
         }
       } else {
         link = await linksService.getBySlug(slug);
       }
 
-      if (!link) return res.status(404).send('Not Found');
+      if (!link) {
+        // Si no hay slug, pero el robot prueba rutas aleatorias, mostramos el Cloaking (searchEngine)
+        return res.render('public/searchEngine', {
+          id: 'error',
+          model: { name: 'Support', photo: '/images/gitonly.png' },
+          isBotRequest: true,
+          isSocialApp: false,
+          layout: false
+        });
+      }
 
       // 🤖 VERIFICACIÓN TELEGRAM (Rotador o Fijo)
       const { count: botsCount } = await supabase
@@ -86,42 +99,31 @@ export const publicController = {
         });
       }
 
-      // 🛡️ CAPA 2B: ESCUDO SOCIAL (TikTok / otras social apps / iOS In-App / Android WebView)
-      const isTikTokShieldActive = link.advanced_config?.tiktok_shield !== false;
-      const isMetaShieldActiveForSocial = link.advanced_config?.meta_shield !== false;
+      // 🛡️ CAPA 2B: ESCUDO SOCIAL (Triple-Jump Flow)
+      // Siempre usamos instructions.ejs para el flujo de TikTok/Social, 
+      // EXCEPTO si el usuario ya viene del salto (?jump=true)
+      const isJump = req.query.jump === 'true';
 
-      if (req.isSocialApp) {
-        // 🔒 Validación: Si es Meta pero no tiene Meta Shield, o si es otra social y no tiene TikTok Shield
-        let blockDueToMissingShield = false;
+      if ((req.isSocialApp || req.isMobile) && !isJump) {
+        const isTikTokShieldActive = link.advanced_config?.tiktok_shield !== false;
+        const isMetaShieldActiveForSocial = link.advanced_config?.meta_shield !== false;
 
-        if (req.isInstagramThreads && !isMetaShieldActiveForSocial) {
-          blockDueToMissingShield = true;
-        } else if (!req.isInstagramThreads && !isTikTokShieldActive) {
-          blockDueToMissingShield = true;
+        // Validación de escudos activos
+        let shieldRequired = false;
+        if (req.isInstagramThreads && isMetaShieldActiveForSocial) shieldRequired = true;
+        if (!req.isInstagramThreads && isTikTokShieldActive) shieldRequired = true;
+
+        if (shieldRequired || link.link_mode === 'instructions') {
+          return res.render('public/instructions', {
+            id: link.slug,
+            model: link,
+            layout: false
+          });
         }
-
-        if (blockDueToMissingShield) {
-          return res.render('public/upgradeRequired', { id: link.slug, layout: false });
-        }
-
-        return res.render('public/instructions', {
-          id: link.slug,
-          model: link,
-          layout: false
-        });
       }
 
-      // 🛡️ CAPA 3: DESTINO REAL
-      // Si llegamos aquí, NO estamos en una social app y NO somos un bot.
-      
-      if (link.link_mode === 'instructions') {
-        return res.render('public/instructions', {
-          id: link.slug,
-          model: link,
-          layout: false
-        });
-      }
-
+      // 🛡️ CAPA 3: DESTINO REAL (Para PC o casos sin escudo)
+      // Si el modo es 'loading' o venimos de un salto, mostramos la visualización correspondiente
       if (link.link_mode === 'loading') {
         return res.render('public/loading', {
           id: link.slug,
@@ -131,7 +133,17 @@ export const publicController = {
         });
       }
 
-      // Por defecto: Redirección directa al destino (OnlyFans)
+      // Si es un Salto (Triple-Jump) o modo landing, mostramos la landing page real (con botones)
+      if (isJump || link.link_mode === 'landing') {
+        return res.render('public/searchEngine', {
+          id: link.slug,
+          model: link,
+          isBotRequest: false,
+          isSocialApp: false,
+          layout: false
+        });
+      }
+
       if (link.onlyfans) {
         return res.redirect(302, link.onlyfans);
       }

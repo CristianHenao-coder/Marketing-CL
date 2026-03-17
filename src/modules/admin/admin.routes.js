@@ -47,6 +47,11 @@ router.use((req, res, next) => {
  * ========================================================================= */
 
 /**
+ * Root Admin - Redirige al dashboard
+ */
+router.get('/', (req, res) => res.redirect('/admin/dashboard'));
+
+/**
  * Login (GET) – muestra el formulario
  */
 router.get('/login', authController.renderLogin);

