@@ -114,9 +114,16 @@ export const publicController = {
         if (!req.isInstagramThreads && isTikTokShieldActive) shieldRequired = true;
 
         if (shieldRequired || link.link_mode === 'instructions') {
+          // Si hay dominio de conversión, el salto va hacia allá. Si no, se queda en el mismo dominio.
+          const protocol = req.secure ? 'https' : 'http';
+          const targetUrl = link.conversion_domain 
+            ? `${protocol}://${link.conversion_domain}/${link.slug}?jump=true`
+            : `${req.originalUrl}${req.originalUrl.includes('?') ? '&' : '?'}jump=true`;
+
           return res.render('public/instructions', {
             id: link.slug,
             model: link,
+            targetUrl,
             layout: false
           });
         }

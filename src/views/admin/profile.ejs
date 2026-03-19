@@ -113,6 +113,7 @@
                                 data-meta-shield="<%= link.advanced_config?.meta_shield || false %>"
                                 data-tiktok-shield="<%= link.advanced_config?.tiktok_shield || false %>"
                                 data-domain="<%= link.custom_domain || '' %>"
+                                data-conversion-domain="<%= link.conversion_domain || '' %>"
                                 style="background: #222; border: 1px solid #444; padding: 5px 10px; border-radius: 4px; cursor: pointer;">
                                 ✏️
                             </button>
@@ -148,14 +149,18 @@
             <!-- Cliente pre-seleccionado y oculto -->
             <input type="hidden" name="client_id" value="<%= client.id %>">
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
                 <div>
                     <label>Slug (Ruta)</label>
-                    <input type="text" name="slug" placeholder="ej: marta-vip-promo" required />
+                    <input type="text" name="slug" placeholder="ej: marta-vip" required />
                 </div>
                 <div>
-                    <label>Dominio Propio (Opcional)</label>
-                    <input type="text" name="custom_domain" placeholder="ej: martavip.com" />
+                    <label>Dominio Bio (Opcional)</label>
+                    <input type="text" name="custom_domain" placeholder="ej: bio.com" />
+                </div>
+                <div>
+                    <label style="color: #ff6ba8;">Dominio Landing (Opcional)</label>
+                    <input type="text" name="conversion_domain" placeholder="ej: real.com" />
                 </div>
             </div>
 
@@ -235,12 +240,17 @@
                 <input type="text" id="edit_name"
                     style="width: 100%; background: #1a1a1a; border: 1px solid #333; color: white; padding: 8px; border-radius: 5px;">
             </div>
-            <div>
-                <label
-                    style="display: block; font-size: 12px; color: var(--text-dim); margin-bottom: 5px;">DOMINIO_PROPIO
-                    (Opcional)</label>
-                <input type="text" id="edit_domain" placeholder="ej: mi-dominio.com"
-                    style="width: 100%; background: #1a1a1a; border: 1px solid #333; color: white; padding: 8px; border-radius: 5px;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <div>
+                    <label style="display: block; font-size: 11px; color: var(--text-dim); margin-bottom: 5px;">DOMINIO_BIO</label>
+                    <input type="text" id="edit_domain" placeholder="ej: bio.com"
+                        style="width: 100%; background: #1a1a1a; border: 1px solid #333; color: white; padding: 8px; border-radius: 5px;">
+                </div>
+                <div>
+                    <label style="display: block; font-size: 11px; color: #ff6ba8; margin-bottom: 5px;">DOMINIO_LANDING</label>
+                    <input type="text" id="edit_conversion_domain" placeholder="ej: real.com"
+                        style="width: 100%; background: #1a1a1a; border: 1px solid #333; color: white; padding: 8px; border-radius: 5px;">
+                </div>
             </div>
             <div style="display: flex; gap: 10px;">
                 <div style="flex: 1;">
@@ -390,6 +400,7 @@
         document.getElementById('edit_tg_limit').value = data.tgLimit || 200;
         document.getElementById('edit_meta_shield').checked = data.metaShield === 'true';
         document.getElementById('edit_tiktok_shield').checked = data.tiktokShield === 'true';
+        document.getElementById('edit_conversion_domain').value = data.conversionDomain || '';
         document.getElementById('editModal').style.display = 'block';
     }
 
@@ -604,7 +615,8 @@
             custom_domain: document.getElementById('edit_domain').value,
             telegram_rotation_limit: parseInt(document.getElementById('edit_tg_limit').value) || 200,
             meta_shield: document.getElementById('edit_meta_shield').checked,
-            tiktok_shield: document.getElementById('edit_tiktok_shield').checked
+            tiktok_shield: document.getElementById('edit_tiktok_shield').checked,
+            conversion_domain: document.getElementById('edit_conversion_domain').value
         };
 
         try {

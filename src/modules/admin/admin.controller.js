@@ -157,6 +157,7 @@ export const adminController = {
       const newLink = {
         slug: b.slug?.trim(),
         custom_domain: b.custom_domain?.trim().replace(/^https?:\/\//i, '').replace(/\/+$/, '') || null,
+        conversion_domain: b.conversion_domain?.trim().replace(/^https?:\/\//i, '').replace(/\/+$/, '') || null,
         display_name: b.display_name,
         onlyfans: b.onlyfans,
         instagram: b.instagram,
@@ -252,12 +253,12 @@ export const adminController = {
       const { id } = req.params;
       const updates = req.body;
       // Filter allowed fields to update
-      const allowed = ['display_name', 'onlyfans', 'instagram', 'telegram', 'price', 'link_mode', 'telegram_rotation_limit', 'custom_domain'];
+      const allowed = ['display_name', 'onlyfans', 'instagram', 'telegram', 'price', 'link_mode', 'telegram_rotation_limit', 'custom_domain', 'conversion_domain'];
       const toUpdate = {};
       for (const key of allowed) {
         if (updates[key] !== undefined) {
           let val = updates[key];
-          if (key === 'custom_domain' && val) {
+          if ((key === 'custom_domain' || key === 'conversion_domain') && val) {
             val = val.trim().replace(/^https?:\/\//i, '').replace(/\/+$/, '');
           }
           toUpdate[key] = val || null;

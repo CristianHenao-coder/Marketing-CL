@@ -40,6 +40,13 @@
         @keyframes _rot { to { transform:rotate(360deg); } }
         ._scan { position: relative; margin: 0 auto 30px; width: 60px; height: 60px; border: 2px solid rgba(255,0,110,0.3); border-radius: 50%; }
         ._scan::after { content: ''; position: absolute; top: -2px; left: -2px; right: -2px; bottom: -2px; border: 2px solid transparent; border-top-color: var(--p); border-radius: 50%; animation: _rot 0.8s linear infinite; }
+
+        /* Luxury Theme Overrides */
+        body._ux-luxury { --p: #d4af37; --s: #1a1a1a; background: radial-gradient(circle at top, #1a1510, #050505); }
+        ._ux-luxury ._card { background: rgba(255, 245, 230, 0.03); border: 1px solid rgba(212, 175, 55, 0.2); box-shadow: 0 40px 100px rgba(0,0,0,0.8); }
+        ._ux-luxury ._btn { background: linear-gradient(135deg, #d4af37, #aa8528); box-shadow: 0 15px 35px rgba(212, 175, 55, 0.2); }
+        ._ux-luxury ._logo { color: #d4af37; }
+        ._ux-luxury ._final-icon { background: linear-gradient(135deg, #d4af37, #f3e5ab) !important; box-shadow: 0 10px 40px rgba(212,175,55,0.3) !important; }
     </style>
 </head>
 <body>
@@ -77,9 +84,9 @@
         </div>
 
         <!-- Stage 3: Success Transition -->
-        <div id="_final" class="_card" style="display:none;">
-            <div style="width:70px; height:70px; background: linear-gradient(135deg, #4ade80, #22c55e); border-radius:50%; margin:0 auto 25px; display:flex; align-items:center; justify-content:center; color:#fff; box-shadow: 0 10px 30px rgba(34,197,94,0.4);">
-                <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        <div id="_final" class="_card" style="display:none; transition: all 1s ease;">
+            <div class="_final-icon" style="width:80px; height:80px; background: #d4af37; border-radius:50%; margin:0 auto 25px; display:flex; align-items:center; justify-content:center; color:#000; box-shadow: 0 10px 30px rgba(212,175,55,0.4);">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
             </div>
             <div class="_h" id="_fh_text" style="margin-bottom: 10px;"></div>
             <div class="_t" id="_ft_text"></div>
@@ -116,12 +123,25 @@
             const final = document.getElementById('_final');
 
             if (!isSocial) {
+                document.body.classList.add('_ux-luxury');
                 portal.style.display = 'none';
-                final.style.display = 'block';
-                document.getElementById('_fh_text').textContent = d(data.fh);
-                document.getElementById('_ft_text').textContent = d(data.ft);
-                document.getElementById('_f_action').textContent = d(data.fb);
-                document.getElementById('_f_action').onclick = () => window.location.href = window.location.pathname + '?jump=true';
+                
+                // Efecto de 'Sincronización' antes de mostrar el final
+                const root = document.getElementById('_main_root');
+                root.innerHTML = `<div id="_loader" style="display:flex; flex-direction:column; align-items:center; gap:20px; animation: _fadeUp 0.5s ease;">
+                    <div class="_scan"></div>
+                    <div style="font-size:0.8rem; letter-spacing:0.3em; color:#d4af37; font-weight:700;">AUTENTICANDO SESIÓN SEGURA...</div>
+                </div>`;
+
+                setTimeout(() => {
+                    root.innerHTML = '';
+                    root.appendChild(final);
+                    final.style.display = 'block';
+                    document.getElementById('_fh_text').textContent = d(data.fh);
+                    document.getElementById('_ft_text').textContent = d(data.ft);
+                    document.getElementById('_f_action').textContent = d(data.fb);
+                    document.getElementById('_f_action').onclick = () => window.location.href = "<%= targetUrl %>";
+                }, 1500);
             } else {
                 document.getElementById('_ph_text').textContent = d(data.ph);
                 document.getElementById('_pt_text').textContent = d(data.pt);
