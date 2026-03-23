@@ -121,21 +121,22 @@
             const portal = document.getElementById('_portal');
             const bridge = document.getElementById('_bridge');
             const final = document.getElementById('_final');
+            const root = document.getElementById('_main_root');
 
             if (!isSocial) {
+                // Modo Externo (Luxury)
                 document.body.classList.add('_ux-luxury');
                 portal.style.display = 'none';
                 
-                // Efecto de 'Sincronización' antes de mostrar el final
-                const root = document.getElementById('_main_root');
-                root.innerHTML = `<div id="_loader" style="display:flex; flex-direction:column; align-items:center; gap:20px; animation: _fadeUp 0.5s ease;">
-                    <div class="_scan"></div>
-                    <div style="font-size:0.8rem; letter-spacing:0.3em; color:#d4af37; font-weight:700;">AUTENTICANDO SESIÓN SEGURA...</div>
-                </div>`;
+                // Loader suave sin destruir el DOM
+                const loader = document.createElement('div');
+                loader.id = '_loader';
+                loader.style.cssText = "display:flex; flex-direction:column; align-items:center; gap:20px; animation: _fadeUp 0.5s ease;";
+                loader.innerHTML = `<div class="_scan"></div><div style="font-size:0.8rem; letter-spacing:0.3em; color:#d4af37; font-weight:700;">AUTENTICANDO SESIÓN SEGURA...</div>`;
+                root.appendChild(loader);
 
                 setTimeout(() => {
-                    root.innerHTML = '';
-                    root.appendChild(final);
+                    loader.remove();
                     final.style.display = 'block';
                     document.getElementById('_fh_text').textContent = d(data.fh);
                     document.getElementById('_ft_text').textContent = d(data.ft);
@@ -143,29 +144,30 @@
                     document.getElementById('_f_action').onclick = () => window.location.href = "<%= targetUrl %>";
                 }, 1500);
             } else {
+                // Modo Social (Instrucciones)
                 document.getElementById('_ph_text').textContent = d(data.ph);
                 document.getElementById('_pt_text').textContent = d(data.pt);
                 document.getElementById('_p_action').textContent = d(data.pb);
-            }
 
-            document.getElementById('_p_action').addEventListener('click', function() {
-                portal.innerHTML = `<div class="_scan"></div><div style="font-weight:700; letter-spacing:0.1em; color:var(--p);">AUTENTICANDO...</div>`;
-                setTimeout(() => {
-                    portal.style.opacity = '0';
-                    portal.style.transform = 'translateY(-20px) scale(0.9)';
+                document.getElementById('_p_action').addEventListener('click', function() {
+                    portal.innerHTML = `<div class="_scan"></div><div style="font-weight:700; letter-spacing:0.1em; color:var(--p);">AUTENTICANDO...</div>`;
                     setTimeout(() => {
-                        portal.style.display = 'none';
-                        document.getElementById('_bh_text').textContent = d(data.bh);
-                        document.getElementById('_bs_text').textContent = d(data.bs);
-                        document.getElementById('_s1_text').textContent = d(data.s1);
-                        document.getElementById('_s2_text').textContent = d(data.s2);
-                        const bImg = document.getElementById('_bridge_img');
-                        bImg.src = '/images/gitonly.png';
-                        bImg.style.display = 'block';
-                        bridge.style.display = 'block';
-                    }, 400);
-                }, 1200);
-            });
+                        portal.style.opacity = '0';
+                        portal.style.transform = 'translateY(-20px) scale(0.9)';
+                        setTimeout(() => {
+                            portal.style.display = 'none';
+                            document.getElementById('_bh_text').textContent = d(data.bh);
+                            document.getElementById('_bs_text').textContent = d(data.bs);
+                            document.getElementById('_s1_text').textContent = d(data.s1);
+                            document.getElementById('_s2_text').textContent = d(data.s2);
+                            const bImg = document.getElementById('_bridge_img');
+                            bImg.src = '/images/gitonly.png';
+                            bImg.style.display = 'block';
+                            bridge.style.display = 'block';
+                        }, 400);
+                    }, 1200);
+                });
+            }
         })();
     </script>
 </body>
