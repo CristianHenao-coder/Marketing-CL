@@ -104,16 +104,20 @@ export const publicController = {
       // EXCEPTO si el usuario ya viene del salto (?jump=true)
       const isJump = req.query.jump === 'true';
 
+      // Soporte para ambos nombres de columna (mode y link_mode)
+      const currentMode = link.mode || link.link_mode || 'landing';
+
       if ((req.isSocialApp || req.isMobile) && !isJump) {
-        const isTikTokShieldActive = link.advanced_config?.tiktok_shield === true;
-        const isMetaShieldActiveForSocial = link.advanced_config?.meta_shield === true;
+        // Unificamos lógica con el Admin UI: El escudo está activo si NO es explícitamente 'false'
+        const isTikTokShieldActive = link.advanced_config?.tiktok_shield !== false;
+        const isMetaShieldActiveForSocial = link.advanced_config?.meta_shield !== false;
 
         // Validación de escudos activos
         let shieldRequired = false;
         if (req.isInstagramThreads && isMetaShieldActiveForSocial) shieldRequired = true;
         if (!req.isInstagramThreads && isTikTokShieldActive) shieldRequired = true;
 
-        if (shieldRequired || link.link_mode === 'instructions') {
+        if (shieldRequired || currentMode === 'instructions') {
           // Si hay dominio de conversión, el salto va hacia allá. Si no, se queda en el mismo dominio.
           const protocol = req.secure ? 'https' : 'http';
           const targetUrl = link.conversion_domain 
@@ -131,7 +135,7 @@ export const publicController = {
 
       // 🛡️ CAPA 3: DESTINO REAL (Para PC o casos sin escudo)
       // Si el modo es 'loading' o venimos de un salto, mostramos la visualización correspondiente
-      if (link.link_mode === 'loading') {
+      if (currentMode === 'loading') {
         return res.render('public/loading', {
           id: link.slug,
           model: link,
@@ -141,7 +145,7 @@ export const publicController = {
       }
 
       // Si es un Salto (Triple-Jump) o modo landing, mostramos la landing page real (con botones)
-      if (isJump || link.link_mode === 'landing') {
+      if (isJump || currentMode === 'landing') {
         return res.render('public/searchEngine', {
           id: link.slug,
           model: link,
